@@ -5,7 +5,7 @@
  * app is opened (or right away with Settings → Check for updates), and the
  * number shows in Settings.
  */
-const VERSION = '0.3';
+const VERSION = '0.4';
 
 const CACHE = 'dti-' + VERSION;
 /* the app itself, kept so it opens with no connection */
