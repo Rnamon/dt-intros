@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#110D27">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DT Intros">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Dice Throne Intros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Bangers&family=Patrick+Hand&family=Alegreya:wght@500&family=Permanent+Marker&family=Pirata+One&family=Comic+Neue:wght@700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: four screens over one dark ground. Home (Random / Choose), the
+   random pool, Choose fighters, and the fight itself, a versus screen with a
+   control rail on the short edge. Settings and the hero picker slide over.
+   Everything follows the phone: sideways or upright. */
+:root{
+  --night:#110D27;      /* rail, outlines on orange, page ground */
+  --night-2:#1C1740;
+  --night-3:#2A2452;    /* raised surfaces on night */
+  --line:#3A3368;       /* hairlines on night */
+  --blaze:#F28C1E;      /* the orange: bars, buttons, VS */
+  --blaze-hi:#FFA33D;
+  --paper:#FFFCF2;      /* speech balloons, primary button */
+  --ink:#17132B;        /* balloon outline and lettering */
+  --pool:#FFD84A;       /* Deadpool's yellow caption boxes */
+  --mist:#B8B1DA;       /* quiet text on night */
+  --zone:#5BE08A;       /* the art safe-zone overlay */
+  --shout:"Bangers","Luckiest Guy","Arial Black",Impact,sans-serif;
+  --vsface:"Luckiest Guy","Arial Black",Impact,sans-serif;
+  --wade:"Comic Neue","Comic Sans MS",system-ui,sans-serif;
+  --ui:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body,#app{height:100%}
+body{margin:0;background:var(--night);color:var(--paper);font-family:var(--ui);overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:disabled{cursor:default}
+:focus-visible{outline:3px solid var(--paper);outline-offset:3px}
+[hidden]{display:none!important}
+#app{position:relative;overflow:hidden}
+
+/* lettering: Patrick Hand is the house voice; a few fixed voices go to the
+   heroes they suit. --k evens out how big each face looks. */
+.stage{--say:"Patrick Hand","Comic Sans MS",system-ui,sans-serif;--sayw:400;--k:1}
+.balloon.v-serif{--say:"Alegreya",Georgia,serif;--sayw:500;--k:.92}
+.balloon.v-rough{--say:"Permanent Marker","Comic Sans MS",system-ui,sans-serif;--sayw:400;--k:.96}
+
+/* ---------- stage ---------- */
+.stage{container:stage/size;position:relative;width:100%;height:100%;overflow:hidden;background:var(--night)}
+.shell{position:absolute;inset:0;display:grid;
+  grid-template-columns:auto 6px minmax(0,1fr) var(--seam) minmax(0,1fr);
+  grid-template-rows:minmax(0,1fr);
+  grid-template-areas:"rail edge a seam b";
+  --seam:clamp(10px,2.2cqw,30px)}
+.rail{grid-area:rail}.edge{grid-area:edge;background:var(--blaze)}
+.hero.a{grid-area:a}.hero.b{grid-area:b}.seam{grid-area:seam;background:var(--blaze)}
+
+@container stage (orientation:portrait){
+  .shell{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) var(--seam) minmax(0,1fr) 6px auto;
+    grid-template-areas:"a" "seam" "b" "edge" "rail";--seam:clamp(10px,2.2cqh,30px)}
+}
+
+/* rail */
+.rail{display:flex;flex-direction:column;align-items:center;gap:clamp(8px,2.6cqh,18px);
+  padding:clamp(10px,3cqh,22px) clamp(10px,1.6cqw,18px);
+  padding-left:max(clamp(10px,1.6cqw,18px),env(safe-area-inset-left,0px));background:var(--night);z-index:3}
+.rail{min-width:0;min-height:0;overflow:hidden}
+.rail .gap{flex:1}
+.rbtn{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:48px}
+.rbtn .disc{display:grid;place-items:center;width:clamp(46px,8.4cqmin,74px);aspect-ratio:1;border-radius:50%;
+  background:var(--blaze);box-shadow:0 3px 0 #9C5410;transition:transform .12s,background .15s}
+.rbtn:hover .disc{background:var(--blaze-hi)}
+.rbtn:active .disc{transform:translateY(2px);box-shadow:0 1px 0 #9C5410}
+.rbtn svg{width:58%;height:58%;fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.rbtn .lbl{font-size:12px;font-weight:700;letter-spacing:.6px;color:var(--mist);text-transform:uppercase}
+.rbtn.main .disc{background:var(--paper);box-shadow:0 3px 0 #B9AE95}
+.rbtn.main .lbl{color:var(--paper)}
+
+@container stage (orientation:portrait){
+  /* upright: buttons spread evenly, equal space at both ends */
+  .rail{flex-direction:row;justify-content:space-evenly;gap:0;padding:clamp(8px,2cqh,16px) max(6px,env(safe-area-inset-right,0px));
+    padding-bottom:max(clamp(8px,2cqh,16px),env(safe-area-inset-bottom,0px))}
+  .rail .gap{display:none}
+}
+
+/* hero halves. Both are cropped the same way, so the two heroes sit at
+   the same height and size; the face zone stays clear of both balloons. */
+.hero{position:relative;overflow:hidden;container:hero/size;background:var(--night-2)}
+.hero{--py:40%}
+.hero .art{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% var(--py)}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none}
+.hero.a::after{background:linear-gradient(to top,rgba(17,13,39,.5),transparent 30%)}
+.hero.b::after{background:linear-gradient(to bottom,rgba(17,13,39,.5),transparent 30%)}
+.logo{position:absolute;left:50%;transform:translateX(-50%);max-width:48%;max-height:24%;width:auto;z-index:1}
+.logo[hidden]{display:none}
+/* until a hero has a logo file, its name stands in */
+.logoname{font-family:var(--vsface);font-size:clamp(20px,7cqmin,46px);line-height:1;color:var(--paper);white-space:nowrap;
+  -webkit-text-stroke:.07em var(--night);paint-order:stroke fill;max-width:none}
+/* a transformation: white flash and a punch-in on the new art */
+.flash{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;
+  background:radial-gradient(circle at 50% 45%,rgba(255,252,242,.95),rgba(255,252,242,.35) 45%,rgba(255,252,242,0) 75%)}
+.hero.a .logo{bottom:3%}
+.hero.b .logo{top:3%}
+
+.zone{position:absolute;z-index:1;border:2px dashed var(--zone);background:rgba(91,224,138,.12);pointer-events:none}
+.zone span{position:absolute;left:6px;top:4px;font-size:12px;font-weight:700;color:var(--zone);letter-spacing:.4px;text-shadow:0 1px 2px #000}
+
+/* speech: each part of a line is its own balloon, stacked in reading order.
+   The tail sits on the balloon nearest the speaker. */
+.speech{position:absolute;z-index:2;display:flex;flex-direction:column;gap:.7em;max-width:90%;pointer-events:none;
+  font-size:clamp(16px,5.4cqmin,40px)}
+.hero.a .speech{top:5%;left:5%;align-items:flex-start}
+.hero.b .speech{bottom:5%;right:5%;align-items:flex-end}
+.balloon{position:relative;isolation:isolate;padding:.5em .95em .55em;color:var(--ink);text-align:center;text-wrap:balance;
+  font-family:var(--say);font-weight:var(--sayw);font-size:calc(1em * var(--k));line-height:1.22;
+  opacity:0;transform:scale(.4);--line:var(--ink)}
+.balloon:not(.fx):not(.pool){padding:.62em 1.15em .66em;min-width:4.6em}
+.balloon.pool{min-width:4em}
+.hero.a .balloon{transform-origin:30% 125%}
+.hero.b .balloon{transform-origin:70% -25%}
+.balloon.on{opacity:1;transform:none;transition:transform .34s cubic-bezier(.3,1.55,.5,1),opacity .1s}
+.balloon.off{opacity:0;transform:scale(.7);transition:transform .12s ease-in,opacity .12s ease-in}
+.balloon .shape{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;z-index:-1;
+  filter:drop-shadow(.1em .13em 0 rgba(17,13,39,.5))}
+.balloon .shape path{fill:var(--paper);stroke:var(--line);stroke-width:3;stroke-linejoin:round}
+.balloon:not(.fx):not(.pool) .shape path.main{stroke-width:4}
+.balloon .shape path.sketch{fill:none;stroke-width:1.4;opacity:.55}
+.balloon .rest{visibility:hidden}
+/* shouts, roars and transformations: a burst, bigger lettering, no typing */
+.balloon.shout{font-family:var(--shout);font-size:1.45em;letter-spacing:.03em;text-transform:uppercase;line-height:1.05;
+  padding:.4em .8em;margin:.35em .4em}
+.balloon.shout .shape path{stroke-width:3.5;stroke-linejoin:miter}
+.balloon.shout.on{transition:transform .26s cubic-bezier(.2,2,.4,1),opacity .05s}
+/* Deadpool talks in yellow boxes, like his comics */
+.balloon.pool{font-family:var(--wade);font-weight:700;font-size:.92em;text-transform:none}
+.balloon.pool .shape path{fill:var(--pool)}
+/* Dark Phoenix: dark balloon, flame edge, fire lettering */
+.balloon.phoenix{font-family:var(--shout);font-size:1.3em;letter-spacing:.04em;line-height:1.05;padding:.55em .95em;margin:.3em}
+.balloon.phoenix .shape{filter:drop-shadow(0 0 .35em rgba(255,98,30,.85))}
+.balloon.phoenix .shape path{fill:#260806;stroke:#FF6A1F;stroke-width:2.5}
+.balloon.phoenix .shown,.balloon.phoenix .rest{padding:0 .12em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.balloon.phoenix .shown{background:linear-gradient(180deg,#FFF0A0 0%,#FFB12E 40%,#FF4A17 75%,#D3170F 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+/* Cursed: ghostly violet balloon with a wavy edge, pirate lettering */
+.balloon.cursed{font-family:"Pirata One",var(--shout);font-size:1.32em;letter-spacing:.03em;line-height:1.05;padding:.5em 1em;margin:.3em;
+  color:#E3D6FF;text-shadow:0 0 .35em rgba(176,140,255,.9)}
+.balloon.cursed .shape{filter:drop-shadow(0 0 .4em rgba(160,120,255,.7))}
+.balloon.cursed .shape path{fill:rgba(28,14,48,.9);stroke:#B9A0FF;stroke-width:2.5}
+
+/* VS */
+.vs{position:absolute;z-index:4;left:calc(50% + var(--railw,0px)/2);top:50%;font-family:var(--vsface);color:var(--blaze);
+  font-size:clamp(46px,19cqmin,150px);line-height:1;letter-spacing:.02em;
+  -webkit-text-stroke:.07em var(--night);paint-order:stroke fill;text-shadow:.04em .06em 0 var(--night);
+  transform:translate(-50%,-46%) rotate(-6deg);pointer-events:none}
+@container stage (orientation:portrait){
+  .vs{left:50%;top:calc(50% - var(--dockh,0px)/2);font-size:clamp(46px,16cqmin,130px)}
+  .hero.a .logo{left:auto;right:3%;bottom:4%;transform:none;max-width:40%}
+  .hero.b .logo{left:3%;top:4%;transform:none;max-width:40%}
+}
+
+/* a short sideways screen (a phone with the browser bar showing): labels go, buttons stay */
+@container stage (orientation:landscape) and (max-height:380px){
+  .rbtn .lbl{display:none}
+  .rail{gap:clamp(6px,2.4cqh,12px)}
+}
+
+/* entrance: the art fills each half and pushes in toward the middle,
+   VS lands, the screen jolts. A shout jolts it again. */
+.go .hero.a .art{animation:pushA .6s cubic-bezier(.15,.8,.25,1) both}
+.go .hero.b .art{animation:pushB .6s cubic-bezier(.15,.8,.25,1) both}
+.go .vs{animation:slam .36s .42s cubic-bezier(.3,1.5,.5,1) both}
+.go .shell{animation:jolt .3s .66s ease-out}
+.go .shell.hit{animation:jolt2 .3s ease-out}
+@keyframes pushA{from{transform:translateX(-7%) scale(1.18)}}
+@keyframes pushB{from{transform:translateX(7%) scale(1.18)}}
+@keyframes pushAv{from{transform:translateY(-7%) scale(1.18)}}
+@keyframes pushBv{from{transform:translateY(7%) scale(1.18)}}
+@keyframes slam{from{transform:translate(-50%,-46%) rotate(-6deg) scale(2.6);opacity:0}}
+@keyframes jolt{25%{transform:translate(3px,-2px)}50%{transform:translate(-3px,2px)}75%{transform:translate(2px,1px)}}
+@keyframes jolt2{25%{transform:translate(4px,-2px)}50%{transform:translate(-4px,2px)}75%{transform:translate(2px,1px)}}
+@container stage (orientation:portrait){
+  .go .hero.a .art{animation-name:pushAv}.go .hero.b .art{animation-name:pushBv}
+}
+
+.toast{position:absolute;z-index:9;left:50%;bottom:14%;transform:translate(-50%,10px);max-width:86%;
+  background:var(--night);border:2px solid var(--blaze);color:var(--paper);border-radius:999px;padding:8px 16px;
+  font-size:15px;font-weight:600;letter-spacing:.3px;text-align:center;opacity:0;pointer-events:none;transition:.2s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+
+/* the stage inside the app */
+.stage[data-mode="choose"] [data-act="next"]{display:none}
+/* a hero with no art yet: their set's color and their initials */
+.hero.noart{background:radial-gradient(ellipse at 50% 42%,color-mix(in srgb,var(--c) 70%,#fff 0%) 0%,color-mix(in srgb,var(--c) 55%,var(--night)) 55%,var(--night) 100%)}
+.hero.noart .art{visibility:hidden}
+.hero.noart::before{content:attr(data-ini);position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
+  font-family:var(--vsface);font-size:min(46cqw,46cqh);color:rgba(255,252,242,.16);line-height:1;pointer-events:none}
+/* auto-play: a ring fills around Next before the next fight */
+.rbtn .disc{position:relative}
+.rbtn .disc svg.ring{position:absolute;left:-6px;top:-6px;width:calc(100% + 12px);height:calc(100% + 12px);max-width:none;
+  transform:rotate(-90deg);pointer-events:none;opacity:0;fill:none;stroke:none;transition:opacity .2s}
+.ring circle{fill:none;stroke:var(--blaze);stroke-width:2.6;stroke-dasharray:116.3;stroke-dashoffset:116.3;stroke-linecap:round}
+.counting .disc svg.ring{opacity:1}
+.counting .ring circle{animation:count var(--t,4s) linear forwards}
+@keyframes count{to{stroke-dashoffset:0}}
+
+/* ---------- screens ---------- */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--night)}
+.bar{display:flex;align-items:center;gap:10px;padding:max(10px,env(safe-area-inset-top,0px)) 16px 10px;flex:none}
+.bar h2{margin:0;font-family:var(--vsface);font-weight:400;font-size:24px;letter-spacing:.5px;color:var(--paper);flex:1;min-width:0}
+.iconbtn{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;flex:none}
+.iconbtn:hover{background:var(--night-3)}
+.iconbtn svg{width:26px;height:26px;fill:none;stroke:var(--paper);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.count{font-size:16px;font-weight:600;color:var(--mist);font-variant-numeric:tabular-nums}
+.scroll{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:0 16px 16px}
+.foot{flex:none;padding:12px 16px max(14px,env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--night) 70%,transparent)}
+.cta{display:block;width:100%;max-width:520px;margin:0 auto;background:var(--blaze);color:var(--ink);border-radius:999px;padding:14px 20px;
+  font-family:var(--vsface);font-size:22px;letter-spacing:.6px;box-shadow:0 4px 0 #9C5410}
+.cta:active{transform:translateY(2px);box-shadow:0 2px 0 #9C5410}
+.cta:disabled{background:var(--night-3);color:var(--mist);box-shadow:none}
+
+/* segmented controls and chips */
+.seg{display:flex;background:var(--night-2);border:1.5px solid var(--line);border-radius:999px;padding:3px;gap:2px}
+.seg button{flex:1;border-radius:999px;padding:8px 12px;font-size:16px;font-weight:600;color:var(--mist);white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--blaze);color:var(--ink)}
+.chip{border:1.5px solid var(--line);border-radius:999px;padding:7px 14px;font-size:15px;font-weight:600;color:var(--paper)}
+.chip:active{background:var(--night-3)}
+
+/* avatars: the face area of the hero art, or initials in the set's color */
+.av{position:relative;display:inline-grid;place-items:center;flex:none;width:var(--s,64px);height:var(--s,64px);border-radius:50%;overflow:hidden;
+  background:var(--c,#8A85A8);color:var(--ink);font-family:var(--vsface);font-size:calc(var(--s,64px) * .34);line-height:1;
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.14)}
+.av img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 44%;transform:scale(1.85);transform-origin:50% 41%}
+
+/* ---------- home ---------- */
+.home{container:home/size}
+.home-bg{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .6s}
+.home-bg.on{opacity:1}
+.home-bg img{width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 40%;filter:saturate(1.1)}
+.home-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,13,39,.55) 0%,rgba(17,13,39,.82) 45%,var(--night) 100%)}
+.home .bar{position:relative;z-index:2;justify-content:flex-end}
+.home-main{position:relative;z-index:1;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;gap:clamp(22px,6cqh,56px);
+  padding:clamp(0px,3cqh,30px) 16px max(20px,env(safe-area-inset-bottom,0px));width:100%;max-width:560px;margin:0 auto}
+.title{margin:0;display:flex;justify-content:center}
+.title img{display:block;width:auto;height:auto;max-width:min(92%,440px);max-height:34cqh;filter:drop-shadow(0 6px 16px rgba(0,0,0,.55))}
+.modes{display:flex;flex-direction:column;gap:clamp(16px,3.2cqh,26px);margin-block:auto}   /* centered in the space under the logo */
+.mode{display:flex;flex-direction:column;gap:10px}
+.big{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border-radius:22px;padding:16px 18px;min-height:84px}
+.big svg{width:44px;height:44px;flex:none;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.big b{display:block;font-family:var(--vsface);font-weight:400;font-size:clamp(24px,7cqw,32px);letter-spacing:.5px;line-height:1}
+.big small{display:block;font-size:16px;font-weight:600;margin-top:5px;opacity:.75}
+.big.primary{background:var(--paper);color:var(--ink);box-shadow:0 5px 0 #B9AE95}
+.big.primary svg{stroke:var(--ink)}
+.big.orange{background:var(--blaze);color:var(--ink);box-shadow:0 5px 0 #9C5410}
+.big.orange svg{stroke:var(--ink)}
+.big:active{transform:translateY(3px)}
+.big:disabled{opacity:.55}
+.poolrow{display:flex;align-items:center;gap:12px;background:rgba(28,23,64,.85);border:1.5px solid var(--line);border-radius:16px;padding:8px 10px 8px 12px;width:100%;text-align:left}
+/* Random: one card. The top starts a fight, the strip below shows and edits the pool */
+.rcard{gap:0;background:var(--paper);border-radius:22px;box-shadow:0 5px 0 #B9AE95;overflow:hidden}
+.rcard .big.primary{box-shadow:none;border-radius:0;background:transparent;padding-bottom:12px}
+.rcard .big.primary:active{transform:none;background:#F3EEE0}
+.rcard .poolrow{border:0;border-top:1.5px solid #E2D9C2;border-radius:0;background:#F3EEE0;color:var(--ink);padding:10px 16px 12px}
+.rcard .poolrow:active{background:#E9E2CF}
+.rcard .pooltxt small{color:#6E6890}
+.rcard .pooledit{color:#B8600C}
+.rcard .faces .slotf{box-shadow:0 0 0 2px #F3EEE0}
+.faces{display:flex;flex:none;width:147px}          /* room for six, so the text never moves */
+.faces .slotf{display:block;margin-left:-9px;border-radius:50%;box-shadow:0 0 0 2px var(--night-2);transition:opacity .9s ease}
+.faces .slotf:first-child{margin-left:0}
+.faces .slotf .av{margin:0;box-shadow:none}
+.faces .slotf.out{opacity:0}
+.faces .av{--s:32px;margin-left:-9px;box-shadow:0 0 0 2px var(--night-2)}
+.faces .av:first-child{margin-left:0}
+.pooltxt{flex:1;min-width:0;font-size:17px;font-weight:600;line-height:1.15}
+.pooltxt small{display:block;font-size:14px;color:var(--mist);font-weight:500}
+.pooltxt .pl{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
+.pooltxt .pl small{display:inline;min-width:4.6em}
+.pooledit{font-size:15px;font-weight:700;color:var(--blaze);letter-spacing:.3px}
+.autorow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 4px}
+.autorow span{font-size:16px;font-weight:600;color:var(--mist)}
+.switch{position:relative;width:52px;height:30px;border-radius:999px;background:var(--night-3);border:1.5px solid var(--line);flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:2px;left:2px;width:23px;height:23px;border-radius:50%;background:var(--mist);transition:transform .2s,background .2s}
+.switch[aria-checked="true"]{background:var(--blaze);border-color:var(--blaze)}
+.switch[aria-checked="true"]::after{transform:translateX(22px);background:var(--paper)}
+/* sideways: title on the left, the two modes on the right */
+@container home (orientation:landscape){
+  .home-main{max-width:980px;flex-direction:row;align-items:center;gap:clamp(20px,5cqw,56px)}
+  .title{flex:1;min-width:0}
+  .title img{max-width:100%;max-height:66cqh}
+  .modes{flex:1.2;min-width:0}
+}
+@container home (orientation:landscape) and (max-height:420px){
+  .home .bar{position:absolute;top:0;right:0}
+  .big{min-height:64px;padding:10px 16px}
+  .big small{display:none}
+  .modes{gap:10px}
+}
+
+/* ---------- hero grids (pool and picker) ---------- */
+.tools{flex:none;display:flex;flex-direction:column;gap:10px;padding:0 16px 12px;max-width:760px;width:100%;margin:0 auto}
+.tools .row{display:flex;align-items:center;gap:8px}
+.tools .row .seg{flex:none}
+.tools .sp{flex:1}
+.grid-wrap{max-width:760px;margin:0 auto}
+.sethead{display:flex;align-items:center;gap:10px;width:100%;padding:16px 4px 8px;text-align:left;border-bottom:1.5px solid var(--line)}
+.sethead .sw{width:12px;height:12px;border-radius:3px;background:var(--c);flex:none}
+.sethead b{flex:1;font-size:18px;font-weight:700;letter-spacing:.4px}
+.sethead .n{font-size:15px;font-weight:600;color:var(--mist);font-variant-numeric:tabular-nums}
+.sethead .tog{font-size:14px;font-weight:700;color:var(--blaze);letter-spacing:.3px;min-width:56px;text-align:right}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:14px 8px;padding:14px 0 6px}
+.tile{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.tile .av{--s:64px;transition:filter .15s,opacity .15s,box-shadow .15s}
+.tile .nm{font-size:14px;font-weight:600;line-height:1.1;text-align:center;max-width:84px}
+.tile.off .av{filter:grayscale(1) brightness(.4);opacity:.6}
+.tile.off .nm{color:var(--mist);opacity:.7}
+.tile.on .av{box-shadow:0 0 0 3px var(--blaze)}
+.tile.sel .av{box-shadow:0 0 0 3px var(--paper),0 0 14px rgba(255,252,242,.5)}
+
+/* ---------- choose fighters ---------- */
+.slots{flex:1;min-height:0;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0 16px;max-width:620px;width:100%;margin:0 auto}
+.slot{position:relative;flex:1;min-height:0;border-radius:20px;overflow:hidden;background:var(--night-2);border:2.5px dashed var(--line);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--mist)}
+.slot .plus{width:56px;height:56px;border-radius:50%;border:2.5px solid var(--blaze);display:grid;place-items:center;color:var(--blaze);font-size:34px;line-height:1;font-weight:600}
+.slot .role{font-family:var(--vsface);font-size:24px;color:var(--paper);letter-spacing:.5px}
+.slot .hint{font-size:16px;font-weight:600}
+.slot.filled{border:2.5px solid var(--blaze);background:var(--c,var(--night-2))}
+.slot.filled img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 40%}
+.slot.filled::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(17,13,39,.85),transparent 45%)}
+.slot.filled .who{position:absolute;z-index:1;left:0;right:0;bottom:12px;text-align:center}
+.slot.filled .who b{display:block;font-family:var(--vsface);font-weight:400;font-size:26px;color:var(--paper);letter-spacing:.5px}
+.slot.filled .who small{display:block;margin-bottom:2px;font-size:14px;font-weight:700;color:var(--blaze);letter-spacing:.6px;text-transform:uppercase}
+.slot.filled .ini{font-family:var(--vsface);font-size:90px;color:rgba(255,252,242,.18)}
+.slotmid{position:relative;flex:none;height:56px;display:flex;align-items:center;justify-content:center;gap:14px}
+.vsb{font-family:var(--vsface);font-size:36px;color:var(--blaze);-webkit-text-stroke:.07em var(--night);paint-order:stroke fill;transform:rotate(-6deg)}
+.swapmini{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--night-3);border:1.5px solid var(--line)}
+.swapmini svg{width:24px;height:24px;fill:none;stroke:var(--paper);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@media (orientation:landscape){
+  .slots{flex-direction:row;max-width:980px}
+  .slotmid{width:72px;height:auto;flex-direction:column}
+}
+
+/* ---------- sheets: picker and settings ---------- */
+.sheet{position:absolute;inset:0;z-index:20;background:rgba(8,6,20,.6);display:flex;align-items:flex-end;justify-content:center}
+.sheet-in{width:100%;max-width:760px;height:min(92%,900px);background:var(--night);border:1.5px solid var(--line);border-bottom:0;
+  border-radius:22px 22px 0 0;display:flex;flex-direction:column;animation:up .22s ease-out}
+.sheet .bar{padding-top:12px}
+@keyframes up{from{transform:translateY(24px);opacity:0}}
+.set-list{display:flex;flex-direction:column;gap:0;max-width:560px;margin:0 auto}
+.setting{display:flex;flex-direction:column;gap:8px;padding:14px 2px;border-bottom:1.5px solid var(--line)}
+.setting .lab{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.setting b{font-size:19px;font-weight:700;letter-spacing:.3px}
+.setting small{font-size:15px;color:var(--mist);line-height:1.3}
+.setting .seg{align-self:flex-start}
+.about{padding:16px 2px 8px;font-size:16px;color:var(--mist);line-height:1.45}
+.about b{color:var(--paper)}
+.about p{margin:0 0 8px}
+
+/* app-wide toast */
+.toast{position:fixed;z-index:40;left:50%;bottom:max(18%,90px)}
+
+/* animations off */
+.still *,.still *::before,.still *::after{animation:none!important;transition:none!important}
+/* last, so it wins over the entrance push */
+.stage .hero.morph .art{animation:morph .45s cubic-bezier(.2,.9,.3,1)}
+.stage .hero.morph .flash{animation:flash .45s ease-out}
+@keyframes morph{0%{transform:scale(1.14)}100%{transform:none}}
+@keyframes flash{0%{opacity:0}18%{opacity:1}100%{opacity:0}}
+
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<div id="app">
+
+  <!-- HOME -->
+  <section id="home" class="screen home">
+    <div class="home-bg" id="homeBg"><img alt=""></div>
+    <header class="bar"><button class="iconbtn" data-open="settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></header>
+    <div class="home-main">
+      <h1 class="title"><img src="app-logo.webp" width="900" height="733" alt="Dice Throne Intros"></h1>
+      <div class="modes">
+        <div class="mode rcard">
+          <button class="big primary" id="goRandom">
+            <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.3" cy="8.3" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.7" cy="8.3" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="8.3" cy="15.7" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.7" cy="15.7" r="1.3" fill="currentColor" stroke="none"/></svg>
+            <span><b>Random fight</b><small id="randomSub">A surprise matchup from your pool</small></span></button>
+          <button class="poolrow" id="openPool"><span class="faces" id="poolFaces"></span>
+            <span class="pooltxt" id="poolTxt"></span><span class="pooledit">Edit</span></button>
+        </div>
+        <div class="mode">
+          <button class="big orange" id="goChoose">
+            <svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3.2"/><path d="M2.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.6"/><path d="M15 14.3c.6-.2 1.3-.3 2-.3 2.4 0 4 1.6 4.5 4.5"/></svg>
+            <span><b>Choose fighters</b><small>Pick both heroes yourself</small></span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RANDOM POOL -->
+  <section id="pool" class="screen" hidden>
+    <header class="bar"><button class="iconbtn" data-back aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h2>Random pool</h2><span class="count" id="poolCount"></span></header>
+    <div class="tools">
+      <div class="seg" id="sideSeg"><button data-side="a">Opener pool</button><button data-side="b">Responder pool</button></div>
+      <div class="row"><div class="seg sortseg"><button data-sort="abc">A–Z</button><button data-sort="set">By set</button></div>
+        <span class="sp"></span><button class="chip" data-all="1">All</button><button class="chip" data-all="0">None</button></div>
+    </div>
+    <div class="scroll"><div class="grid-wrap" id="poolGrid"></div></div>
+    <footer class="foot"><button class="cta" id="poolFight">Random fight</button></footer>
+  </section>
+
+  <!-- CHOOSE FIGHTERS -->
+  <section id="choose" class="screen" hidden>
+    <header class="bar"><button class="iconbtn" data-back aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h2>Choose fighters</h2></header>
+    <div class="slots">
+      <button class="slot" data-slot="0"></button>
+      <div class="slotmid"><span class="vsb">VS</span>
+        <button class="swapmini" id="slotSwap" aria-label="Swap sides"><svg viewBox="0 0 24 24"><path d="M20 8H5M8.5 4.5 5 8l3.5 3.5M4 16h15M15.5 12.5 19 16l-3.5 3.5"/></svg></button></div>
+      <button class="slot" data-slot="1"></button>
+    </div>
+    <footer class="foot"><button class="cta" id="chooseFight" disabled>Fight!</button></footer>
+  </section>
+
+  <!-- FIGHT -->
+  <section id="fight" class="screen" hidden></section>
+
+  <!-- HERO PICKER -->
+  <div class="sheet" id="picker" hidden><div class="sheet-in">
+    <header class="bar"><h2 id="pickTitle"></h2>
+      <button class="iconbtn" data-back aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+    <div class="tools"><div class="row"><div class="seg sortseg"><button data-sort="abc">A–Z</button><button data-sort="set">By set</button></div></div></div>
+    <div class="scroll"><div class="grid-wrap" id="pickGrid"></div></div>
+  </div></div>
+
+  <!-- SETTINGS -->
+  <div class="sheet" id="settings" hidden><div class="sheet-in">
+    <header class="bar"><h2>Settings</h2>
+      <button class="iconbtn" data-back aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
+    <div class="scroll"><div class="set-list">
+      <div class="setting"><div class="lab"><b>Text speed</b></div>
+        <div class="seg" data-pref="speed"><button data-v="slow">Slow</button><button data-v="normal">Normal</button><button data-v="fast">Fast</button></div></div>
+      <div class="setting"><div class="lab"><b>Animations</b></div>
+        <small>Heroes pushing in, the VS slam, screen shake, transformation flashes.</small>
+        <div class="seg" data-pref="anim"><button data-v="on">On</button><button data-v="off">Off</button></div></div>
+      <div class="setting"><div class="lab"><b>Auto-play</b></div>
+        <small>In random fights, the next fight rolls a few seconds after one ends.</small>
+        <div class="seg" data-pref="auto"><button data-v="off">Off</button><button data-v="on">On</button></div></div>
+      <div class="setting"><div class="lab"><b>Menu background</b></div>
+        <div class="seg" data-pref="bg"><button data-v="art">Hero art</button><button data-v="plain">Plain</button></div></div>
+      <div class="setting"><div class="lab"><b>Full screen</b></div>
+        <small>Hides the browser bar when you start a fight (Android). On iPhone, add the app to your home screen instead.</small>
+        <div class="seg" data-pref="full"><button data-v="on">On</button><button data-v="off">Off</button></div></div>
+      <div class="setting"><div class="lab"><b>Art safe zone</b></div>
+        <small>For preparing hero art: shows where faces must sit on the fight screen.</small>
+        <div class="seg" data-pref="zone"><button data-v="0">Hide</button><button data-v="1">Show</button></div></div>
+      <div class="setting"><div class="lab"><b>Version</b><span class="count" id="verNum">—</span></div>
+        <small>Updates install themselves when you open the app. Impatient? Check now.</small>
+        <button class="chip" id="updBtn" style="align-self:flex-start">Check for updates</button></div>
+      <div class="about">
+        <p><b>Dice Throne Intros</b></p>
+        <p>Pre-fight dialogues for all 45 Dice Throne heroes. Made by Gad.</p>
+        <p>Dice Throne is a game by Roxley Games. This is an unofficial fan project.</p>
+      </div>
+    </div></div>
+  </div></div>
+
+  <div class="toast" role="status"></div>
+</div>
+
+<template id="stageTpl">
+  <div class="stage">
+    <div class="shell">
+      <nav class="rail" aria-label="Fight controls">
+        <button class="rbtn" data-act="replay" aria-label="Replay">
+          <span class="disc"><svg viewBox="0 0 24 24"><path d="M5 6v12M8.5 6v12M12 6l8 6-8 6z"/></svg></span><span class="lbl">Replay</span></button>
+        <button class="rbtn" data-act="swap" aria-label="Swap sides">
+          <span class="disc"><svg viewBox="0 0 24 24"><path d="M20 8H5M8.5 4.5 5 8l3.5 3.5M4 16h15M15.5 12.5 19 16l-3.5 3.5"/></svg></span><span class="lbl">Swap</span></button>
+        <button class="rbtn main" data-act="next" aria-label="Next random fight">
+          <span class="disc"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="8.6" cy="8.6" r="1.2" fill="#17132B" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="#17132B" stroke="none"/><circle cx="15.4" cy="15.4" r="1.2" fill="#17132B" stroke="none"/></svg>
+            <svg class="ring" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18.5"/></svg></span><span class="lbl">Next</span></button>
+        <span class="gap"></span>
+        <button class="rbtn" data-act="settings" aria-label="Settings">
+          <span class="disc"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="lbl">Settings</span></button>
+        <button class="rbtn" data-act="back" aria-label="Back">
+          <span class="disc"><svg viewBox="0 0 24 24"><path d="M9 5 4.5 9.5 9 14"/><path d="M4.5 9.5H14a5.5 5.5 0 0 1 0 11h-3"/></svg></span><span class="lbl">Back</span></button>
+      </nav>
+      <div class="edge"></div>
+      <section class="hero a"><img class="art" alt=""><div class="flash"></div><img class="logo" alt=""><span class="logo logoname" hidden></span><div class="speech"></div></section>
+      <div class="seam"></div>
+      <section class="hero b"><img class="art" alt=""><div class="flash"></div><img class="logo" alt=""><span class="logo logoname" hidden></span><div class="speech"></div></section>
+    </div>
+    <div class="vs" aria-hidden="true">VS</div>
+  </div>
+</template>
+
+<script>
+/* ---------------- heroes ---------------- */
+const ROSTER = [
+  ['Season 1',['Barbarian','Monk','Moon Elf','Ninja','Paladin','Pyromancer','Shadow Thief','Treant']],
+  ['Season 2',['Artificer','Cursed Pirate','Gunslinger','Huntress','Samurai','Seraph','Tactician','Vampire Lord']],
+  ['Marvel',['Black Panther','Black Widow','Captain Marvel','Doctor Strange','Loki','Spider-Man','Scarlet Witch','Thor']],
+  ['X-Men',['Cyclops','Gambit','Iceman','Jean Grey','Psylocke','Rogue','Storm','Wolverine']],
+  ['Outcasts',['Headless Horseman','Necromancer','Pale Lady','Raveness']],
+  ['Vanguard',['Druid','Duelist','Forgemaster','Sun Elf']],
+  ['Santa v Krampus',['Santa','Krampus']],
+  ['Singles',['Alchemist','Mystic Brawler','Deadpool']]
+];
+const SET_COLOR = { 'Season 1':'#B07A3C','Season 2':'#4C8FB5','Marvel':'#C4544A','X-Men':'#5A6FD1',
+  'Outcasts':'#7A4BA8','Vanguard':'#3F9A82','Santa v Krampus':'#4C9A5A','Singles':'#8A85A8' };
+const slug = n => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const HEROES = [], H = {};
+ROSTER.forEach(([set, names]) => names.forEach(name => { const h = { id: slug(name), name, set }; HEROES.push(h); H[h.id] = h; }));
+const ALL = HEROES.map(h => h.id);
+const initials = n => { const w = n.split(/[\s-]+/); return (w.length > 1 ? w[0][0] + w[1][0] : n.slice(0, 2)).toUpperCase(); };
+
+/* how each transformed form speaks; the first form of each hero is their normal art */
+const FORM_STYLE = { werewolf:'shout', bear:'shout', cat:'shout', phoenix:'phoenix', cursed:'cursed' };
+/* voices and outline colors: first pass, to be tuned per hero in the hero lab */
+const HERO_VOICE = {
+  serif: ['moon-elf','paladin','treant','artificer','samurai','seraph','tactician','vampire-lord','black-panther',
+          'doctor-strange','loki','thor','storm','necromancer','pale-lady','duelist','sun-elf'],
+  rough: ['barbarian','wolverine','headless-horseman','forgemaster','krampus']
+};
+const voiceOf = id => HERO_VOICE.serif.includes(id) ? 'serif' : HERO_VOICE.rough.includes(id) ? 'rough' : '';
+const HERO_LINE = { 'shadow-thief':'#8E4FE0', 'monk':'#C8995A', 'gunslinger':'#4FA8E8', 'pale-lady':'#B98AD6',
+  'jean-grey':'#3FA65A', 'cursed-pirate':'#2E9C9A', 'druid':'#5E9A3A', 'pyromancer':'#E8622A',
+  'samurai':'#C8423A', 'barbarian':'#B5652B' };
+const lineColor = id => HERO_LINE[id] || SET_COLOR[H[id].set];
+const artSrc = (id, form) => 'art/' + id + (form && !FORM_STYLE[form] ? '' : form ? '-' + form : '') + '.webp';
+
+/* ---------------- settings ---------------- */
+const prefs = { speed:'normal', anim:'on', auto:'off', bg:'art', full:'on', zone:'0', order:'abc',
+  pool:{ a:ALL.slice(), b:ALL.slice() }, pick:[null, null] };
+try {
+  const p = JSON.parse(localStorage.getItem('dti-app') || '{}');
+  Object.assign(prefs, p, { pool: Object.assign(prefs.pool, p.pool || {}) });
+} catch (e) {}
+// older saves had one shared pool: both sides start from it
+if (prefs.pool.split === false) prefs.pool.b = (prefs.pool.a || ALL).slice();
+delete prefs.pool.split; delete prefs.sort;
+['a','b'].forEach(k => prefs.pool[k] = (prefs.pool[k] || ALL.slice()).filter(id => H[id]));
+const save = () => { try { localStorage.setItem('dti-app', JSON.stringify(prefs)); } catch (e) {} };
+const SPEED = { slow:1.5, normal:1, fast:.6 };
+const mul = () => SPEED[prefs.speed] || 1;
+const mq = matchMedia('(prefers-reduced-motion: reduce)');
+const still = () => mq.matches || prefs.anim === 'off';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+/* time to finish reading a line after it has typed out: 0.9–2 s, scaled by text speed */
+const readPause = text => Math.min(2000, Math.max(900, 600 + 25 * text.length)) * mul();
+
+/* ---------------- dialogues ---------------- */
+let DATA = null;
+const dataReady = fetch('data/dice-throne-dialogues.json').then(r => r.json()).then(d => { DATA = d; }).catch(() => {});
+
+/* ---------- balloon outlines ----------
+   Drawn around the text box in its own pixels, so one outline covers body
+   and tail at any size. The opener's tail hangs from the lower left and
+   leans in toward the speaker; the responder's is the same shape turned
+   upside down at the upper right. */
+function tailSpot(w, h){
+  const x1 = Math.max(18, w * .12), x2 = x1 + Math.max(18, w * .075);
+  return { x1, x2, tip:[x2 + 6, h + Math.min(28, h * .5) + 4] };
+}
+function boxPath(w, h, r, tail){
+  r = Math.min(r, h / 2);
+  let bottom = `H${r}`;
+  if (tail){
+    const { x1, x2, tip } = tailSpot(w, h), th = tip[1] - h;
+    bottom = `H${x2} Q${x2 - 1},${h + th*.45} ${tip[0]},${tip[1]} Q${x1 + (x2-x1)*.6},${h + th*.42} ${x1},${h} H${r}`;
+  }
+  return `M${r},0 H${w-r} A${r},${r} 0 0 1 ${w},${r} V${h-r} A${r},${r} 0 0 1 ${w-r},${h} ${bottom}` +
+         ` A${r},${r} 0 0 1 0,${h-r} V${r} A${r},${r} 0 0 1 ${r},0 Z`;
+}
+/* a point-sampled outline around the box: a superellipse, pushed out by
+   `edge(t, i)` along its normal. Used for oval, hand-drawn, burst, flame, ghost. */
+function ringPoints(w, h, n, grow, edge, count){
+  const cx = w/2, cy = h/2, rx = w/2 + grow, ry = h/2 + grow, pts = [];
+  for (let i = 0; i < count; i++){
+    const t = i / count * Math.PI * 2, c = Math.cos(t), s = Math.sin(t);
+    const bx = cx + rx * Math.sign(c) * Math.pow(Math.abs(c), 2/n), by = cy + ry * Math.sign(s) * Math.pow(Math.abs(s), 2/n);
+    const dx = bx - cx, dy = by - cy, len = Math.hypot(dx, dy) || 1, o = edge(t, i);
+    pts.push([bx + dx / len * o, by + dy / len * o]);
+  }
+  return pts;
+}
+/* swap the stretch of bottom edge under the tail spot for a tail tip */
+function addTail(pts, w, h){
+  const { x1, x2, tip } = tailSpot(w, h);
+  const idx = pts.map((p, i) => (p[1] > h * .5 && p[0] >= x1 && p[0] <= x2) ? i : -1).filter(i => i >= 0);
+  if (!idx.length) return pts;
+  const a = Math.min(...idx), b = Math.max(...idx);
+  return pts.slice(0, a + 1).concat([tip], pts.slice(b));
+}
+const toPath = pts => 'M' + pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' L') + ' Z';
+function rng(seed){ return () => (seed = (seed * 16807) % 2147483647) / 2147483647; }
+
+function shapeFor(kind, w, h, tail, seed){
+  const r = rng(seed + 7), ph = [r() * 6.28, r() * 6.28, r() * 6.28];
+  const perim = Math.PI * (w + h), dense = Math.max(90, Math.round(perim / 4));
+  let pts, sketch = null;
+  if (kind === 'shout'){
+    const n = Math.max(14, Math.round(perim / 30)) * 2;
+    pts = ringPoints(w, h, 4, 4, (t, i) => i % 2 ? 0 : 7 + ((i * 37 + seed) % 7), n);
+    if (tail){ // the outer point nearest the tail spot becomes a long spike
+      const { tip } = tailSpot(w, h); let best = 0, bd = 1e9;
+      pts.forEach((p, i) => { if (i % 2) return; const d = Math.hypot(p[0] - tip[0], p[1] - h); if (d < bd){ bd = d; best = i; } });
+      pts[best] = [tip[0], tip[1] + 6];
+    }
+    return { d: toPath(pts) };
+  }
+  if (kind === 'phoenix'){        // flame tongues: sharp peaks, round valleys
+    const k = Math.max(9, Math.round(perim / 34));
+    pts = ringPoints(w, h, 3.4, 4, t => 1 + 8 * Math.pow((Math.sin(k * t + ph[0]) + 1) / 2, 4), dense * 2);
+  } else if (kind === 'cursed'){  // slow ghostly waves
+    const k = Math.max(7, Math.round(perim / 46));
+    pts = ringPoints(w, h, 3, 4, t => 3 + 3.2 * Math.sin(k * t + ph[0]), dense);
+  } else if (kind === 'oval'){
+    pts = ringPoints(w, h, 2.5, 0, () => 0, dense);
+  } else if (kind === 'hand'){    // a little uneven, with a second sketchy pass
+    const wob = (t, a) => a * (.6 * Math.sin(3 * t + ph[0]) + .4 * Math.sin(5 * t + ph[1]) + .25 * Math.sin(9 * t + ph[2]));
+    pts = ringPoints(w, h, 3.4, 1, t => wob(t, 2.6), dense);
+    const p2 = ringPoints(w, h, 3.4, 1, t => wob(t + .35, 2.2) + 1.6, dense);
+    sketch = toPath(tail ? addTail(p2, w, h) : p2);
+  } else return { d: boxPath(w, h, kind === 'pool' ? 10 : 30, tail) };
+  return { d: toPath(tail ? addTail(pts, w, h) : pts), sketch };
+}
+/* Shrink-wrap: a wrapped line leaves the box as wide as the space it was
+   given. Find the narrowest width that keeps the same number of lines, so
+   two-line balloons hug their text. Measured on the full text (the hidden
+   rest of the line still takes its space while typing). */
+function fitBalloon(b){
+  b.style.width = '';
+  const h0 = b.offsetHeight;
+  let lo = 24, hi = b.offsetWidth;
+  if (hi <= lo) return;
+  while (hi - lo > 1){
+    const mid = (lo + hi) >> 1;
+    b.style.width = mid + 'px';
+    // too narrow if it adds a line, or if a word that can't break spills out
+    if (b.offsetHeight > h0 || b.scrollWidth > b.clientWidth + 1) lo = mid; else hi = mid;
+  }
+  b.style.width = Math.min(b.offsetWidth + 2, hi + 2) + 'px';
+}
+function drawBalloon(b){
+  const svg = b.querySelector('.shape'); if (!svg) return;
+  const w = b.offsetWidth, h = b.offsetHeight, tail = b.dataset.tail === '1';
+  const kind = b.dataset.kind || 'hand';
+  const seed = [...b.textContent].reduce((a, c) => a + c.charCodeAt(0), 11);
+  const { d, sketch } = shapeFor(kind, w, h, tail, seed);
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  const flip = b.closest('.hero.b') ? ` transform="rotate(180 ${w/2} ${h/2})"` : '';
+  svg.innerHTML = `<g${flip}><path class="main" d="${d}"/>${sketch ? `<path class="sketch" d="${sketch}"/>` : ''}</g>`;
+}
+
+
+/* ---------------- the fight ---------------- */
+class Stage {
+  constructor(host){
+    host.appendChild(document.getElementById('stageTpl').content.cloneNode(true));
+    this.el = host.lastElementChild;
+    this.pair = ['shadow-thief','gunslinger']; this.mode = 'random';
+    this.run = 0; this.skip = -1; this.lastMirror = {};
+    this.el.addEventListener('click', e => {
+      const b = e.target.closest('[data-act]');
+      if (b) return this.act(b.dataset.act);
+      if (e.target.closest('.hero')) this.skip = this.run;   // tap the fight to finish the lines
+    });
+    this.ro = new ResizeObserver(entries => {
+      entries.forEach(en => {
+        if (en.target === this.el) this.el.querySelectorAll('.balloon').forEach(fitBalloon);
+        else if (en.target.classList.contains('balloon')) drawBalloon(en.target);
+      });
+      this.measure(); this.zones();
+    });
+    this.ro.observe(this.el);
+    this.el.querySelectorAll('.hero').forEach(h => {
+      const img = h.querySelector('.art');
+      img.addEventListener('load', () => { h.classList.remove('noart'); this.zones(); });
+      // a missing form image falls back to the hero's normal art; a missing normal art shows the placeholder
+      img.addEventListener('error', () => { if (img.dataset.src !== img.dataset.base) img.src = img.dataset.src = img.dataset.base; else h.classList.add('noart'); });
+    });
+  }
+  start(pair, mode){ this.pair = pair.slice(); this.mode = mode; this.el.dataset.mode = mode; this.play(); }
+  stop(){ this.run++; this.cancelAuto(); }
+  measure(){
+    const rail = this.el.querySelector('.rail');
+    const portrait = this.el.clientHeight > this.el.clientWidth;
+    this.el.style.setProperty('--railw', portrait ? '0px' : rail.offsetWidth + 6 + 'px');
+    this.el.style.setProperty('--dockh', portrait ? rail.offsetHeight + 6 + 'px' : '0px');
+  }
+  /* the safe zone where it lands on screen: y 30.5–62% of the art, and in
+     width whatever survives on the narrowest half (0.74 wide) */
+  zones(){
+    this.el.querySelectorAll('.hero').forEach(h => {
+      let z = h.querySelector('.zone');
+      const img = h.querySelector('.art');
+      if (prefs.zone !== '1' || !img.naturalWidth || h.classList.contains('noart')){ if (z) z.remove(); return; }
+      if (!z){ z = document.createElement('div'); z.className = 'zone'; z.innerHTML = '<span>Face zone</span>'; h.appendChild(z); }
+      const W = h.clientWidth, Hh = h.clientHeight, nw = img.naturalWidth, nh = img.naturalHeight;
+      const s = Math.max(W / nw, Hh / nh), rw = nw * s, rh = nh * s;
+      const ox = (W - rw) / 2, oy = (Hh - rh) * .40;
+      const x0 = Math.max(0, (1 - .74 / (nw / nh)) / 2);
+      Object.assign(z.style, { left: ox + x0 * rw + 'px', top: oy + .305 * rh + 'px',
+        width: (1 - 2 * x0) * rw + 'px', height: (.622 - .305) * rh + 'px' });
+    });
+  }
+  load(ids){
+    ['a','b'].forEach((side, i) => {
+      const id = ids[i], h = this.el.querySelector('.hero.' + side), hero = H[id];
+      const art = h.querySelector('.art'), logo = h.querySelector('img.logo'), name = h.querySelector('.logoname');
+      h.classList.remove('morph');
+      h.style.setProperty('--c', SET_COLOR[hero.set]); h.dataset.ini = initials(hero.name);
+      art.dataset.base = artSrc(id);
+      if (art.dataset.src !== art.dataset.base){ art.src = art.dataset.src = art.dataset.base; }
+      art.alt = hero.name;
+      name.textContent = hero.name;
+      logo.onload = () => { logo.hidden = false; name.hidden = true; };
+      logo.onerror = () => { logo.hidden = true; name.hidden = false; };
+      logo.src = 'logos/' + id + '.png'; logo.alt = hero.name;
+    });
+  }
+  /* swap the art to a form, with a flash */
+  setForm(hero, id, form, quiet){
+    const img = hero.querySelector('.art'), src = artSrc(id, form);
+    if (img.dataset.src === src) return;
+    img.src = img.dataset.src = src;
+    if (still() || quiet) return;
+    hero.classList.remove('morph'); void hero.offsetWidth; hero.classList.add('morph');
+  }
+  act(a){
+    this.cancelAuto();
+    if (a === 'replay') return this.play();
+    if (a === 'swap'){ this.pair.reverse(); return this.play(); }
+    if (a === 'next'){ this.pair = nextPair(); return this.play(); }
+    if (a === 'settings') return openSheet('settings');
+    if (a === 'back') return history.back();
+  }
+  cancelAuto(){
+    clearTimeout(this.autoT);
+    this.el.querySelector('.rbtn.main').classList.remove('counting');
+  }
+  scheduleAuto(){
+    if (this.mode !== 'random' || prefs.auto !== 'on' || current !== 'fight' || openedSheet) return;
+    const ms = 4000 * mul(), btn = this.el.querySelector('.rbtn.main');
+    btn.style.setProperty('--t', ms + 'ms');
+    btn.classList.remove('counting'); void btn.offsetWidth; btn.classList.add('counting');
+    this.autoT = setTimeout(() => { btn.classList.remove('counting'); this.pair = nextPair(); this.play(); }, ms);
+  }
+  /* Each speaker has one balloon. A new part of the line replaces it, and
+     if the part names a form, the art swaps to that form at the same moment. */
+  async part(hero, speaker, p, id){
+    const box = hero.querySelector('.speech'), old = box.querySelector('.balloon');
+    if (old){
+      old.classList.remove('on'); old.classList.add('off');
+      await sleep(still() ? 0 : 130);
+      old.remove();
+      if (id !== this.run) return;
+    }
+    if (p.form) this.setForm(hero, speaker, p.form);
+    const fx = FORM_STYLE[p.form];          // shout, phoenix, cursed, or a normal balloon
+    const kind = fx || (speaker === 'deadpool' ? 'pool' : '');
+    const voice = !fx && kind !== 'pool' ? voiceOf(speaker) : '';
+    const b = document.createElement('div');
+    b.className = 'balloon' + (kind ? ' ' + kind : '') + (fx ? ' fx' : '') + (voice ? ' v-' + voice : '');
+    if (kind) b.dataset.kind = kind;
+    b.dataset.tail = '1';
+    if (!fx && kind !== 'pool') b.style.setProperty('--line', lineColor(speaker));
+    b.innerHTML = '<svg class="shape" aria-hidden="true"></svg><span class="shown"></span><span class="rest"></span>';
+    box.appendChild(b);
+    const shown = b.querySelector('.shown'), rest = b.querySelector('.rest'), text = p.text;
+    rest.textContent = text;                 // reserves the full size, so the balloon never jumps
+    fitBalloon(b);
+    this.ro.observe(b); drawBalloon(b);
+    void b.offsetWidth; b.classList.add('on');
+    if (fx){                                 // a transformation lands all at once, with a shake
+      shown.textContent = text; rest.textContent = '';
+      const sh = this.el.querySelector('.shell');
+      sh.classList.remove('hit'); void sh.offsetWidth; sh.classList.add('hit');
+      return;
+    }
+    await sleep(still() ? 0 : 160);
+    const tick = 28 * mul();
+    for (let i = 1; i <= text.length; i++){
+      if (id !== this.run) return;
+      if (this.skip === id){ shown.textContent = text; rest.textContent = ''; return; }
+      shown.textContent = text.slice(0, i); rest.textContent = text.slice(i);
+      await sleep(text[i-1] === ' ' ? tick / 2 : tick);
+    }
+  }
+  async wait(ms, id){
+    for (let t = 0; t < ms; t += 40){ if (id !== this.run || this.skip === id) return; await sleep(40); }
+  }
+  async play(){
+    const id = ++this.run; this.skip = -1; this.cancelAuto(); this.done = false;
+    await dataReady;
+    if (id !== this.run) return;
+    const key = this.pair.join('>');
+    let lines = DATA && DATA[key];
+    if (!lines){ toast('No intro found for ' + this.pair.map(i => H[i].name).join(' vs ')); return; }
+    if (Array.isArray(lines[0][0])){          // a mirror match: one of its exchanges, not the same twice running
+      let i = 0;
+      if (lines.length > 1) do { i = Math.floor(Math.random() * lines.length); } while (i === this.lastMirror[key]);
+      this.lastMirror[key] = i; lines = lines[i];
+    }
+    const who = this.pair;
+    this.load(who);
+    lines.forEach((side, s) => side.forEach(p => { if (p.form && FORM_STYLE[p.form]) new Image().src = artSrc(who[s], p.form); }));
+    const heroes = [this.el.querySelector('.hero.a'), this.el.querySelector('.hero.b')];
+    // a hero enters in the form of their first line (Pale Lady can open as the wolf)
+    heroes.forEach((h, s) => this.setForm(h, who[s], lines[s][0].form, true));
+    heroes.forEach(h => h.querySelector('.speech').innerHTML = '');
+    this.el.querySelector('.shell').classList.remove('hit');
+    this.el.classList.remove('go'); void this.el.offsetWidth; this.el.classList.add('go');
+    await Promise.race([document.fonts.ready, sleep(1500)]);
+    await this.wait(still() ? 300 : 950, id);
+    let last = '';
+    for (let s = 0; s < 2; s++){
+      if (s) await this.wait(Math.max(1000 * mul(), readPause(last)), id);
+      for (let p = 0; p < lines[s].length; p++){
+        if (p) await this.wait(readPause(last), id);
+        if (id !== this.run) return;
+        last = FORM_STYLE[lines[s][p].form] ? '' : lines[s][p].text;
+        await this.part(heroes[s], who[s], lines[s][p], id);
+      }
+    }
+    if (id === this.run){ this.done = true; this.scheduleAuto(); }
+  }
+}
+
+/* ---------------- random pool: a shuffled bag, so fights don't repeat
+   until every pairing in the pool has come up once ---------------- */
+let bag = [], lastKey = '';
+const poolA = () => prefs.pool.a;
+const poolB = () => prefs.pool.b;
+const poolOk = () => poolA().length > 0 && poolB().length > 0;
+function nextPair(){
+  if (!bag.length){
+    poolA().forEach(a => poolB().forEach(b => bag.push([a, b])));
+    for (let i = bag.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+    if (bag.length > 1 && bag[bag.length - 1].join('>') === lastKey) bag.unshift(bag.pop());
+  }
+  const p = bag.pop(); lastKey = p.join('>'); return p;
+}
+const resetBag = () => { bag = []; };
+
+/* ---------------- screens and the Back button ---------------- */
+const $ = s => document.querySelector(s);
+const app = $('#app');
+let current = 'home', openedSheet = null, stage = null;
+function toast(msg){
+  const t = $('.toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 2600);
+}
+function showScreen(name){
+  ['home','pool','choose','fight'].forEach(n => $('#' + n).hidden = n !== name);
+  if (current === 'fight' && name !== 'fight' && stage) stage.stop();
+  current = name;
+  if (name === 'home') renderHome();
+  if (name === 'pool') renderPool();
+  if (name === 'choose') renderChoose();
+}
+function go(name){ history.pushState({ screen: name }, ''); showScreen(name); }
+function openSheet(name){
+  if (openedSheet) closeSheetNow();
+  history.pushState({ screen: current, sheet: name }, '');
+  openedSheet = name; $('#' + name).hidden = false;
+  if (name === 'settings') renderSettings();
+  if (stage) stage.cancelAuto();
+}
+function closeSheetNow(){ if (openedSheet){ $('#' + openedSheet).hidden = true; openedSheet = null; } }
+addEventListener('popstate', e => {
+  const st = e.state || { screen: 'home' };
+  closeSheetNow();
+  if (st.sheet){ openedSheet = st.sheet; $('#' + st.sheet).hidden = false; }
+  if (st.screen !== current) showScreen(st.screen);
+  else if (current === 'fight' && !st.sheet && stage && stage.done) stage.scheduleAuto();
+});
+app.addEventListener('click', e => {
+  if (e.target.closest('[data-back]')) return history.back();
+  const o = e.target.closest('[data-open]'); if (o) return openSheet(o.dataset.open);
+  if (e.target.classList.contains('sheet')) return history.back();     // tap outside a sheet
+});
+/* full screen on Android when a fight starts (needs the tap itself) */
+function goFull(){
+  if (prefs.full !== 'on' || document.fullscreenElement || !document.fullscreenEnabled) return;
+  if (matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches) return;
+  try { const p = document.documentElement.requestFullscreen(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
+}
+function startFight(pair, mode){
+  if (!stage) stage = new Stage($('#fight'));
+  go('fight');
+  stage.measure();
+  stage.start(pair, mode);
+}
+
+/* ---------------- avatars and grids ---------------- */
+function av(id, size){
+  const h = H[id];
+  return '<span class="av" style="--c:' + SET_COLOR[h.set] + (size ? ';--s:' + size + 'px' : '') + '">' + initials(h.name) +
+    '<img src="' + artSrc(id) + '" alt="" loading="lazy" onerror="this.remove()"></span>';
+}
+function ordered(){
+  return prefs.order === 'abc' ? [[null, HEROES.slice().sort((a, b) => a.name.localeCompare(b.name))]]
+    : ROSTER.map(([set]) => [set, HEROES.filter(h => h.set === set)]);
+}
+function gridHTML(cls, withHeads){
+  return ordered().map(([set, list]) => {
+    let head = '';
+    if (set){
+      const on = withHeads ? list.filter(h => withHeads.includes(h.id)).length : 0;
+      head = withHeads
+        ? '<button class="sethead" data-set="' + set + '" style="--c:' + SET_COLOR[set] + '"><span class="sw"></span><b>' + set + '</b>' +
+          '<span class="n">' + on + '/' + list.length + '</span><span class="tog">' + (on === list.length ? 'Remove' : 'Add all') + '</span></button>'
+        : '<div class="sethead" style="--c:' + SET_COLOR[set] + '"><span class="sw"></span><b>' + set + '</b></div>';
+    }
+    return head + '<div class="grid">' + list.map(h =>
+      '<button class="tile ' + cls(h.id) + '" data-id="' + h.id + '" aria-label="' + h.name + '">' + av(h.id) +
+      '<span class="nm">' + h.name + '</span></button>').join('') + '</div>';
+  }).join('');
+}
+function syncSegs(root){
+  root.querySelectorAll('.sortseg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.sort === prefs.order)));
+}
+document.querySelectorAll('.sortseg').forEach(seg => seg.addEventListener('click', e => {
+  const b = e.target.closest('[data-sort]'); if (!b) return;
+  prefs.order = b.dataset.sort; save();
+  if (current === 'pool') renderPool();
+  if (openedSheet === 'picker') renderPicker();
+}));
+
+/* ---------------- home ---------------- */
+function renderHome(){
+  const A = poolA(), B = poolB();
+  poolFacesStart(Array.from(new Set(A.concat(B))));
+  const n = k => k + (k === 1 ? ' hero' : ' heroes');
+  const same = A.length === B.length && A.every(id => B.includes(id));
+  const txt = same
+    ? (A.length === ALL.length ? 'All 45 heroes' : n(A.length)) + '<small>for opener and responder</small>'
+    : '<span class="pl"><small>Opener</small>' + n(A.length) + '</span><span class="pl"><small>Responder</small>' + n(B.length) + '</span>';
+  $('#poolTxt').innerHTML = txt;
+  $('#goRandom').disabled = !poolOk();
+  $('#randomSub').textContent = poolOk() ? 'A surprise matchup from your pool' : 'Add heroes to the pool first';
+  homeBackground();
+}
+/* up to six faces. A bigger pool holds them for a while, then swaps them
+   one at a time, left to right, each fading out and the next fading in. */
+let facesT = null, facesGen = 0;
+function poolFacesStart(ids){
+  clearTimeout(facesT); facesGen++;
+  const gen = facesGen, box = $('#poolFaces');
+  const pick = (avoid) => {
+    const rest = ids.filter(id => !avoid.includes(id));
+    return (rest.length >= 6 ? rest : ids).slice().sort(() => Math.random() - .5).slice(0, 6);
+  };
+  let now = ids.length <= 6 ? ids.slice() : pick([]);
+  box.innerHTML = now.map(id => '<span class="slotf" data-id="' + id + '">' + av(id, 32) + '</span>').join('');
+  if (ids.length <= 6) return;
+  const cycle = () => {
+    if (gen !== facesGen) return;
+    if (current !== 'home'){ facesT = setTimeout(cycle, 2000); return; }
+    const next = pick(now), slots = [...box.children];
+    slots.forEach((el, i) => setTimeout(() => {
+      if (gen !== facesGen) return;
+      el.classList.add('out');
+      setTimeout(() => {
+        if (gen !== facesGen) return;
+        el.innerHTML = av(next[i], 32); el.dataset.id = next[i];
+        requestAnimationFrame(() => el.classList.remove('out'));
+      }, 900);
+    }, i * 450));
+    now = next;
+    facesT = setTimeout(cycle, 6 * 450 + 1800 + 5000);   // all six swapped, then hold about five seconds
+  };
+  facesT = setTimeout(cycle, 5000);
+}
+let bgTried = false;
+function homeBackground(){
+  const box = $('#homeBg');
+  if (prefs.bg !== 'art'){ box.classList.remove('on'); return; }
+  if (bgTried) { box.classList.add('on'); return; }
+  bgTried = true;
+  const ids = ALL.slice().sort(() => Math.random() - .5);
+  const tryOne = i => {
+    if (i >= ids.length) return;
+    const img = new Image();
+    img.onload = () => { box.querySelector('img').src = img.src; box.classList.add('on'); };
+    img.onerror = () => tryOne(i + 1);
+    img.src = artSrc(ids[i]);
+  };
+  tryOne(0);
+}
+$('#goRandom').addEventListener('click', () => { if (!poolOk()) return; goFull(); startFight(nextPair(), 'random'); });
+$('#goChoose').addEventListener('click', () => { goFull(); go('choose'); });
+$('#openPool').addEventListener('click', () => go('pool'));
+
+/* ---------------- random pool ---------------- */
+let poolSide = 'a';
+function renderPool(){
+  $('#sideSeg').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === poolSide)));
+  syncSegs($('#pool'));
+  const list = prefs.pool[poolSide];
+  $('#poolCount').textContent = list.length + '/45';
+  $('#poolGrid').innerHTML = gridHTML(id => list.includes(id) ? 'on' : 'off', list);
+  $('#poolFight').disabled = !poolOk();
+  $('#poolFight').textContent = poolOk() ? 'Random fight' : 'Each pool needs a hero';
+}
+function poolChanged(){ resetBag(); save(); renderPool(); }
+$('#pool').addEventListener('click', e => {
+  const t = e.target.closest('.tile'), sh = e.target.closest('.sethead[data-set]');
+  const sd = e.target.closest('[data-side]'), all = e.target.closest('[data-all]');
+  const list = prefs.pool[poolSide];
+  if (t){ const i = list.indexOf(t.dataset.id); i < 0 ? list.push(t.dataset.id) : list.splice(i, 1); return poolChanged(); }
+  if (sh){
+    const ids = HEROES.filter(h => h.set === sh.dataset.set).map(h => h.id);
+    const full = ids.every(id => list.includes(id));
+    prefs.pool[poolSide] = full ? list.filter(id => !ids.includes(id)) : Array.from(new Set(list.concat(ids)));
+    return poolChanged();
+  }
+  if (sd){ poolSide = sd.dataset.side; return renderPool(); }
+  if (all){ prefs.pool[poolSide] = all.dataset.all === '1' ? ALL.slice() : []; return poolChanged(); }
+});
+$('#poolFight').addEventListener('click', () => { if (!poolOk()) return; goFull(); startFight(nextPair(), 'random'); });
+
+/* ---------------- choose fighters ---------------- */
+let pickSlot = 0;
+function slotHTML(i){
+  const id = prefs.pick[i], role = i ? 'Responder' : 'Opener';
+  if (!id) return '<span class="plus">+</span><span class="role">' + role + '</span><span class="hint">Tap to choose</span>';
+  const h = H[id];
+  return '<span class="ini">' + initials(h.name) + '</span><img src="' + artSrc(id) + '" alt="" onerror="this.remove()">' +
+    '<span class="who"><small>' + role + '</small><b>' + h.name + '</b></span>';
+}
+function renderChoose(){
+  document.querySelectorAll('.slot').forEach(s => {
+    const i = +s.dataset.slot, id = prefs.pick[i];
+    s.classList.toggle('filled', !!id);
+    s.style.setProperty('--c', id ? SET_COLOR[H[id].set] : '');
+    s.setAttribute('aria-label', (i ? 'Responder: ' : 'Opener: ') + (id ? H[id].name + ', tap to change' : 'choose a hero'));
+    s.innerHTML = slotHTML(i);
+  });
+  $('#chooseFight').disabled = !(prefs.pick[0] && prefs.pick[1]);
+}
+document.querySelectorAll('.slot').forEach(s => s.addEventListener('click', () => { pickSlot = +s.dataset.slot; openSheet('picker'); renderPicker(); }));
+$('#slotSwap').addEventListener('click', () => { prefs.pick.reverse(); save(); renderChoose(); });
+$('#chooseFight').addEventListener('click', () => { if (prefs.pick[0] && prefs.pick[1]) startFight(prefs.pick, 'choose'); });
+function renderPicker(){
+  $('#pickTitle').textContent = pickSlot ? 'Choose the responder' : 'Choose the opener';
+  syncSegs($('#picker'));
+  $('#pickGrid').innerHTML = gridHTML(id => id === prefs.pick[pickSlot] ? 'sel' : '', null);
+}
+$('#pickGrid').addEventListener('click', e => {
+  const t = e.target.closest('.tile'); if (!t) return;
+  prefs.pick[pickSlot] = t.dataset.id; save();
+  renderChoose();
+  history.back();
+});
+
+/* ---------------- settings ---------------- */
+function renderSettings(){
+  document.querySelectorAll('[data-pref]').forEach(seg => seg.querySelectorAll('button').forEach(b =>
+    b.setAttribute('aria-pressed', String(prefs[seg.dataset.pref] === b.dataset.v))));
+}
+$('#settings').addEventListener('click', e => {
+  const b = e.target.closest('[data-pref] [data-v]'); if (!b) return;
+  const k = b.parentElement.dataset.pref; prefs[k] = b.dataset.v; save(); renderSettings(); applyPrefs();
+});
+function applyPrefs(){
+  app.classList.toggle('still', prefs.anim === 'off');
+  if (stage) stage.zones();
+  if (current === 'home') renderHome();
+}
+
+/* ---------------- installed app: offline copy and updates ----------------
+   The version number lives in sw.js. Raising it there makes every phone
+   fetch the new version and reload into it. */
+let swReg = null;
+const swOk = 'serviceWorker' in navigator && location.protocol.startsWith('http');
+function showVersion(){
+  const ctl = swOk && navigator.serviceWorker.controller;
+  if (!ctl) return;
+  const ch = new MessageChannel();
+  ch.port1.onmessage = e => { $('#verNum').textContent = 'v' + e.data; };
+  ctl.postMessage('version', [ch.port2]);
+}
+const takeOver = sw => { if (sw) sw.postMessage('skipWaiting'); return !!sw; };
+if (swOk){
+  // the first install shouldn't reload the page; only a newer version should
+  let reloaded = false;
+  let hadCtl = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadCtl){ hadCtl = true; showVersion(); return; }
+    if (reloaded) return;
+    reloaded = true; location.reload();
+  });
+  addEventListener('load', () => {
+    // updateViaCache:'none' makes every check read sw.js from the server, not an old copy
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+      swReg = reg;
+      takeOver(reg.waiting);
+      reg.addEventListener('updatefound', () => {
+        const sw = reg.installing; if (!sw) return;
+        sw.addEventListener('statechange', () => {
+          if (sw.state === 'installed' && navigator.serviceWorker.controller) takeOver(sw);
+        });
+      });
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+      showVersion();
+    }).catch(() => {});
+  });
+}
+async function checkUpdate(){
+  const btn = $('#updBtn');
+  if (!swOk) return toast('Updates work once the app is online');
+  const reg = swReg || await navigator.serviceWorker.getRegistration();
+  if (!reg) return toast('Updates work once the app is online');
+  btn.disabled = true; btn.textContent = 'Checking…';
+  try {
+    await reg.update();
+    await sleep(900);                       // give the new version a moment to install
+    if (reg.waiting || reg.installing){ toast('New version found, reloading'); takeOver(reg.waiting || reg.installing); }
+    else toast('You have the latest version');
+  } catch (e){ toast('Could not reach the server'); }
+  btn.disabled = false; btn.textContent = 'Check for updates';
+}
+$('#updBtn').addEventListener('click', checkUpdate);
+
+/* ---------------- start ---------------- */
+history.replaceState({ screen: 'home' }, '');
+applyPrefs();
+showScreen('home');
+</script>
+
+</body>
+</html>
