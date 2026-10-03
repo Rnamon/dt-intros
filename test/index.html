@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#110D27">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<title>DT Test</title>
+<style>body{margin:0;background:#110D27;color:#fff;font:24px system-ui;display:grid;place-items:center;height:100vh;text-align:center}</style></head>
+<body><div>DT test page<br><small id="m"></small></div>
+<script>
+document.getElementById('m').textContent = matchMedia('(display-mode: standalone)').matches ? 'standalone: app mode' : 'in browser';
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script></body></html>
