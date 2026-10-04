@@ -1,9 +1,41 @@
 <!doctype html>
+<!--
+  DICE THRONE INTROS: what changed, version by version.
+  The version number lives in two places that must match:
+  APP_VERSION in the script below, and VERSION in sw.js
+  (raising it in sw.js is what makes phones fetch the new version).
+
+  0.5  New look, in the spirit of the Dice Throne digital game:
+       - slate ground with grit, slanted slate buttons, gold for the main
+         action and for whatever is selected, Lilita One headings
+       - Home: app logo top left (top centre when upright); a hero from the
+         pool stands in the middle and cross-fades to another every 4
+         seconds; Choose is a gold banner; Pool and Fight share one leaning
+         panel; the ember strip under Fight runs edge to edge
+       - Pool: small square cards (gold frame = in the pool, dim = out, no
+         check mark); Opener/Responder tabs lean right/left with the side
+         being edited; count next to the title; Fight top right sideways,
+         full width at the bottom upright
+       - Choose Heroes: title centred; VS, swap and Fight in the middle
+         sideways; upright, Fight at the bottom with an up/down swap beside
+         it; Opener/Responder tag at the top of each card; hero logo in
+         place of the name
+       - Fight: slanted rail buttons with their names, now also sideways;
+         Next in gold; gold seams and a metallic gold VS; bigger logos (a
+         gold name until a hero has one); the auto-play line runs around Next
+       - Settings: full screen with Fight / Display / About tabs; gold-knob
+         switches; Menu background None / Heroes / Custom (coming later);
+         version bottom left; Restore defaults
+       - balloons, lettering and hero voices unchanged
+  0.4  and earlier: the first app. Home, Random pool, Choose fighters, the
+       fight, Settings; installs to the home screen, works offline and
+       updates itself.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#110D27">
+<meta name="theme-color" content="#141A26">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,28 +46,36 @@
 <title>Dice Throne Intros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Bangers&family=Patrick+Hand&family=Alegreya:wght@500&family=Permanent+Marker&family=Pirata+One&family=Comic+Neue:wght@700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Luckiest+Guy&family=Bangers&family=Patrick+Hand&family=Alegreya:wght@500&family=Permanent+Marker&family=Pirata+One&family=Comic+Neue:wght@700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-/* Layout: four screens over one dark ground. Home (Random / Choose), the
+/* Layout: four screens over one slate ground. Home (Random / Choose), the
    random pool, Choose fighters, and the fight itself, a versus screen with a
    control rail on the short edge. Settings and the hero picker slide over.
    Everything follows the phone: sideways or upright. */
 :root{
-  --night:#110D27;      /* rail, outlines on orange, page ground */
-  --night-2:#1C1740;
-  --night-3:#2A2452;    /* raised surfaces on night */
-  --line:#3A3368;       /* hairlines on night */
-  --blaze:#F28C1E;      /* the orange: bars, buttons, VS */
-  --blaze-hi:#FFA33D;
-  --paper:#FFFCF2;      /* speech balloons, primary button */
+  --night:#141A26;      /* the ground of every screen */
+  --night-2:#1E2738;    /* raised panels */
+  --night-3:#2E4468;    /* slate button face */
+  --slate-hi:#3E5C8C;   /* slate button highlight */
+  --edge:#0B111D;       /* slate button rim and thickness */
+  --line:#34405E;       /* hairlines and panel rims */
+  --gold-hi:#FFE27A;
+  --blaze:#F7B52C;      /* gold: the main action, whatever is selected, VS */
+  --gold-lo:#E07C14;
+  --ember:#C9560E;      /* the strip under Fight */
+  --brown:#7A3E06;      /* rim of gold buttons */
+  --paper:#FFFCF2;      /* speech balloons */
   --ink:#17132B;        /* balloon outline and lettering */
   --pool:#FFD84A;       /* Deadpool's yellow caption boxes */
-  --mist:#B8B1DA;       /* quiet text on night */
+  --mist:#8E9BB8;       /* quiet text */
   --zone:#5BE08A;       /* the art safe-zone overlay */
+  --head:"Lilita One","Arial Black",Impact,sans-serif;
   --shout:"Bangers","Luckiest Guy","Arial Black",Impact,sans-serif;
-  --vsface:"Luckiest Guy","Arial Black",Impact,sans-serif;
+  --vsface:var(--head);
   --wade:"Comic Neue","Comic Sans MS",system-ui,sans-serif;
   --ui:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --slate-face:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 2px,transparent 2px 9px),linear-gradient(180deg,var(--slate-hi),var(--night-3) 55%,#22355A);
+  --gold-face:repeating-linear-gradient(115deg,rgba(255,255,255,.13) 0 3px,transparent 3px 12px),linear-gradient(180deg,var(--gold-hi),var(--blaze) 48%,var(--gold-lo));
   color-scheme:dark;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -43,7 +83,7 @@ html,body,#app{height:100%}
 body{margin:0;background:var(--night);color:var(--paper);font-family:var(--ui);overflow:hidden}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 button:disabled{cursor:default}
-:focus-visible{outline:3px solid var(--paper);outline-offset:3px}
+:focus-visible{outline:3px solid var(--gold-hi);outline-offset:3px}
 [hidden]{display:none!important}
 #app{position:relative;overflow:hidden}
 
@@ -60,35 +100,38 @@ button:disabled{cursor:default}
   grid-template-rows:minmax(0,1fr);
   grid-template-areas:"rail edge a seam b";
   --seam:clamp(10px,2.2cqw,30px)}
-.rail{grid-area:rail}.edge{grid-area:edge;background:var(--blaze)}
-.hero.a{grid-area:a}.hero.b{grid-area:b}.seam{grid-area:seam;background:var(--blaze)}
+.rail{grid-area:rail}.hero.a{grid-area:a}.hero.b{grid-area:b}
+.edge{grid-area:edge}.seam{grid-area:seam}
+.edge,.seam{background:linear-gradient(180deg,var(--gold-hi),var(--blaze) 50%,var(--gold-lo));box-shadow:0 0 0 1.5px #5A2E04;z-index:2}
 
 @container stage (orientation:portrait){
   .shell{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) var(--seam) minmax(0,1fr) 6px auto;
     grid-template-areas:"a" "seam" "b" "edge" "rail";--seam:clamp(10px,2.2cqh,30px)}
 }
 
-/* rail */
-.rail{display:flex;flex-direction:column;align-items:center;gap:clamp(8px,2.6cqh,18px);
-  padding:clamp(10px,3cqh,22px) clamp(10px,1.6cqw,18px);
-  padding-left:max(clamp(10px,1.6cqw,18px),env(safe-area-inset-left,0px));background:var(--night);z-index:3}
-.rail{min-width:0;min-height:0;overflow:hidden}
+/* rail: slanted slate buttons with their names under them; Next is gold */
+.rail{display:flex;flex-direction:column;align-items:center;gap:clamp(4px,2cqh,14px);
+  padding:clamp(8px,2.6cqh,18px) clamp(10px,1.6cqw,18px);
+  padding-left:max(clamp(10px,1.6cqw,18px),env(safe-area-inset-left,0px));
+  background:linear-gradient(90deg,#0F1420,#182033);z-index:3;min-width:0;min-height:0;overflow:hidden}
 .rail .gap{flex:1}
-.rbtn{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:48px}
-.rbtn .disc{display:grid;place-items:center;width:clamp(46px,8.4cqmin,74px);aspect-ratio:1;border-radius:50%;
-  background:var(--blaze);box-shadow:0 3px 0 #9C5410;transition:transform .12s,background .15s}
-.rbtn:hover .disc{background:var(--blaze-hi)}
-.rbtn:active .disc{transform:translateY(2px);box-shadow:0 1px 0 #9C5410}
-.rbtn svg{width:58%;height:58%;fill:none;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-.rbtn .lbl{font-size:12px;font-weight:700;letter-spacing:.6px;color:var(--mist);text-transform:uppercase}
-.rbtn.main .disc{background:var(--paper);box-shadow:0 3px 0 #B9AE95}
-.rbtn.main .lbl{color:var(--paper)}
+.rbtn{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:52px;--bh:clamp(32px,10cqh,54px)}
+.rbtn .disc{position:relative;display:grid;place-items:center;height:var(--bh);width:calc(var(--bh) * 1.24);isolation:isolate;transition:transform .12s}
+.rbtn .disc::before{content:"";position:absolute;inset:0;z-index:-1;transform:skewX(-7deg);border-radius:7px;background:var(--slate-face);
+  border:2px solid var(--edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 0 var(--edge)}
+.rbtn.main .disc::before{background:var(--gold-face);border-color:var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #6B3404}
+.rbtn:active .disc{transform:translateY(2px)}
+.rbtn svg{width:52%;height:52%;fill:none;stroke:#fff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 0 rgba(0,0,0,.45))}
+.rbtn .lbl{font-size:12px;font-weight:700;letter-spacing:.9px;color:#AEB9D4;text-transform:uppercase;line-height:1}
+.rbtn.main .lbl{color:var(--blaze)}
 
 @container stage (orientation:portrait){
   /* upright: buttons spread evenly, equal space at both ends */
-  .rail{flex-direction:row;justify-content:space-evenly;gap:0;padding:clamp(8px,2cqh,16px) max(6px,env(safe-area-inset-right,0px));
-    padding-bottom:max(clamp(8px,2cqh,16px),env(safe-area-inset-bottom,0px))}
+  .rail{flex-direction:row;justify-content:space-evenly;gap:0;padding:clamp(8px,1.6cqh,14px) max(6px,env(safe-area-inset-right,0px));
+    padding-bottom:max(clamp(8px,1.6cqh,14px),env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,#182033,#0F1420)}
   .rail .gap{display:none}
+  .rbtn{--bh:clamp(38px,5.4cqh,52px)}
+  .edge,.seam{background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi) 50%,var(--gold-lo))}
 }
 
 /* hero halves. Both are cropped the same way, so the two heroes sit at
@@ -97,13 +140,14 @@ button:disabled{cursor:default}
 .hero{--py:40%}
 .hero .art{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% var(--py)}
 .hero::after{content:"";position:absolute;inset:0;pointer-events:none}
-.hero.a::after{background:linear-gradient(to top,rgba(17,13,39,.5),transparent 30%)}
-.hero.b::after{background:linear-gradient(to bottom,rgba(17,13,39,.5),transparent 30%)}
-.logo{position:absolute;left:50%;transform:translateX(-50%);max-width:48%;max-height:24%;width:auto;z-index:1}
+.hero.a::after{background:linear-gradient(to top,rgba(10,13,20,.55),transparent 30%)}
+.hero.b::after{background:linear-gradient(to bottom,rgba(10,13,20,.55),transparent 30%)}
+.logo{position:absolute;left:50%;transform:translateX(-50%);max-width:72%;max-height:30%;width:auto;z-index:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.7))}
 .logo[hidden]{display:none}
 /* until a hero has a logo file, its name stands in */
-.logoname{font-family:var(--vsface);font-size:clamp(20px,7cqmin,46px);line-height:1;color:var(--paper);white-space:nowrap;
-  -webkit-text-stroke:.07em var(--night);paint-order:stroke fill;max-width:none}
+.logoname{font-family:var(--head);font-size:clamp(22px,8cqmin,52px);line-height:1.05;white-space:nowrap;max-width:none;
+  background:linear-gradient(180deg,#FFF3B0,var(--blaze) 55%,#C77712);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 3px 0 #4A2804) drop-shadow(0 0 1px #2B1600)}
 /* a transformation: white flash and a punch-in on the new art */
 .flash{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;
   background:radial-gradient(circle at 50% 45%,rgba(255,252,242,.95),rgba(255,252,242,.35) 45%,rgba(255,252,242,0) 75%)}
@@ -155,21 +199,21 @@ button:disabled{cursor:default}
 .balloon.cursed .shape{filter:drop-shadow(0 0 .4em rgba(160,120,255,.7))}
 .balloon.cursed .shape path{fill:rgba(28,14,48,.9);stroke:#B9A0FF;stroke-width:2.5}
 
-/* VS */
-.vs{position:absolute;z-index:4;left:calc(50% + var(--railw,0px)/2);top:50%;font-family:var(--vsface);color:var(--blaze);
+/* VS: metallic gold */
+.vs{position:absolute;z-index:4;left:calc(50% + var(--railw,0px)/2);top:50%;font-family:var(--head);
   font-size:clamp(46px,19cqmin,150px);line-height:1;letter-spacing:.02em;
-  -webkit-text-stroke:.07em var(--night);paint-order:stroke fill;text-shadow:.04em .06em 0 var(--night);
+  background:linear-gradient(180deg,#FFF3B0,var(--blaze) 50%,var(--gold-lo));-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 .045em 0 #4A2804) drop-shadow(0 0 2px #2B1600) drop-shadow(0 0 .2em rgba(247,181,44,.35));
   transform:translate(-50%,-46%) rotate(-6deg);pointer-events:none}
 @container stage (orientation:portrait){
   .vs{left:50%;top:calc(50% - var(--dockh,0px)/2);font-size:clamp(46px,16cqmin,130px)}
-  .hero.a .logo{left:auto;right:3%;bottom:4%;transform:none;max-width:40%}
-  .hero.b .logo{left:3%;top:4%;transform:none;max-width:40%}
+  .hero.a .logo{left:auto;right:3%;bottom:4%;transform:none;max-width:60%;max-height:22%}
+  .hero.b .logo{left:3%;top:4%;transform:none;max-width:60%;max-height:22%}
 }
 
-/* a short sideways screen (a phone with the browser bar showing): labels go, buttons stay */
-@container stage (orientation:landscape) and (max-height:380px){
+/* a very short sideways screen: the names under the buttons go, the buttons stay */
+@container stage (orientation:landscape) and (max-height:300px){
   .rbtn .lbl{display:none}
-  .rail{gap:clamp(6px,2.4cqh,12px)}
 }
 
 /* entrance: the art fills each half and pushes in toward the middle,
@@ -191,8 +235,8 @@ button:disabled{cursor:default}
 }
 
 .toast{position:absolute;z-index:9;left:50%;bottom:14%;transform:translate(-50%,10px);max-width:86%;
-  background:var(--night);border:2px solid var(--blaze);color:var(--paper);border-radius:999px;padding:8px 16px;
-  font-size:15px;font-weight:600;letter-spacing:.3px;text-align:center;opacity:0;pointer-events:none;transition:.2s}
+  background:var(--night-2);border:2px solid var(--blaze);color:var(--paper);border-radius:10px;padding:8px 16px;
+  font-size:16px;font-weight:600;letter-spacing:.3px;text-align:center;opacity:0;pointer-events:none;transition:.2s;box-shadow:0 6px 16px rgba(0,0,0,.5)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 
 
@@ -202,167 +246,265 @@ button:disabled{cursor:default}
 .hero.noart{background:radial-gradient(ellipse at 50% 42%,color-mix(in srgb,var(--c) 70%,#fff 0%) 0%,color-mix(in srgb,var(--c) 55%,var(--night)) 55%,var(--night) 100%)}
 .hero.noart .art{visibility:hidden}
 .hero.noart::before{content:attr(data-ini);position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
-  font-family:var(--vsface);font-size:min(46cqw,46cqh);color:rgba(255,252,242,.16);line-height:1;pointer-events:none}
-/* auto-play: a ring fills around Next before the next fight */
-.rbtn .disc{position:relative}
-.rbtn .disc svg.ring{position:absolute;left:-6px;top:-6px;width:calc(100% + 12px);height:calc(100% + 12px);max-width:none;
-  transform:rotate(-90deg);pointer-events:none;opacity:0;fill:none;stroke:none;transition:opacity .2s}
-.ring circle{fill:none;stroke:var(--blaze);stroke-width:2.6;stroke-dasharray:116.3;stroke-dashoffset:116.3;stroke-linecap:round}
+  font-family:var(--head);font-size:min(46cqw,46cqh);color:rgba(255,252,242,.16);line-height:1;pointer-events:none}
+/* auto-play: a line runs around Next before the next fight */
+.rbtn .disc svg.ring{position:absolute;left:-5px;top:-5px;width:calc(100% + 10px);height:calc(100% + 10px);max-width:none;transform:skewX(-7deg);
+  pointer-events:none;opacity:0;fill:none;stroke:none;filter:none;transition:opacity .2s}
+.ring rect{fill:none;stroke:var(--gold-hi);stroke-width:3;vector-effect:non-scaling-stroke;stroke-dasharray:100;stroke-dashoffset:100;stroke-linecap:round}
 .counting .disc svg.ring{opacity:1}
-.counting .ring circle{animation:count var(--t,4s) linear forwards}
+.counting .ring rect{animation:count var(--t,4s) linear forwards}
 @keyframes count{to{stroke-dashoffset:0}}
 
-/* ---------- screens ---------- */
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--night)}
-.bar{display:flex;align-items:center;gap:10px;padding:max(10px,env(safe-area-inset-top,0px)) 16px 10px;flex:none}
-.bar h2{margin:0;font-family:var(--vsface);font-weight:400;font-size:24px;letter-spacing:.5px;color:var(--paper);flex:1;min-width:0}
-.iconbtn{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;flex:none}
-.iconbtn:hover{background:var(--night-3)}
-.iconbtn svg{width:26px;height:26px;fill:none;stroke:var(--paper);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.count{font-size:16px;font-weight:600;color:var(--mist);font-variant-numeric:tabular-nums}
+/* ================= the game look =================
+   Gritty slate ground, slanted slate buttons, gold for the main action
+   and for whatever is selected, heavy white headings. */
+#app{container:app/size}
+/* grit: fine speckle over everything */
+#app::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:35;opacity:.42;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.4 -.55'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;
+  background:radial-gradient(ellipse at 30% 20%,rgba(80,100,140,.18),transparent 60%),radial-gradient(ellipse at 80% 90%,rgba(0,0,0,.45),transparent 60%),var(--night)}
+.screen::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 45%,rgba(0,0,0,.5) 100%)}
+.screen > *{position:relative}
+.bar{display:flex;align-items:center;gap:18px;flex:none;
+  padding:max(12px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.bar h2{margin:0;font-family:var(--head);font-weight:400;font-size:clamp(28px,4.4cqmin + 12px,42px);letter-spacing:.5px;line-height:1;color:#fff;
+  text-shadow:0 3px 0 rgba(0,0,0,.45);white-space:nowrap}
+.bar h2 em{font-style:normal;color:var(--blaze)}
+.iconbtn{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;flex:none}
+.iconbtn svg{width:30px;height:30px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 0 rgba(0,0,0,.5))}
+.count{font-family:var(--head);font-size:26px;color:#fff;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.count small{font-size:17px;color:var(--mist)}
 .scroll{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:0 16px 16px}
-.foot{flex:none;padding:12px 16px max(14px,env(safe-area-inset-bottom,0px));background:linear-gradient(to top,var(--night) 70%,transparent)}
-.cta{display:block;width:100%;max-width:520px;margin:0 auto;background:var(--blaze);color:var(--ink);border-radius:999px;padding:14px 20px;
-  font-family:var(--vsface);font-size:22px;letter-spacing:.6px;box-shadow:0 4px 0 #9C5410}
-.cta:active{transform:translateY(2px);box-shadow:0 2px 0 #9C5410}
-.cta:disabled{background:var(--night-3);color:var(--mist);box-shadow:none}
 
-/* segmented controls and chips */
-.seg{display:flex;background:var(--night-2);border:1.5px solid var(--line);border-radius:999px;padding:3px;gap:2px}
-.seg button{flex:1;border-radius:999px;padding:8px 12px;font-size:16px;font-weight:600;color:var(--mist);white-space:nowrap}
-.seg button[aria-pressed="true"]{background:var(--blaze);color:var(--ink)}
-.chip{border:1.5px solid var(--line);border-radius:999px;padding:7px 14px;font-size:15px;font-weight:600;color:var(--paper)}
-.chip:active{background:var(--night-3)}
+/* slate button: slanted, with a sheen and some thickness underneath */
+.sbtn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:none;height:44px;padding:0 20px;isolation:isolate;
+  font-weight:600;font-size:19px;letter-spacing:.4px;text-transform:uppercase;color:#fff;white-space:nowrap}
+.sbtn::before{content:"";position:absolute;inset:0;z-index:-1;transform:skewX(-7deg);border-radius:7px;background:var(--slate-face);
+  border:2px solid var(--edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 0 var(--edge),0 6px 10px rgba(0,0,0,.35)}
+.sbtn:active{transform:translateY(2px)}
+.sbtn:active::before{box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 var(--edge)}
+.sbtn.sm{height:36px;padding:0 15px;font-size:16px}
+.sbtn svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2.3;stroke-linecap:round;stroke-linejoin:round}
+.sbtn:disabled{opacity:.45;transform:none}
+.sbtn.gold{text-shadow:0 1px 0 #9A4A06}
+.sbtn.gold::before{background:var(--gold-face);border-color:var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #6B3404,0 6px 10px rgba(0,0,0,.35)}
 
-/* avatars: the face area of the hero art, or initials in the set's color */
-.av{position:relative;display:inline-grid;place-items:center;flex:none;width:var(--s,64px);height:var(--s,64px);border-radius:50%;overflow:hidden;
-  background:var(--c,#8A85A8);color:var(--ink);font-family:var(--vsface);font-size:calc(var(--s,64px) * .34);line-height:1;
-  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.14)}
-.av img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 44%;transform:scale(1.85);transform-origin:50% 41%}
+/* Fight: the whole button leans and clips what's inside, so the ember
+   strip runs edge to edge; the lettering is stood back up */
+.fbtn{display:flex;flex-direction:column;width:100%;transform:skewX(-6deg);border-radius:10px;overflow:hidden;color:#fff;text-align:center;
+  background:var(--gold-face);border:2.5px solid var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 6px 0 #6B3404,0 9px 14px rgba(0,0,0,.45)}
+.fbtn .top{flex:1;display:flex;align-items:center;justify-content:center;gap:.28em;transform:skewX(6deg);padding:.15em .3em .1em;
+  font-family:var(--head);font-size:var(--fs,44px);line-height:1;text-shadow:0 3px 0 #9A4A06,0 0 1px #6B3404}
+.fbtn .top svg{width:.9em;height:.9em;fill:#fff;stroke:#9A4A06;stroke-width:1.2;filter:drop-shadow(0 2px 0 #9A4A06)}
+.fbtn .strip{flex:none;background:linear-gradient(180deg,#E8781A,var(--ember));border-top:2px solid #A8460A;padding:4px 0 5px}
+.fbtn .strip span{display:block;transform:skewX(6deg);font-weight:700;font-size:15px;letter-spacing:.9px;text-transform:uppercase;text-shadow:0 1px 0 #7A3404;white-space:nowrap}
+.fbtn:active{transform:skewX(-6deg) translateY(3px);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 3px 0 #6B3404}
+.fbtn:disabled{filter:grayscale(.9) brightness(.62);transform:skewX(-6deg)}
+
+/* segmented: slate chips, the chosen one gold */
+.seg{display:flex;gap:7px;flex:none}
+.seg button{display:grid;place-items:center;height:36px;padding:0 14px;border-radius:6px;font-weight:600;font-size:16px;text-transform:uppercase;white-space:nowrap;
+  background:linear-gradient(180deg,var(--night-3),#1F3050);border:2px solid var(--edge);box-shadow:0 3px 0 var(--edge);color:#C9D3EA}
+.seg button[aria-pressed="true"]{background:linear-gradient(180deg,var(--gold-hi),var(--blaze) 50%,var(--gold-lo));border-color:var(--brown);color:#fff;text-shadow:0 1px 0 #9A4A06}
+.seg button:disabled{opacity:.45}
+
+/* gold-knob switch */
+.tog{position:relative;flex:none;width:84px;height:40px;border-radius:999px;background:linear-gradient(180deg,#0B0F17,#1A2131);box-shadow:inset 0 2px 6px rgba(0,0,0,.8),0 0 0 2px #2A3346}
+.tog::after{content:"";position:absolute;top:3px;left:3px;width:34px;height:34px;border-radius:50%;transition:left .18s,background .18s;
+  background:radial-gradient(circle at 35% 30%,#8B95AD,#566079 60%,#343C50);box-shadow:0 2px 3px rgba(0,0,0,.6)}
+.tog[aria-checked="true"]::after{left:calc(100% - 37px);background:radial-gradient(circle at 35% 30%,var(--gold-hi),var(--blaze) 50%,#9A5A08);box-shadow:0 0 10px rgba(247,181,44,.45),0 2px 3px rgba(0,0,0,.6)}
+
+/* faces: the face area of the hero art, or initials in the set's color */
+.av{position:relative;display:inline-grid;place-items:center;flex:none;width:var(--s,64px);height:var(--s,64px);border-radius:7px;overflow:hidden;
+  background:var(--c,#8A85A8);color:rgba(255,255,255,.85);font-family:var(--head);font-size:calc(var(--s,64px) * .38);line-height:1}
+.av img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 30%;transform:scale(1.9);transform-origin:50% 28%}
 
 /* ---------- home ---------- */
-.home{container:home/size}
-.home-bg{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .6s}
+/* the hero behind it all: one from the pool, cross-fading to the next */
+.home-bg{position:absolute;z-index:0;left:50%;top:0;height:100%;width:min(48cqw,100cqh);transform:translateX(-50%);opacity:0;transition:opacity .6s;
+  -webkit-mask-image:radial-gradient(ellipse 50% 52% at 50% 45%,#000 52%,transparent 100%);mask-image:radial-gradient(ellipse 50% 52% at 50% 45%,#000 52%,transparent 100%)}
 .home-bg.on{opacity:1}
-.home-bg img{width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 40%;filter:saturate(1.1)}
-.home-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,13,39,.55) 0%,rgba(17,13,39,.82) 45%,var(--night) 100%)}
-.home .bar{position:relative;z-index:2;justify-content:flex-end}
-.home-main{position:relative;z-index:1;flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;gap:clamp(22px,6cqh,56px);
-  padding:clamp(0px,3cqh,30px) 16px max(20px,env(safe-area-inset-bottom,0px));width:100%;max-width:560px;margin:0 auto}
-.title{margin:0;display:flex;justify-content:center}
-.title img{display:block;width:auto;height:auto;max-width:min(92%,440px);max-height:34cqh;filter:drop-shadow(0 6px 16px rgba(0,0,0,.55))}
-.modes{display:flex;flex-direction:column;gap:clamp(16px,3.2cqh,26px);margin-block:auto}   /* centered in the space under the logo */
-.mode{display:flex;flex-direction:column;gap:10px}
-.big{display:flex;align-items:center;gap:14px;width:100%;text-align:left;border-radius:22px;padding:16px 18px;min-height:84px}
-.big svg{width:44px;height:44px;flex:none;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.big b{display:block;font-family:var(--vsface);font-weight:400;font-size:clamp(24px,7cqw,32px);letter-spacing:.5px;line-height:1}
-.big small{display:block;font-size:16px;font-weight:600;margin-top:5px;opacity:.75}
-.big.primary{background:var(--paper);color:var(--ink);box-shadow:0 5px 0 #B9AE95}
-.big.primary svg{stroke:var(--ink)}
-.big.orange{background:var(--blaze);color:var(--ink);box-shadow:0 5px 0 #9C5410}
-.big.orange svg{stroke:var(--ink)}
-.big:active{transform:translateY(3px)}
-.big:disabled{opacity:.55}
-.poolrow{display:flex;align-items:center;gap:12px;background:rgba(28,23,64,.85);border:1.5px solid var(--line);border-radius:16px;padding:8px 10px 8px 12px;width:100%;text-align:left}
-/* Random: one card. The top starts a fight, the strip below shows and edits the pool */
-.rcard{gap:0;background:var(--paper);border-radius:22px;box-shadow:0 5px 0 #B9AE95;overflow:hidden}
-.rcard .big.primary{box-shadow:none;border-radius:0;background:transparent;padding-bottom:12px}
-.rcard .big.primary:active{transform:none;background:#F3EEE0}
-.rcard .poolrow{border:0;border-top:1.5px solid #E2D9C2;border-radius:0;background:#F3EEE0;color:var(--ink);padding:10px 16px 12px}
-.rcard .poolrow:active{background:#E9E2CF}
-.rcard .pooltxt small{color:#6E6890}
-.rcard .pooledit{color:#B8600C}
-.rcard .faces .slotf{box-shadow:0 0 0 2px #F3EEE0}
-.faces{display:flex;flex:none;width:147px}          /* room for six, so the text never moves */
-.faces .slotf{display:block;margin-left:-9px;border-radius:50%;box-shadow:0 0 0 2px var(--night-2);transition:opacity .9s ease}
+.home-bg img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 30%;opacity:0;transition:opacity 1.4s ease}
+.home-bg img.on{opacity:1}
+.home::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 60%,rgba(70,96,150,.45),transparent 70%)}
+.home > *{z-index:1}
+.home .bar{position:absolute;top:0;right:0;padding-top:max(10px,env(safe-area-inset-top,0px));z-index:3}
+.title{position:absolute;margin:0;z-index:2;left:max(18px,env(safe-area-inset-left,0px));top:max(12px,env(safe-area-inset-top,0px))}
+.title img{display:block;width:min(30cqw,60cqh);height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}
+.modes{position:absolute;z-index:2;right:max(18px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));
+  width:min(38cqw,420px);display:flex;flex-direction:column;gap:clamp(10px,5cqh,24px)}
+/* Choose: a gold banner with two heroes on its left */
+.gban{display:flex;align-items:stretch;width:100%;height:clamp(56px,19cqh,80px);transform:skewX(-6deg);border-radius:10px;overflow:hidden;text-align:left;
+  background:var(--gold-face);border:2.5px solid var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 5px 0 #6B3404,0 8px 12px rgba(0,0,0,.45)}
+.gban:active{transform:skewX(-6deg) translateY(3px)}
+.gban .art{width:44%;display:flex;border-right:2.5px solid var(--brown);background:#5A2E04}
+.gban .art span{flex:1;position:relative;overflow:hidden;background:var(--c,#5A2E04)}
+.gban .art span + span{border-left:2px solid var(--brown)}
+.gban .art img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 30%;transform:skewX(6deg) scale(1.5);transform-origin:50% 28%}
+.gban .txt{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;padding:0 10px 0 16px;transform:skewX(6deg)}
+.gban .txt b{font-family:var(--head);font-weight:400;font-size:clamp(24px,8cqh,32px);line-height:1;color:#fff;text-shadow:0 3px 0 #9A4A06}
+.gban .txt small{font-size:16px;font-weight:700;color:#7A3404;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* the pool and Fight share one leaning panel: Fight rolls from the pool */
+.combo{position:relative;isolation:isolate;display:flex;flex-direction:column;gap:clamp(8px,3cqh,12px);padding:10px 16px 14px}
+.combo::before{content:"";position:absolute;inset:0;z-index:-1;transform:skewX(-6deg);border-radius:14px;
+  background:linear-gradient(180deg,rgba(26,33,52,.93),rgba(12,16,26,.93));box-shadow:inset 0 0 0 2px var(--line),0 10px 20px rgba(0,0,0,.4)}
+.poolrow{display:flex;align-items:center;gap:10px;width:100%;height:clamp(44px,13cqh,56px);text-align:left}
+.faces{display:flex;flex:none;padding-left:2px}
+.faces .slotf{display:block;margin-left:-9px;border-radius:7px;box-shadow:0 0 0 2.5px #141A28,0 0 0 4px rgba(247,181,44,.75);transition:opacity .9s ease}
 .faces .slotf:first-child{margin-left:0}
-.faces .slotf .av{margin:0;box-shadow:none}
+.faces .slotf .av{display:grid}
 .faces .slotf.out{opacity:0}
-.faces .av{--s:32px;margin-left:-9px;box-shadow:0 0 0 2px var(--night-2)}
-.faces .av:first-child{margin-left:0}
-.pooltxt{flex:1;min-width:0;font-size:17px;font-weight:600;line-height:1.15}
-.pooltxt small{display:block;font-size:14px;color:var(--mist);font-weight:500}
-.pooltxt .pl{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
-.pooltxt .pl small{display:inline;min-width:4.6em}
-.pooledit{font-size:15px;font-weight:700;color:var(--blaze);letter-spacing:.3px}
-.autorow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 4px}
-.autorow span{font-size:16px;font-weight:600;color:var(--mist)}
-.switch{position:relative;width:52px;height:30px;border-radius:999px;background:var(--night-3);border:1.5px solid var(--line);flex:none;transition:background .2s}
-.switch::after{content:"";position:absolute;top:2px;left:2px;width:23px;height:23px;border-radius:50%;background:var(--mist);transition:transform .2s,background .2s}
-.switch[aria-checked="true"]{background:var(--blaze);border-color:var(--blaze)}
-.switch[aria-checked="true"]::after{transform:translateX(22px);background:var(--paper)}
-/* sideways: title on the left, the two modes on the right */
-@container home (orientation:landscape){
-  .home-main{max-width:980px;flex-direction:row;align-items:center;gap:clamp(20px,5cqw,56px)}
-  .title{flex:1;min-width:0}
-  .title img{max-width:100%;max-height:66cqh}
-  .modes{flex:1.2;min-width:0}
-}
-@container home (orientation:landscape) and (max-height:420px){
-  .home .bar{position:absolute;top:0;right:0}
-  .big{min-height:64px;padding:10px 16px}
-  .big small{display:none}
-  .modes{gap:10px}
+.pooltxt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.1}
+.pooltxt b{font-family:var(--head);font-weight:400;font-size:24px;line-height:1;color:#fff}
+.pooltxt small{font-size:15px;font-weight:600;color:var(--mist);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#goRandom{height:clamp(72px,26cqh,104px);--fs:clamp(34px,12cqh,46px)}
+@container app (orientation:portrait){
+  .title{left:50%;transform:translateX(-50%);top:max(22px,env(safe-area-inset-top,0px))}
+  .title img{width:min(60cqw,28cqh)}
+  .home-bg{left:-4%;right:-4%;width:auto;transform:none;top:17cqh;height:56cqh}
+  .modes{left:0;right:0;width:auto;max-width:480px;margin:0 auto;padding:0 22px;gap:18px}
+  .gban{height:78px}
+  .gban .txt b{font-size:30px}
+  .poolrow{height:54px}
+  #goRandom{height:100px;--fs:44px}
 }
 
-/* ---------- hero grids (pool and picker) ---------- */
-.tools{flex:none;display:flex;flex-direction:column;gap:10px;padding:0 16px 12px;max-width:760px;width:100%;margin:0 auto}
-.tools .row{display:flex;align-items:center;gap:8px}
-.tools .row .seg{flex:none}
+/* ---------- hero grids (pool and picker): small square cards ---------- */
+.tools{flex:none;display:flex;align-items:center;gap:8px;padding:6px max(18px,env(safe-area-inset-right,0px)) 12px max(18px,env(safe-area-inset-left,0px))}
 .tools .sp{flex:1}
-.grid-wrap{max-width:760px;margin:0 auto}
-.sethead{display:flex;align-items:center;gap:10px;width:100%;padding:16px 4px 8px;text-align:left;border-bottom:1.5px solid var(--line)}
+.grid-wrap{max-width:1200px;margin:0 auto}
+.sethead{display:flex;align-items:center;gap:10px;width:100%;padding:14px 4px 6px;text-align:left;border-bottom:2px solid var(--line)}
 .sethead .sw{width:12px;height:12px;border-radius:3px;background:var(--c);flex:none}
-.sethead b{flex:1;font-size:18px;font-weight:700;letter-spacing:.4px}
+.sethead b{flex:1;font-family:var(--head);font-weight:400;font-size:19px;letter-spacing:.4px}
 .sethead .n{font-size:15px;font-weight:600;color:var(--mist);font-variant-numeric:tabular-nums}
-.sethead .tog{font-size:14px;font-weight:700;color:var(--blaze);letter-spacing:.3px;min-width:56px;text-align:right}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:14px 8px;padding:14px 0 6px}
-.tile{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
-.tile .av{--s:64px;transition:filter .15s,opacity .15s,box-shadow .15s}
-.tile .nm{font-size:14px;font-weight:600;line-height:1.1;text-align:center;max-width:84px}
-.tile.off .av{filter:grayscale(1) brightness(.4);opacity:.6}
-.tile.off .nm{color:var(--mist);opacity:.7}
-.tile.on .av{box-shadow:0 0 0 3px var(--blaze)}
-.tile.sel .av{box-shadow:0 0 0 3px var(--paper),0 0 14px rgba(255,252,242,.5)}
+.sethead .tog2{font-size:14px;font-weight:700;color:var(--blaze);letter-spacing:.4px;text-transform:uppercase;min-width:60px;text-align:right}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:9px;padding:10px 3px 6px}
+.tile{position:relative;aspect-ratio:64/78;border-radius:7px;overflow:hidden;background:var(--c,#555);min-width:0;
+  box-shadow:0 0 0 2px #0B0F17,0 0 0 3px #2C3448;transition:filter .15s,box-shadow .15s}
+.tile img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 30%;transform:scale(1.35);transform-origin:50% 28%}
+.tile .ini{position:absolute;inset:0;display:grid;place-items:center;padding-bottom:12px;font-family:var(--head);font-size:24px;color:rgba(255,255,255,.4);
+  background:radial-gradient(ellipse at 50% 35%,color-mix(in srgb,var(--c) 85%,#fff),color-mix(in srgb,var(--c) 50%,#000))}
+.tile .nm{position:absolute;left:0;right:0;bottom:0;padding:12px 2px 3px;font-weight:700;font-size:10.5px;line-height:1.05;text-align:center;letter-spacing:.2px;
+  color:#fff;text-transform:uppercase;background:linear-gradient(to top,rgba(5,7,12,.95) 40%,transparent)}
+.tile.off{filter:grayscale(1) brightness(.32)}
+.tile.on,.tile.sel{box-shadow:0 0 0 2px #0B0F17,0 0 0 4px var(--blaze),0 0 10px rgba(247,181,44,.45)}
+.tile.sel{box-shadow:0 0 0 2px #0B0F17,0 0 0 4px var(--gold-hi),0 0 16px rgba(255,226,122,.7)}
 
-/* ---------- choose fighters ---------- */
-.slots{flex:1;min-height:0;display:flex;flex-direction:column;align-items:stretch;gap:0;padding:0 16px;max-width:620px;width:100%;margin:0 auto}
-.slot{position:relative;flex:1;min-height:0;border-radius:20px;overflow:hidden;background:var(--night-2);border:2.5px dashed var(--line);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--mist)}
-.slot .plus{width:56px;height:56px;border-radius:50%;border:2.5px solid var(--blaze);display:grid;place-items:center;color:var(--blaze);font-size:34px;line-height:1;font-weight:600}
-.slot .role{font-family:var(--vsface);font-size:24px;color:var(--paper);letter-spacing:.5px}
+/* ---------- random pool ---------- */
+.pool{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr) auto;
+  grid-template-areas:"bar" "tabs" "tools" "scroll" "fight"}
+.pool .bar{grid-area:bar}
+.pool .bar .sp{flex:1}
+.pool .ptabs{grid-area:tabs}
+.pool .tools{grid-area:tools}
+.pool .scroll{grid-area:scroll;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 50px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 50px),transparent)}
+.pool .foot{grid-area:fight;padding:6px 22px max(16px,env(safe-area-inset-bottom,0px))}
+#poolFight{height:84px;--fs:40px;max-width:520px;margin:0 auto}
+/* opener and responder: both tabs lean toward the side being edited */
+.ptabs{display:flex;gap:10px;padding:4px 22px 6px;--sk:-14deg}
+.ptabs.lean-l{--sk:14deg}
+.ptab{position:relative;flex:1;display:grid;place-items:center;height:44px;padding:0 22px;isolation:isolate;
+  font-weight:600;font-size:18px;text-transform:uppercase;letter-spacing:.5px;color:#C9D3EA;white-space:nowrap}
+.ptab::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:7px;transform:skewX(var(--sk));transition:transform .25s ease;
+  background:var(--slate-face);border:2px solid var(--edge);box-shadow:0 4px 0 var(--edge)}
+.ptab[aria-pressed="true"]{color:#fff;text-shadow:0 2px 0 #9A4A06}
+.ptab[aria-pressed="true"]::before{background:var(--gold-face);border-color:var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #6B3404}
+@container app (orientation:landscape){
+  .pool{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto minmax(0,1fr);
+    grid-template-areas:"bar tabs fight" "tools tools tools" "scroll scroll scroll"}
+  .pool .bar .sp{display:none}
+  .pool .ptabs{align-self:center;justify-self:center;padding:max(12px,env(safe-area-inset-top,0px)) 10px 4px}
+  .ptab{flex:none;width:clamp(120px,18cqw,160px)}
+  .pool .foot{padding:max(8px,env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) 0 0}
+  #poolFight{width:clamp(130px,20cqw,180px);height:62px;--fs:30px}
+  #poolFight .strip span{font-size:12px}
+  .pool .scroll{padding:0 max(22px,env(safe-area-inset-right,0px)) 16px max(22px,env(safe-area-inset-left,0px))}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(62px,1fr))}
+}
+
+/* ---------- choose heroes ---------- */
+.choose .bar{justify-content:space-between}
+.choose .bar h2{position:absolute;left:50%;transform:translateX(-50%)}
+.cgrid{flex:1;min-height:0;display:grid;width:100%;max-width:1100px;margin:0 auto;
+  grid-template-columns:minmax(0,1fr) auto;grid-template-rows:minmax(0,1fr) 0 minmax(0,1fr) auto;
+  grid-template-areas:"a a" "vs vs" "b b" "fight swap";row-gap:24px;column-gap:14px;
+  padding:6px max(20px,env(safe-area-inset-right,0px)) max(18px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
+.slot[data-slot="0"]{grid-area:a}.slot[data-slot="1"]{grid-area:b}
+.cgrid .vsb{grid-area:vs;align-self:center;justify-self:center;z-index:5}
+#slotSwap{grid-area:swap;align-self:center;width:66px;height:56px;padding:0}
+#chooseFight{grid-area:fight;height:72px;--fs:38px}
+.slot{position:relative;min-height:0;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  background:repeating-linear-gradient(135deg,#1B2232 0 10px,#182030 10px 20px);box-shadow:0 0 0 3px #0B0F17,0 0 0 5px #3B4560;color:var(--mist)}
+.slot .plus{width:58px;height:58px;border-radius:50%;border:3px solid var(--blaze);display:grid;place-items:center;color:var(--blaze);font-size:40px;line-height:1;
+  box-shadow:0 0 12px rgba(247,181,44,.35)}
+.slot .role{font-family:var(--head);font-size:24px;color:#fff;letter-spacing:.5px}
 .slot .hint{font-size:16px;font-weight:600}
-.slot.filled{border:2.5px solid var(--blaze);background:var(--c,var(--night-2))}
-.slot.filled img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 40%}
-.slot.filled::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(17,13,39,.85),transparent 45%)}
-.slot.filled .who{position:absolute;z-index:1;left:0;right:0;bottom:12px;text-align:center}
-.slot.filled .who b{display:block;font-family:var(--vsface);font-weight:400;font-size:26px;color:var(--paper);letter-spacing:.5px}
-.slot.filled .who small{display:block;margin-bottom:2px;font-size:14px;font-weight:700;color:var(--blaze);letter-spacing:.6px;text-transform:uppercase}
-.slot.filled .ini{font-family:var(--vsface);font-size:90px;color:rgba(255,252,242,.18)}
-.slotmid{position:relative;flex:none;height:56px;display:flex;align-items:center;justify-content:center;gap:14px}
-.vsb{font-family:var(--vsface);font-size:36px;color:var(--blaze);-webkit-text-stroke:.07em var(--night);paint-order:stroke fill;transform:rotate(-6deg)}
-.swapmini{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--night-3);border:1.5px solid var(--line)}
-.swapmini svg{width:24px;height:24px;fill:none;stroke:var(--paper);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-@media (orientation:landscape){
-  .slots{flex-direction:row;max-width:980px}
-  .slotmid{width:72px;height:auto;flex-direction:column}
+.slot.filled{background:var(--c,var(--night-2));box-shadow:0 0 0 3px #0B0F17,0 0 0 6px var(--blaze),0 10px 20px rgba(0,0,0,.6)}
+.slot.filled > img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 36%}
+.slot.filled::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(5,7,12,.95),transparent 42%)}
+.slot.filled .ini{font-family:var(--head);font-size:90px;color:rgba(255,252,242,.18)}
+/* opener / responder rides at the top of the card, clear of the face */
+.slot .tag{position:absolute;z-index:2;left:50%;top:10px;transform:translateX(-50%);padding:3px 12px 4px;border-radius:999px;background:rgba(8,10,16,.78);
+  box-shadow:0 0 0 1.5px rgba(247,181,44,.6);font-weight:700;font-size:14px;letter-spacing:1.2px;text-transform:uppercase;color:var(--blaze)}
+/* the hero's logo where the name was; the name stands in until there is one */
+.slot .who{position:absolute;z-index:1;left:6%;right:6%;bottom:10px;height:28%;display:flex;align-items:flex-end;justify-content:center}
+.slot .who img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px #000)}
+.slot .who b{font-family:var(--head);font-weight:400;font-size:28px;line-height:1;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.6)}
+.vsb{font-family:var(--head);font-size:clamp(52px,9cqmin + 20px,84px);line-height:1;transform:rotate(-6deg);pointer-events:none;
+  background:linear-gradient(180deg,#FFF3B0,var(--blaze) 50%,var(--gold-lo));-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 4px 0 #4A2804) drop-shadow(0 0 2px #2B1600) drop-shadow(0 0 18px rgba(247,181,44,.35))}
+#slotSwap .h{display:none}
+@container app (orientation:landscape){
+  .cgrid{grid-template-columns:minmax(0,1fr) clamp(120px,17cqw,160px) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto auto auto minmax(0,1fr);
+    grid-template-areas:"a . b" "a vs b" "a swap b" "a fight b" "a . b";row-gap:16px;column-gap:clamp(16px,3cqw,30px);padding-top:4px}
+  .cgrid .vsb{align-self:center}
+  #slotSwap{justify-self:center}
+  #slotSwap .h{display:block}#slotSwap .v{display:none}
+  #chooseFight{height:clamp(66px,23cqh,92px);--fs:clamp(28px,9cqh,36px)}
+  #chooseFight .strip span{font-size:12px}
 }
 
 /* ---------- sheets: picker and settings ---------- */
-.sheet{position:absolute;inset:0;z-index:20;background:rgba(8,6,20,.6);display:flex;align-items:flex-end;justify-content:center}
-.sheet-in{width:100%;max-width:760px;height:min(92%,900px);background:var(--night);border:1.5px solid var(--line);border-bottom:0;
-  border-radius:22px 22px 0 0;display:flex;flex-direction:column;animation:up .22s ease-out}
+.sheet{position:absolute;inset:0;z-index:20;background:rgba(6,8,14,.65);display:flex;align-items:flex-end;justify-content:center}
+.sheet-in{width:100%;max-width:900px;height:min(92%,900px);background:var(--night);border-top:3px solid var(--blaze);
+  border-radius:16px 16px 0 0;display:flex;flex-direction:column;animation:up .22s ease-out;box-shadow:0 -10px 30px rgba(0,0,0,.5)}
 .sheet .bar{padding-top:12px}
+.sheet .bar h2{flex:1;min-width:0;font-size:28px}
 @keyframes up{from{transform:translateY(24px);opacity:0}}
-.set-list{display:flex;flex-direction:column;gap:0;max-width:560px;margin:0 auto}
-.setting{display:flex;flex-direction:column;gap:8px;padding:14px 2px;border-bottom:1.5px solid var(--line)}
-.setting .lab{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-.setting b{font-size:19px;font-weight:700;letter-spacing:.3px}
-.setting small{font-size:15px;color:var(--mist);line-height:1.3}
-.setting .seg{align-self:flex-start}
-.about{padding:16px 2px 8px;font-size:16px;color:var(--mist);line-height:1.45}
-.about b{color:var(--paper)}
+#picker .tools{padding-top:0}
+
+/* settings: a full screen with tabs */
+#settings .sheet-in{max-width:none;height:100%;border:0;border-radius:0;animation:none;box-shadow:none;position:relative;
+  background:radial-gradient(ellipse at 30% 20%,rgba(80,100,140,.18),transparent 60%),var(--night)}
+.setbody{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px}
+.stabs{display:flex;gap:8px;padding:2px 16px 0}
+.stab{position:relative;flex:1;display:grid;place-items:center;height:46px;isolation:isolate;font-weight:600;font-size:18px;text-transform:uppercase;letter-spacing:.4px;color:#fff}
+.stab::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:6px;background:var(--slate-face);border:2px solid var(--edge);box-shadow:0 4px 0 var(--edge)}
+.stab[aria-selected="true"]{text-shadow:0 2px 0 #9A4A06}
+.stab[aria-selected="true"]::before{background:var(--gold-face);border-color:var(--brown);box-shadow:none;
+  clip-path:polygon(0 0,100% 0,100% 84%,56% 84%,50% 100%,44% 84%,0 84%)}
+.panes{flex:1;min-height:0;overflow:auto;padding:4px 22px 90px}
+.pane{display:flex;flex-direction:column;max-width:620px}
+.srow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px 0;border-bottom:1.5px solid rgba(52,64,94,.6)}
+.srow .lab{flex:1;min-width:160px}
+.srow b{display:block;font-weight:600;font-size:21px;color:#C3CDE4}
+.srow small{display:block;font-size:14px;font-weight:600;color:#7D89A6;line-height:1.2;margin-top:2px}
+.about{padding:16px 0 8px;font-size:16px;color:var(--mist);line-height:1.45}
+.about b{color:#fff}
 .about p{margin:0 0 8px}
+.setfoot{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px max(22px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(22px,env(safe-area-inset-left,0px));
+  background:linear-gradient(to top,var(--night) 60%,transparent)}
+.ver{font-weight:700;font-size:15px;color:#fff;opacity:.85;letter-spacing:.4px;font-variant-numeric:tabular-nums}
+@container app (orientation:landscape){
+  .setbody{flex-direction:row;gap:0}
+  .stabs{flex-direction:column;gap:14px;padding:14px 0 0 max(28px,env(safe-area-inset-left,0px));width:250px;flex:none}
+  .stab{flex:none;width:178px;height:48px;font-size:20px}
+  .stab[aria-selected="true"]{width:196px;margin-left:22px}
+  .stab[aria-selected="true"]::before{clip-path:polygon(0 0,90% 0,100% 50%,90% 100%,0 100%);border-radius:6px 0 0 6px}
+  .panes{padding:0 max(36px,env(safe-area-inset-right,0px)) 80px 20px}
+}
 
 /* app-wide toast */
 .toast{position:fixed;z-index:40;left:50%;bottom:max(18%,90px)}
@@ -386,52 +528,46 @@ button:disabled{cursor:default}
 
   <!-- HOME -->
   <section id="home" class="screen home">
-    <div class="home-bg" id="homeBg"><img alt=""></div>
+    <div class="home-bg" id="homeBg" aria-hidden="true"><img alt=""><img alt=""></div>
+    <h1 class="title"><img src="app-logo.webp" width="900" height="733" alt="Dice Throne Intros"></h1>
     <header class="bar"><button class="iconbtn" data-open="settings" aria-label="Settings">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></header>
-    <div class="home-main">
-      <h1 class="title"><img src="app-logo.webp" width="900" height="733" alt="Dice Throne Intros"></h1>
-      <div class="modes">
-        <div class="mode rcard">
-          <button class="big primary" id="goRandom">
-            <svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.3" cy="8.3" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.7" cy="8.3" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="8.3" cy="15.7" r="1.3" fill="currentColor" stroke="none"/><circle cx="15.7" cy="15.7" r="1.3" fill="currentColor" stroke="none"/></svg>
-            <span><b>Random fight</b><small id="randomSub">A surprise matchup from your pool</small></span></button>
-          <button class="poolrow" id="openPool"><span class="faces" id="poolFaces"></span>
-            <span class="pooltxt" id="poolTxt"></span><span class="pooledit">Edit</span></button>
-        </div>
-        <div class="mode">
-          <button class="big orange" id="goChoose">
-            <svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3.2"/><path d="M2.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.6"/><path d="M15 14.3c.6-.2 1.3-.3 2-.3 2.4 0 4 1.6 4.5 4.5"/></svg>
-            <span><b>Choose fighters</b><small>Pick both heroes yourself</small></span></button>
-        </div>
+    <div class="modes">
+      <button class="gban" id="goChoose"><span class="art" id="chooseArt"></span>
+        <span class="txt"><b>Choose</b><small>Pick both fighters</small></span></button>
+      <div class="combo">
+        <button class="poolrow" id="openPool"><span class="faces" id="poolFaces"></span>
+          <span class="pooltxt"><b>Pool</b><small id="poolTxt"></small></span><span class="sbtn sm gold">Edit</span></button>
+        <button class="fbtn" id="goRandom"><span class="top"><svg viewBox="0 0 24 24"><path d="M5 3h4l10 10-4 4L5 7z"/><path d="M19 3h-4L5 13l4 4L19 7z"/></svg>Fight</span>
+          <span class="strip"><span id="randomSub">Random from your pool</span></span></button>
       </div>
     </div>
   </section>
 
   <!-- RANDOM POOL -->
-  <section id="pool" class="screen" hidden>
-    <header class="bar"><button class="iconbtn" data-back aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <h2>Random pool</h2><span class="count" id="poolCount"></span></header>
-    <div class="tools">
-      <div class="seg" id="sideSeg"><button data-side="a">Opener pool</button><button data-side="b">Responder pool</button></div>
-      <div class="row"><div class="seg sortseg"><button data-sort="abc">A–Z</button><button data-sort="set">By set</button></div>
-        <span class="sp"></span><button class="chip" data-all="1">All</button><button class="chip" data-all="0">None</button></div>
-    </div>
+  <section id="pool" class="screen pool" hidden>
+    <header class="bar"><button class="sbtn" data-back>Back</button>
+      <h2>Pool</h2><span class="sp"></span><span class="count" id="poolCount"></span></header>
+    <div class="ptabs" id="sideSeg"><button class="ptab" data-side="a">Opener</button><button class="ptab" data-side="b">Responder</button></div>
+    <div class="tools"><div class="seg sortseg"><button data-sort="abc">A–Z</button><button data-sort="set">By set</button></div>
+      <span class="sp"></span><button class="sbtn sm" data-all="1">All</button><button class="sbtn sm" data-all="0">None</button></div>
     <div class="scroll"><div class="grid-wrap" id="poolGrid"></div></div>
-    <footer class="foot"><button class="cta" id="poolFight">Random fight</button></footer>
+    <footer class="foot"><button class="fbtn" id="poolFight"><span class="top">Fight</span>
+      <span class="strip"><span id="poolFightSub">From this pool</span></span></button></footer>
   </section>
 
-  <!-- CHOOSE FIGHTERS -->
-  <section id="choose" class="screen" hidden>
-    <header class="bar"><button class="iconbtn" data-back aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <h2>Choose fighters</h2></header>
-    <div class="slots">
+  <!-- CHOOSE HEROES -->
+  <section id="choose" class="screen choose" hidden>
+    <header class="bar"><button class="sbtn" data-back>Back</button><h2>Choose <em>Heroes</em></h2></header>
+    <div class="cgrid">
       <button class="slot" data-slot="0"></button>
-      <div class="slotmid"><span class="vsb">VS</span>
-        <button class="swapmini" id="slotSwap" aria-label="Swap sides"><svg viewBox="0 0 24 24"><path d="M20 8H5M8.5 4.5 5 8l3.5 3.5M4 16h15M15.5 12.5 19 16l-3.5 3.5"/></svg></button></div>
+      <span class="vsb" aria-hidden="true">VS</span>
       <button class="slot" data-slot="1"></button>
+      <button class="sbtn" id="slotSwap" aria-label="Swap sides">
+        <svg class="h" viewBox="0 0 24 24"><path d="M20 8H5M8.5 4.5 5 8l3.5 3.5M4 16h15M15.5 12.5 19 16l-3.5 3.5"/></svg>
+        <svg class="v" viewBox="0 0 24 24"><path d="M8 20V5M4.5 8.5 8 5l3.5 3.5M16 4v15M12.5 15.5 16 19l3.5-3.5"/></svg></button>
+      <button class="fbtn" id="chooseFight" disabled><span class="top">Fight</span><span class="strip"><span>Let's go</span></span></button>
     </div>
-    <footer class="foot"><button class="cta" id="chooseFight" disabled>Fight!</button></footer>
   </section>
 
   <!-- FIGHT -->
@@ -440,41 +576,49 @@ button:disabled{cursor:default}
   <!-- HERO PICKER -->
   <div class="sheet" id="picker" hidden><div class="sheet-in">
     <header class="bar"><h2 id="pickTitle"></h2>
-      <button class="iconbtn" data-back aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
-    <div class="tools"><div class="row"><div class="seg sortseg"><button data-sort="abc">A–Z</button><button data-sort="set">By set</button></div></div></div>
+      <button class="sbtn sm" data-back>Close</button></header>
+    <div class="tools"><div class="seg sortseg"><button data-sort="abc">A–Z</button><button data-sort="set">By set</button></div></div>
     <div class="scroll"><div class="grid-wrap" id="pickGrid"></div></div>
   </div></div>
 
   <!-- SETTINGS -->
   <div class="sheet" id="settings" hidden><div class="sheet-in">
-    <header class="bar"><h2>Settings</h2>
-      <button class="iconbtn" data-back aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></header>
-    <div class="scroll"><div class="set-list">
-      <div class="setting"><div class="lab"><b>Text speed</b></div>
-        <div class="seg" data-pref="speed"><button data-v="slow">Slow</button><button data-v="normal">Normal</button><button data-v="fast">Fast</button></div></div>
-      <div class="setting"><div class="lab"><b>Animations</b></div>
-        <small>Heroes pushing in, the VS slam, screen shake, transformation flashes.</small>
-        <div class="seg" data-pref="anim"><button data-v="on">On</button><button data-v="off">Off</button></div></div>
-      <div class="setting"><div class="lab"><b>Auto-play</b></div>
-        <small>In random fights, the next fight rolls a few seconds after one ends.</small>
-        <div class="seg" data-pref="auto"><button data-v="off">Off</button><button data-v="on">On</button></div></div>
-      <div class="setting"><div class="lab"><b>Menu background</b></div>
-        <div class="seg" data-pref="bg"><button data-v="art">Hero art</button><button data-v="plain">Plain</button></div></div>
-      <div class="setting"><div class="lab"><b>Full screen</b></div>
-        <small>Hides the browser bar when you start a fight (Android). On iPhone, add the app to your home screen instead.</small>
-        <div class="seg" data-pref="full"><button data-v="on">On</button><button data-v="off">Off</button></div></div>
-      <div class="setting"><div class="lab"><b>Art safe zone</b></div>
-        <small>For preparing hero art: shows where faces must sit on the fight screen.</small>
-        <div class="seg" data-pref="zone"><button data-v="0">Hide</button><button data-v="1">Show</button></div></div>
-      <div class="setting"><div class="lab"><b>Version</b><span class="count" id="verNum">—</span></div>
-        <small>Updates install themselves when you open the app. Impatient? Check now.</small>
-        <button class="chip" id="updBtn" style="align-self:flex-start">Check for updates</button></div>
-      <div class="about">
-        <p><b>Dice Throne Intros</b></p>
-        <p>Pre-fight dialogues for all 45 Dice Throne heroes. Made by Gad.</p>
-        <p>Dice Throne is a game by Roxley Games. This is an unofficial fan project.</p>
+    <header class="bar"><button class="sbtn" data-back>Back</button><h2>Settings</h2></header>
+    <div class="setbody">
+      <div class="stabs" role="tablist" id="setTabs">
+        <button class="stab" role="tab" data-tab="fight">Fight</button>
+        <button class="stab" role="tab" data-tab="display">Display</button>
+        <button class="stab" role="tab" data-tab="about">About</button>
       </div>
-    </div></div>
+      <div class="panes">
+        <div class="pane" data-pane="fight">
+          <div class="srow"><div class="lab"><b>Text speed</b></div>
+            <div class="seg" data-pref="speed"><button data-v="slow">Slow</button><button data-v="normal">Normal</button><button data-v="fast">Fast</button></div></div>
+          <div class="srow"><div class="lab"><b>Animations</b><small>Heroes pushing in, the VS slam, screen shake, transformation flashes</small></div>
+            <button class="tog" role="switch" data-tog="anim" data-on="on" data-off="off" aria-label="Animations"></button></div>
+          <div class="srow"><div class="lab"><b>Auto-play</b><small>In random fights, the next fight rolls a few seconds after one ends</small></div>
+            <button class="tog" role="switch" data-tog="auto" data-on="on" data-off="off" aria-label="Auto-play"></button></div>
+        </div>
+        <div class="pane" data-pane="display" hidden>
+          <div class="srow"><div class="lab"><b>Menu background</b><small>Heroes: one from your pool behind the home screen, changing every few seconds</small></div>
+            <div class="seg" data-pref="bg"><button data-v="none">None</button><button data-v="heroes">Heroes</button><button data-v="custom" disabled title="Coming soon">Custom</button></div></div>
+          <div class="srow"><div class="lab"><b>Full screen</b><small>Hides the browser bar when a fight starts (Android). On iPhone, add the app to your home screen instead.</small></div>
+            <button class="tog" role="switch" data-tog="full" data-on="on" data-off="off" aria-label="Full screen"></button></div>
+          <div class="srow"><div class="lab"><b>Art safe zone</b><small>For preparing hero art: shows where faces must sit on the fight screen</small></div>
+            <button class="tog" role="switch" data-tog="zone" data-on="1" data-off="0" aria-label="Art safe zone"></button></div>
+        </div>
+        <div class="pane" data-pane="about" hidden>
+          <div class="srow"><div class="lab"><b>Updates</b><small>Updates install themselves when you open the app. Impatient? Check now.</small></div>
+            <button class="sbtn sm" id="updBtn">Check for updates</button></div>
+          <div class="about">
+            <p><b>Dice Throne Intros</b></p>
+            <p>Pre-fight dialogues for all 45 Dice Throne heroes. Made by Gad.</p>
+            <p>Dice Throne is a game by Roxley Games. This is an unofficial fan project.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="setfoot"><span class="ver" id="verNum"></span><button class="sbtn sm" id="resetBtn">Restore defaults</button></footer>
   </div></div>
 
   <div class="toast" role="status"></div>
@@ -489,8 +633,8 @@ button:disabled{cursor:default}
         <button class="rbtn" data-act="swap" aria-label="Swap sides">
           <span class="disc"><svg viewBox="0 0 24 24"><path d="M20 8H5M8.5 4.5 5 8l3.5 3.5M4 16h15M15.5 12.5 19 16l-3.5 3.5"/></svg></span><span class="lbl">Swap</span></button>
         <button class="rbtn main" data-act="next" aria-label="Next random fight">
-          <span class="disc"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="8.6" cy="8.6" r="1.2" fill="#17132B" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="#17132B" stroke="none"/><circle cx="15.4" cy="15.4" r="1.2" fill="#17132B" stroke="none"/></svg>
-            <svg class="ring" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18.5"/></svg></span><span class="lbl">Next</span></button>
+          <span class="disc"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="8.6" cy="8.6" r="1.2" fill="#fff" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="#fff" stroke="none"/><circle cx="15.4" cy="15.4" r="1.2" fill="#fff" stroke="none"/></svg>
+            <svg class="ring" viewBox="0 0 100 80" preserveAspectRatio="none"><rect x="2" y="2" width="96" height="76" rx="9" pathLength="100"/></svg></span><span class="lbl">Next</span></button>
         <span class="gap"></span>
         <button class="rbtn" data-act="settings" aria-label="Settings">
           <span class="disc"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="lbl">Settings</span></button>
@@ -507,6 +651,9 @@ button:disabled{cursor:default}
 </template>
 
 <script>
+/* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
+const APP_VERSION = '0.5';
+
 /* ---------------- heroes ---------------- */
 const ROSTER = [
   ['Season 1',['Barbarian','Monk','Moon Elf','Ninja','Paladin','Pyromancer','Shadow Thief','Treant']],
@@ -542,7 +689,7 @@ const lineColor = id => HERO_LINE[id] || SET_COLOR[H[id].set];
 const artSrc = (id, form) => 'art/' + id + (form && !FORM_STYLE[form] ? '' : form ? '-' + form : '') + '.webp';
 
 /* ---------------- settings ---------------- */
-const prefs = { speed:'normal', anim:'on', auto:'off', bg:'art', full:'on', zone:'0', order:'abc',
+const prefs = { speed:'normal', anim:'on', auto:'off', bg:'heroes', full:'on', zone:'0', order:'abc',
   pool:{ a:ALL.slice(), b:ALL.slice() }, pick:[null, null] };
 try {
   const p = JSON.parse(localStorage.getItem('dti-app') || '{}');
@@ -551,6 +698,9 @@ try {
 // older saves had one shared pool: both sides start from it
 if (prefs.pool.split === false) prefs.pool.b = (prefs.pool.a || ALL).slice();
 delete prefs.pool.split; delete prefs.sort;
+// 0.5 renamed the menu backgrounds: hero art is now 'heroes', plain is 'none'
+if (prefs.bg === 'art') prefs.bg = 'heroes';
+if (prefs.bg === 'plain') prefs.bg = 'none';
 ['a','b'].forEach(k => prefs.pool[k] = (prefs.pool[k] || ALL.slice()).filter(id => H[id]));
 const save = () => { try { localStorage.setItem('dti-app', JSON.stringify(prefs)); } catch (e) {} };
 const SPEED = { slow:1.5, normal:1, fast:.6 };
@@ -906,11 +1056,17 @@ function startFight(pair, mode){
   stage.start(pair, mode);
 }
 
-/* ---------------- avatars and grids ---------------- */
+/* ---------------- faces and grids ---------------- */
 function av(id, size){
   const h = H[id];
   return '<span class="av" style="--c:' + SET_COLOR[h.set] + (size ? ';--s:' + size + 'px' : '') + '">' + initials(h.name) +
     '<img src="' + artSrc(id) + '" alt="" loading="lazy" onerror="this.remove()"></span>';
+}
+/* a hero card: art (or initials on the set's color) and the name under it */
+function cardHTML(h, cls){
+  return '<button class="tile ' + cls + '" data-id="' + h.id + '" style="--c:' + SET_COLOR[h.set] + '" aria-label="' + h.name + '">' +
+    '<span class="ini">' + initials(h.name) + '</span><img src="' + artSrc(h.id) + '" alt="" loading="lazy" onerror="this.remove()">' +
+    '<span class="nm">' + h.name + '</span></button>';
 }
 function ordered(){
   return prefs.order === 'abc' ? [[null, HEROES.slice().sort((a, b) => a.name.localeCompare(b.name))]]
@@ -923,12 +1079,10 @@ function gridHTML(cls, withHeads){
       const on = withHeads ? list.filter(h => withHeads.includes(h.id)).length : 0;
       head = withHeads
         ? '<button class="sethead" data-set="' + set + '" style="--c:' + SET_COLOR[set] + '"><span class="sw"></span><b>' + set + '</b>' +
-          '<span class="n">' + on + '/' + list.length + '</span><span class="tog">' + (on === list.length ? 'Remove' : 'Add all') + '</span></button>'
+          '<span class="n">' + on + '/' + list.length + '</span><span class="tog2">' + (on === list.length ? 'Remove' : 'Add all') + '</span></button>'
         : '<div class="sethead" style="--c:' + SET_COLOR[set] + '"><span class="sw"></span><b>' + set + '</b></div>';
     }
-    return head + '<div class="grid">' + list.map(h =>
-      '<button class="tile ' + cls(h.id) + '" data-id="' + h.id + '" aria-label="' + h.name + '">' + av(h.id) +
-      '<span class="nm">' + h.name + '</span></button>').join('') + '</div>';
+    return head + '<div class="grid">' + list.map(h => cardHTML(h, cls(h.id))).join('') + '</div>';
   }).join('');
 }
 function syncSegs(root){
@@ -942,32 +1096,35 @@ document.querySelectorAll('.sortseg').forEach(seg => seg.addEventListener('click
 }));
 
 /* ---------------- home ---------------- */
+const poolUnion = () => Array.from(new Set(poolA().concat(poolB())));
 function renderHome(){
   const A = poolA(), B = poolB();
-  poolFacesStart(Array.from(new Set(A.concat(B))));
+  poolFacesStart(poolUnion());
   const n = k => k + (k === 1 ? ' hero' : ' heroes');
   const same = A.length === B.length && A.every(id => B.includes(id));
-  const txt = same
-    ? (A.length === ALL.length ? 'All 45 heroes' : n(A.length)) + '<small>for opener and responder</small>'
-    : '<span class="pl"><small>Opener</small>' + n(A.length) + '</span><span class="pl"><small>Responder</small>' + n(B.length) + '</span>';
-  $('#poolTxt').innerHTML = txt;
+  $('#poolTxt').textContent = same ? (A.length === ALL.length ? 'All 45 heroes' : n(A.length))
+    : A.length + ' vs ' + B.length + ' heroes';            // opener pool vs responder pool
   $('#goRandom').disabled = !poolOk();
-  $('#randomSub').textContent = poolOk() ? 'A surprise matchup from your pool' : 'Add heroes to the pool first';
+  $('#randomSub').textContent = poolOk() ? 'Random from your pool' : 'Add heroes to the pool first';
+  // the Choose banner shows the last two heroes picked
+  const two = [prefs.pick[0] || 'pale-lady', prefs.pick[1] || 'gunslinger'];
+  $('#chooseArt').innerHTML = two.map(id => '<span style="--c:' + SET_COLOR[H[id].set] + '"><img src="' + artSrc(id) + '" alt="" onerror="this.remove()"></span>').join('');
   homeBackground();
 }
-/* up to six faces. A bigger pool holds them for a while, then swaps them
+/* up to four faces. A bigger pool holds them for a while, then swaps them
    one at a time, left to right, each fading out and the next fading in. */
+const FACES = 4;
 let facesT = null, facesGen = 0;
 function poolFacesStart(ids){
   clearTimeout(facesT); facesGen++;
   const gen = facesGen, box = $('#poolFaces');
   const pick = (avoid) => {
     const rest = ids.filter(id => !avoid.includes(id));
-    return (rest.length >= 6 ? rest : ids).slice().sort(() => Math.random() - .5).slice(0, 6);
+    return (rest.length >= FACES ? rest : ids).slice().sort(() => Math.random() - .5).slice(0, FACES);
   };
-  let now = ids.length <= 6 ? ids.slice() : pick([]);
-  box.innerHTML = now.map(id => '<span class="slotf" data-id="' + id + '">' + av(id, 32) + '</span>').join('');
-  if (ids.length <= 6) return;
+  let now = ids.length <= FACES ? ids.slice() : pick([]);
+  box.innerHTML = now.map(id => '<span class="slotf" data-id="' + id + '">' + av(id, 34) + '</span>').join('');
+  if (ids.length <= FACES) return;
   const cycle = () => {
     if (gen !== facesGen) return;
     if (current !== 'home'){ facesT = setTimeout(cycle, 2000); return; }
@@ -977,30 +1134,55 @@ function poolFacesStart(ids){
       el.classList.add('out');
       setTimeout(() => {
         if (gen !== facesGen) return;
-        el.innerHTML = av(next[i], 32); el.dataset.id = next[i];
+        el.innerHTML = av(next[i], 34); el.dataset.id = next[i];
         requestAnimationFrame(() => el.classList.remove('out'));
       }, 900);
     }, i * 450));
     now = next;
-    facesT = setTimeout(cycle, 6 * 450 + 1800 + 5000);   // all six swapped, then hold about five seconds
+    facesT = setTimeout(cycle, FACES * 450 + 1800 + 5000);   // all swapped, then hold about five seconds
   };
   facesT = setTimeout(cycle, 5000);
 }
-let bgTried = false;
+/* Menu background "Heroes": a hero from the pool behind the home screen,
+   cross-fading to another every few seconds. Heroes without art are skipped. */
+const HOLD = 4000;
+const hasArt = {};                                       // id -> true / false once tried
+const tryArt = id => new Promise(res => {
+  if (id in hasArt) return res(hasArt[id]);
+  const im = new Image();
+  im.onload = () => res(hasArt[id] = true);
+  im.onerror = () => res(hasArt[id] = false);
+  im.src = artSrc(id);
+});
+let bgT = null, bgGen = 0, bgOrder = [], bgAt = -1, bgFront = 0;
 function homeBackground(){
   const box = $('#homeBg');
-  if (prefs.bg !== 'art'){ box.classList.remove('on'); return; }
-  if (bgTried) { box.classList.add('on'); return; }
-  bgTried = true;
-  const ids = ALL.slice().sort(() => Math.random() - .5);
-  const tryOne = i => {
-    if (i >= ids.length) return;
-    const img = new Image();
-    img.onload = () => { box.querySelector('img').src = img.src; box.classList.add('on'); };
-    img.onerror = () => tryOne(i + 1);
-    img.src = artSrc(ids[i]);
-  };
-  tryOne(0);
+  clearTimeout(bgT); bgGen++;
+  if (prefs.bg !== 'heroes'){ box.classList.remove('on'); return; }
+  box.classList.add('on');
+  bgOrder = poolUnion().sort(() => Math.random() - .5); bgAt = -1;
+  bgNext(bgGen);
+}
+async function bgNext(gen){
+  const imgs = $('#homeBg').querySelectorAll('img'), shown = imgs[bgFront].dataset.id;
+  for (let k = 0; k < bgOrder.length; k++){
+    bgAt = (bgAt + 1) % bgOrder.length;
+    const id = bgOrder[bgAt];
+    if (id === shown && bgOrder.length > 1) continue;
+    if (!await tryArt(id)) continue;
+    if (gen !== bgGen) return;
+    if (id !== shown){
+      const back = imgs[1 - bgFront];
+      back.src = artSrc(id); back.dataset.id = id;
+      try { await back.decode(); } catch (e) {}
+      if (gen !== bgGen) return;
+      back.classList.add('on'); imgs[bgFront].classList.remove('on'); bgFront = 1 - bgFront;
+    }
+    break;
+  }
+  if (gen !== bgGen) return;
+  const wait = () => { bgT = setTimeout(() => (current === 'home' && !openedSheet && !document.hidden) ? bgNext(gen) : wait(), HOLD); };
+  wait();
 }
 $('#goRandom').addEventListener('click', () => { if (!poolOk()) return; goFull(); startFight(nextPair(), 'random'); });
 $('#goChoose').addEventListener('click', () => { goFull(); go('choose'); });
@@ -1009,13 +1191,15 @@ $('#openPool').addEventListener('click', () => go('pool'));
 /* ---------------- random pool ---------------- */
 let poolSide = 'a';
 function renderPool(){
-  $('#sideSeg').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === poolSide)));
+  const tabs = $('#sideSeg');
+  tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === poolSide)));
+  tabs.classList.toggle('lean-l', poolSide === 'b');      // opener leans right, responder leans left
   syncSegs($('#pool'));
   const list = prefs.pool[poolSide];
-  $('#poolCount').textContent = list.length + '/45';
+  $('#poolCount').innerHTML = list.length + '<small> / 45</small>';
   $('#poolGrid').innerHTML = gridHTML(id => list.includes(id) ? 'on' : 'off', list);
   $('#poolFight').disabled = !poolOk();
-  $('#poolFight').textContent = poolOk() ? 'Random fight' : 'Each pool needs a hero';
+  $('#poolFightSub').textContent = poolOk() ? 'From this pool' : 'Each pool needs a hero';
 }
 function poolChanged(){ resetBag(); save(); renderPool(); }
 $('#pool').addEventListener('click', e => {
@@ -1034,14 +1218,16 @@ $('#pool').addEventListener('click', e => {
 });
 $('#poolFight').addEventListener('click', () => { if (!poolOk()) return; goFull(); startFight(nextPair(), 'random'); });
 
-/* ---------------- choose fighters ---------------- */
+/* ---------------- choose heroes ---------------- */
 let pickSlot = 0;
 function slotHTML(i){
   const id = prefs.pick[i], role = i ? 'Responder' : 'Opener';
   if (!id) return '<span class="plus">+</span><span class="role">' + role + '</span><span class="hint">Tap to choose</span>';
   const h = H[id];
+  // the logo, or the name until the hero has one
   return '<span class="ini">' + initials(h.name) + '</span><img src="' + artSrc(id) + '" alt="" onerror="this.remove()">' +
-    '<span class="who"><small>' + role + '</small><b>' + h.name + '</b></span>';
+    '<span class="tag">' + role + '</span>' +
+    '<span class="who"><img src="logos/' + id + '.png" alt="' + h.name + '" onerror="this.nextElementSibling.hidden=false;this.remove()"><b hidden>' + h.name + '</b></span>';
 }
 function renderChoose(){
   document.querySelectorAll('.slot').forEach(s => {
@@ -1069,13 +1255,26 @@ $('#pickGrid').addEventListener('click', e => {
 });
 
 /* ---------------- settings ---------------- */
+const DEFAULTS = { speed:'normal', anim:'on', auto:'off', bg:'heroes', full:'on', zone:'0' };
+let setTab = 'fight';
 function renderSettings(){
-  document.querySelectorAll('[data-pref]').forEach(seg => seg.querySelectorAll('button').forEach(b =>
+  document.querySelectorAll('#settings [data-pref]').forEach(seg => seg.querySelectorAll('button').forEach(b =>
     b.setAttribute('aria-pressed', String(prefs[seg.dataset.pref] === b.dataset.v))));
+  document.querySelectorAll('#settings [data-tog]').forEach(t => t.setAttribute('aria-checked', String(prefs[t.dataset.tog] === t.dataset.on)));
+  document.querySelectorAll('#setTabs .stab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === setTab)));
+  document.querySelectorAll('#settings .pane').forEach(p => p.hidden = p.dataset.pane !== setTab);
+  $('#verNum').textContent = 'Version ' + (swVersion || APP_VERSION);
 }
 $('#settings').addEventListener('click', e => {
-  const b = e.target.closest('[data-pref] [data-v]'); if (!b) return;
-  const k = b.parentElement.dataset.pref; prefs[k] = b.dataset.v; save(); renderSettings(); applyPrefs();
+  const tab = e.target.closest('[data-tab]');
+  if (tab){ setTab = tab.dataset.tab; return renderSettings(); }
+  const tg = e.target.closest('[data-tog]');
+  if (tg) prefs[tg.dataset.tog] = prefs[tg.dataset.tog] === tg.dataset.on ? tg.dataset.off : tg.dataset.on;
+  const b = e.target.closest('[data-pref] [data-v]');
+  if (b && !b.disabled) prefs[b.parentElement.dataset.pref] = b.dataset.v;
+  if (e.target.closest('#resetBtn')){ Object.assign(prefs, DEFAULTS); toast('Settings restored'); }
+  else if (!tg && !b) return;
+  save(); renderSettings(); applyPrefs();
 });
 function applyPrefs(){
   app.classList.toggle('still', prefs.anim === 'off');
@@ -1086,13 +1285,13 @@ function applyPrefs(){
 /* ---------------- installed app: offline copy and updates ----------------
    The version number lives in sw.js. Raising it there makes every phone
    fetch the new version and reload into it. */
-let swReg = null;
+let swReg = null, swVersion = '';
 const swOk = 'serviceWorker' in navigator && location.protocol.startsWith('http');
 function showVersion(){
   const ctl = swOk && navigator.serviceWorker.controller;
   if (!ctl) return;
   const ch = new MessageChannel();
-  ch.port1.onmessage = e => { $('#verNum').textContent = 'v' + e.data; };
+  ch.port1.onmessage = e => { swVersion = e.data; $('#verNum').textContent = 'Version ' + e.data; };
   ctl.postMessage('version', [ch.port2]);
 }
 const takeOver = sw => { if (sw) sw.postMessage('skipWaiting'); return !!sw; };
