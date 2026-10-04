@@ -5,6 +5,14 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  0.7  Fixes after trying 0.6 on a phone:
+       - Pool (sideways): the count next to "Pool" has a fixed width, so
+         Opener/Responder, All/None and the sort buttons never move
+       - Pool (sideways): Fight's top edge is level with the Opener tab
+       - Home: the faces in the pool row lean with the same --tilt
+       - Choose (upright): VS a little bigger; the upper card's logo sits a
+         little higher so it does not crowd VS
+
   0.6  Polish after the first look on a phone:
        - every leaning button in the app shares one angle (--tilt)
        - Home: Choose, the pool and Fight lean as one block so their edges
@@ -396,8 +404,9 @@ button:disabled{cursor:default}
   background:linear-gradient(180deg,rgba(26,33,52,.93),rgba(12,16,26,.93));box-shadow:inset 0 0 0 2px var(--line),0 10px 20px rgba(0,0,0,.4)}
 .poolrow{display:flex;align-items:center;gap:12px;width:100%;height:clamp(44px,13cqh,56px);text-align:left;transform:skewX(var(--untilt))}
 .faces{display:flex;flex:none;padding-left:2px}
-.faces .slotf{display:block;margin-left:7px;border-radius:7px;box-shadow:0 0 0 2.5px #141A28,0 0 0 4px rgba(247,181,44,.75);transition:opacity .9s ease}
+.faces .slotf{display:block;margin-left:7px;transform:skewX(var(--tilt));border-radius:7px;box-shadow:0 0 0 2.5px #141A28,0 0 0 4px rgba(247,181,44,.75);transition:opacity .9s ease}
 .faces .slotf:first-child{margin-left:0}
+.faces .slotf .av img{transform:skewX(var(--untilt)) scale(1.9)}
 .faces .slotf .av{display:grid}
 .faces .slotf.out{opacity:0}
 .pooltxt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.1}
@@ -463,16 +472,17 @@ button:disabled{cursor:default}
 .ptab[aria-pressed="true"]{color:#fff;text-shadow:0 2px 0 #9A4A06}
 .ptab[aria-pressed="true"]::before{background:var(--gold-face);border-color:var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #6B3404}
 @container app (orientation:landscape){
-  .pool{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto minmax(0,1fr);
+  .pool{grid-template-columns:max-content minmax(0,1fr) auto;grid-template-rows:auto auto minmax(0,1fr);
     grid-template-areas:"bar tabs fight" "sort all fight" "scroll scroll scroll"}
   .pool .tools{display:contents}
   .pool .tools .sp{display:none}
   .pool .sortseg{grid-area:sort;align-self:center;margin:0 0 6px max(20px,env(safe-area-inset-left,0px))}
   .pool .allgrp{grid-area:all;align-self:center;justify-self:center;margin-bottom:6px}
   .pool .bar .sp{display:none}
-  .pool .ptabs{align-self:center;justify-self:center;padding:max(12px,env(safe-area-inset-top,0px)) 10px 4px}
-  .ptab{flex:none;width:clamp(120px,18cqw,160px)}
-  .pool .foot{padding:max(10px,env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) 8px 0}
+  .pool .count{min-width:104px}   /* fixed width: "0 / 45" and "45 / 45" must not shift the buttons */
+  .pool .ptabs{align-self:start;justify-self:center;padding:max(12px,env(safe-area-inset-top,0px)) 10px 4px}
+  .ptab{flex:none;width:clamp(112px,16cqw,150px)}
+  .pool .foot{padding:max(12px,env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) 8px 0}
   #poolFight{width:clamp(150px,24cqw,210px);height:clamp(84px,27cqh,104px);--fs:clamp(30px,10cqh,40px)}
   #poolFight .strip span{font-size:13px}
   .pool .scroll{padding:0 max(22px,env(safe-area-inset-right,0px)) 16px max(22px,env(safe-area-inset-left,0px))}
@@ -484,7 +494,7 @@ button:disabled{cursor:default}
 .choose .bar h2{position:absolute;left:50%;transform:translateX(-50%)}
 .cgrid{flex:1;min-height:0;display:grid;width:100%;max-width:1100px;margin:0 auto;
   grid-template-columns:minmax(0,1fr) auto;grid-template-rows:minmax(0,1fr) 0 minmax(0,1fr) auto;
-  grid-template-areas:"a a" "vs vs" "b b" "fight swap";row-gap:24px;column-gap:14px;
+  grid-template-areas:"a a" "vs vs" "b b" "fight swap";row-gap:30px;column-gap:14px;
   padding:6px max(20px,env(safe-area-inset-right,0px)) max(18px,env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
 .slot[data-slot="0"]{grid-area:a}.slot[data-slot="1"]{grid-area:b}
 .cgrid .vsb{grid-area:vs;align-self:center;justify-self:center;z-index:5}
@@ -510,7 +520,9 @@ button:disabled{cursor:default}
 .slot .who{position:absolute;z-index:1;left:6%;right:6%;bottom:10px;height:28%;display:flex;align-items:flex-end;justify-content:center}
 .slot .who img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px #000)}
 .slot .who b{font-family:var(--head);font-weight:400;font-size:28px;line-height:1;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.6)}
-.vsb{font-family:var(--head);font-size:clamp(52px,9cqmin + 20px,84px);line-height:1;transform:rotate(-6deg);pointer-events:none;
+.slot[data-slot="0"] .who{bottom:10px}
+@container app (orientation:portrait){.slot[data-slot="0"] .who{bottom:24px}}
+.vsb{font-family:var(--head);font-size:clamp(62px,11cqmin + 22px,98px);line-height:1;transform:rotate(-6deg);pointer-events:none;
   background:linear-gradient(180deg,#FFF3B0,var(--blaze) 50%,var(--gold-lo));-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 4px 0 #4A2804) drop-shadow(0 0 2px #2B1600) drop-shadow(0 0 18px rgba(247,181,44,.35))}
 #slotSwap .h{display:none}
@@ -711,7 +723,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '0.6';
+const APP_VERSION = '0.7';
 
 /* ---------------- heroes ---------------- */
 const ROSTER = [
