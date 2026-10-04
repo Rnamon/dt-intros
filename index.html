@@ -5,6 +5,23 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  0.6  Polish after the first look on a phone:
+       - every leaning button in the app shares one angle (--tilt)
+       - Home: Choose, the pool and Fight lean as one block so their edges
+         line up; faces in the pool row spaced apart; Choose text centred in
+         its gold part; FIGHT in capitals with a die instead of swords;
+         sideways, the hero sits between the logo and the buttons and
+         "Created by Gad Freund (Rnamon) · Version" sits under the logo
+       - Choose Heroes: Opener/Responder are gold tabs in the cards' top
+         corners; Fight has no strip, just FIGHT and the die
+       - Pool: characters bigger in their cards; sideways, All/None sit under
+         the Opener/Responder tabs and Fight is bigger, with the die
+       - Fight: logos cropped to their visible part, so both sit the same
+         distance from the side edges; sideways, the VS seam leans right
+         while the opener talks, left while the responder answers, and
+         straightens when they're done
+       - full screen hides the phone's status and navigation bars, now also
+         in the installed app (first tap); manifest asks for full screen
   0.5  New look, in the spirit of the Dice Throne digital game:
        - slate ground with grit, slanted slate buttons, gold for the main
          action and for whatever is selected, Lilita One headings
@@ -75,6 +92,8 @@
   --wade:"Comic Neue","Comic Sans MS",system-ui,sans-serif;
   --ui:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
   --slate-face:repeating-linear-gradient(115deg,rgba(255,255,255,.05) 0 2px,transparent 2px 9px),linear-gradient(180deg,var(--slate-hi),var(--night-3) 55%,#22355A);
+  --tilt:-6deg;         /* the one lean every button in the app shares */
+  --untilt:6deg;        /* stands lettering back up inside a leaning shape */
   --gold-face:repeating-linear-gradient(115deg,rgba(255,255,255,.13) 0 3px,transparent 3px 12px),linear-gradient(180deg,var(--gold-hi),var(--blaze) 48%,var(--gold-lo));
   color-scheme:dark;
 }
@@ -117,7 +136,7 @@ button:disabled{cursor:default}
 .rail .gap{flex:1}
 .rbtn{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:52px;--bh:clamp(32px,10cqh,54px)}
 .rbtn .disc{position:relative;display:grid;place-items:center;height:var(--bh);width:calc(var(--bh) * 1.24);isolation:isolate;transition:transform .12s}
-.rbtn .disc::before{content:"";position:absolute;inset:0;z-index:-1;transform:skewX(-7deg);border-radius:7px;background:var(--slate-face);
+.rbtn .disc::before{content:"";position:absolute;inset:0;z-index:-1;transform:skewX(var(--tilt));border-radius:7px;background:var(--slate-face);
   border:2px solid var(--edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 0 var(--edge)}
 .rbtn.main .disc::before{background:var(--gold-face);border-color:var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #6B3404}
 .rbtn:active .disc{transform:translateY(2px)}
@@ -136,13 +155,14 @@ button:disabled{cursor:default}
 
 /* hero halves. Both are cropped the same way, so the two heroes sit at
    the same height and size; the face zone stays clear of both balloons. */
-.hero{position:relative;overflow:hidden;container:hero/size;background:var(--night-2)}
+.hero{position:relative;overflow:hidden;container:hero/size}
+.hero .bg{position:absolute;inset:0;background:var(--night-2)}
 .hero{--py:40%}
 .hero .art{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% var(--py)}
 .hero::after{content:"";position:absolute;inset:0;pointer-events:none}
 .hero.a::after{background:linear-gradient(to top,rgba(10,13,20,.55),transparent 30%)}
 .hero.b::after{background:linear-gradient(to bottom,rgba(10,13,20,.55),transparent 30%)}
-.logo{position:absolute;left:50%;transform:translateX(-50%);max-width:72%;max-height:30%;width:auto;z-index:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.7))}
+.logo{position:absolute;left:50%;transform:translateX(-50%);max-width:60%;max-height:23%;width:auto;z-index:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.7))}
 .logo[hidden]{display:none}
 /* until a hero has a logo file, its name stands in */
 .logoname{font-family:var(--head);font-size:clamp(22px,8cqmin,52px);line-height:1.05;white-space:nowrap;max-width:none;
@@ -207,8 +227,28 @@ button:disabled{cursor:default}
   transform:translate(-50%,-46%) rotate(-6deg);pointer-events:none}
 @container stage (orientation:portrait){
   .vs{left:50%;top:calc(50% - var(--dockh,0px)/2);font-size:clamp(46px,16cqmin,130px)}
-  .hero.a .logo{left:auto;right:3%;bottom:4%;transform:none;max-width:60%;max-height:22%}
-  .hero.b .logo{left:3%;top:4%;transform:none;max-width:60%;max-height:22%}
+  .hero.a .logo{left:auto;right:5%;bottom:4%;transform:none;max-width:54%;max-height:18%}
+  .hero.b .logo{left:5%;top:4%;transform:none;max-width:54%;max-height:18%}
+}
+
+/* sideways, the seam leans while they talk: right while the opener speaks,
+   left while the responder answers, straight again when they're done. Each
+   hero's layers reach a little past the seam and are cut along it, so the
+   lean never shows the ground behind them. */
+@property --lean{syntax:'<angle>';inherits:true;initial-value:0deg}
+.stage{--lean:0deg;transition:--lean .55s cubic-bezier(.3,1.25,.5,1)}
+.stage[data-lean="a"]{--lean:5deg}
+.stage[data-lean="b"]{--lean:-5deg}
+@container stage (orientation:landscape){
+  .shell{--half:calc(var(--seam) / 2);--reach:calc(var(--half) + 50cqh * .0875 + 3px);--lt:calc(50cqh * tan(var(--lean)))}
+  .hero{overflow:visible}
+  .hero .bg,.hero .art,.hero .flash,.hero::after{right:auto;width:calc(100% + var(--reach))}
+  .hero.b .bg,.hero.b .art,.hero.b .flash,.hero.b::after{left:calc(-1 * var(--reach))}
+  .hero.a .bg,.hero.a .art,.hero.a .flash,.hero.a::after{
+    clip-path:polygon(0 0,calc(100% - var(--reach) + var(--half) + var(--lt)) 0,calc(100% - var(--reach) + var(--half) - var(--lt)) 100%,0 100%)}
+  .hero.b .bg,.hero.b .art,.hero.b .flash,.hero.b::after{
+    clip-path:polygon(calc(var(--reach) - var(--half) + var(--lt)) 0,100% 0,100% 100%,calc(var(--reach) - var(--half) - var(--lt)) 100%)}
+  .seam{transform:skewX(calc(-1 * var(--lean)))}
 }
 
 /* a very short sideways screen: the names under the buttons go, the buttons stay */
@@ -243,12 +283,12 @@ button:disabled{cursor:default}
 /* the stage inside the app */
 .stage[data-mode="choose"] [data-act="next"]{display:none}
 /* a hero with no art yet: their set's color and their initials */
-.hero.noart{background:radial-gradient(ellipse at 50% 42%,color-mix(in srgb,var(--c) 70%,#fff 0%) 0%,color-mix(in srgb,var(--c) 55%,var(--night)) 55%,var(--night) 100%)}
+.hero.noart .bg{background:radial-gradient(ellipse at 50% 42%,color-mix(in srgb,var(--c) 70%,#fff 0%) 0%,color-mix(in srgb,var(--c) 55%,var(--night)) 55%,var(--night) 100%)}
 .hero.noart .art{visibility:hidden}
-.hero.noart::before{content:attr(data-ini);position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
+.hero.noart .bg::after{content:attr(data-ini);position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
   font-family:var(--head);font-size:min(46cqw,46cqh);color:rgba(255,252,242,.16);line-height:1;pointer-events:none}
 /* auto-play: a line runs around Next before the next fight */
-.rbtn .disc svg.ring{position:absolute;left:-5px;top:-5px;width:calc(100% + 10px);height:calc(100% + 10px);max-width:none;transform:skewX(-7deg);
+.rbtn .disc svg.ring{position:absolute;left:-5px;top:-5px;width:calc(100% + 10px);height:calc(100% + 10px);max-width:none;transform:skewX(var(--tilt));
   pointer-events:none;opacity:0;fill:none;stroke:none;filter:none;transition:opacity .2s}
 .ring rect{fill:none;stroke:var(--gold-hi);stroke-width:3;vector-effect:non-scaling-stroke;stroke-dasharray:100;stroke-dashoffset:100;stroke-linecap:round}
 .counting .disc svg.ring{opacity:1}
@@ -280,7 +320,7 @@ button:disabled{cursor:default}
 /* slate button: slanted, with a sheen and some thickness underneath */
 .sbtn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:none;height:44px;padding:0 20px;isolation:isolate;
   font-weight:600;font-size:19px;letter-spacing:.4px;text-transform:uppercase;color:#fff;white-space:nowrap}
-.sbtn::before{content:"";position:absolute;inset:0;z-index:-1;transform:skewX(-7deg);border-radius:7px;background:var(--slate-face);
+.sbtn::before{content:"";position:absolute;inset:0;z-index:-1;transform:skewX(var(--tilt));border-radius:7px;background:var(--slate-face);
   border:2px solid var(--edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 4px 0 var(--edge),0 6px 10px rgba(0,0,0,.35)}
 .sbtn:active{transform:translateY(2px)}
 .sbtn:active::before{box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 var(--edge)}
@@ -292,21 +332,24 @@ button:disabled{cursor:default}
 
 /* Fight: the whole button leans and clips what's inside, so the ember
    strip runs edge to edge; the lettering is stood back up */
-.fbtn{display:flex;flex-direction:column;width:100%;transform:skewX(-6deg);border-radius:10px;overflow:hidden;color:#fff;text-align:center;
+.fbtn{display:flex;flex-direction:column;width:100%;transform:skewX(var(--own,var(--tilt)));border-radius:10px;overflow:hidden;color:#fff;text-align:center;
   background:var(--gold-face);border:2.5px solid var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 6px 0 #6B3404,0 9px 14px rgba(0,0,0,.45)}
-.fbtn .top{flex:1;display:flex;align-items:center;justify-content:center;gap:.28em;transform:skewX(6deg);padding:.15em .3em .1em;
-  font-family:var(--head);font-size:var(--fs,44px);line-height:1;text-shadow:0 3px 0 #9A4A06,0 0 1px #6B3404}
-.fbtn .top svg{width:.9em;height:.9em;fill:#fff;stroke:#9A4A06;stroke-width:1.2;filter:drop-shadow(0 2px 0 #9A4A06)}
+.fbtn .top{flex:1;display:flex;align-items:center;justify-content:center;gap:.3em;transform:skewX(var(--untilt));padding:.12em .3em .08em;
+  font-family:var(--head);font-size:var(--fs,44px);line-height:1;text-transform:uppercase;letter-spacing:.02em;text-shadow:0 3px 0 #9A4A06,0 0 1px #6B3404}
+/* the die: white with brown pips, like the rest of the gold buttons' lettering */
+.fbtn .top svg.die{width:.82em;height:.82em;flex:none;transform:rotate(-10deg);filter:drop-shadow(0 3px 0 #9A4A06)}
 .fbtn .strip{flex:none;background:linear-gradient(180deg,#E8781A,var(--ember));border-top:2px solid #A8460A;padding:4px 0 5px}
-.fbtn .strip span{display:block;transform:skewX(6deg);font-weight:700;font-size:15px;letter-spacing:.9px;text-transform:uppercase;text-shadow:0 1px 0 #7A3404;white-space:nowrap}
-.fbtn:active{transform:skewX(-6deg) translateY(3px);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 3px 0 #6B3404}
-.fbtn:disabled{filter:grayscale(.9) brightness(.62);transform:skewX(-6deg)}
+.fbtn .strip span{display:block;transform:skewX(var(--untilt));font-weight:700;font-size:15px;letter-spacing:.9px;text-transform:uppercase;text-shadow:0 1px 0 #7A3404;white-space:nowrap}
+.fbtn:active{transform:skewX(var(--own,var(--tilt))) translateY(3px);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 3px 0 #6B3404}
+.fbtn:disabled{filter:grayscale(.9) brightness(.62);transform:skewX(var(--own,var(--tilt)))}
 
 /* segmented: slate chips, the chosen one gold */
-.seg{display:flex;gap:7px;flex:none}
-.seg button{display:grid;place-items:center;height:36px;padding:0 14px;border-radius:6px;font-weight:600;font-size:16px;text-transform:uppercase;white-space:nowrap;
-  background:linear-gradient(180deg,var(--night-3),#1F3050);border:2px solid var(--edge);box-shadow:0 3px 0 var(--edge);color:#C9D3EA}
-.seg button[aria-pressed="true"]{background:linear-gradient(180deg,var(--gold-hi),var(--blaze) 50%,var(--gold-lo));border-color:var(--brown);color:#fff;text-shadow:0 1px 0 #9A4A06}
+.seg{display:flex;gap:9px;flex:none}
+.seg button{position:relative;isolation:isolate;display:grid;place-items:center;height:36px;padding:0 14px;font-weight:600;font-size:16px;text-transform:uppercase;white-space:nowrap;color:#C9D3EA}
+.seg button::before{content:"";position:absolute;inset:0;z-index:-1;transform:skewX(var(--tilt));border-radius:6px;
+  background:linear-gradient(180deg,var(--night-3),#1F3050);border:2px solid var(--edge);box-shadow:0 3px 0 var(--edge)}
+.seg button[aria-pressed="true"]{color:#fff;text-shadow:0 1px 0 #9A4A06}
+.seg button[aria-pressed="true"]::before{background:linear-gradient(180deg,var(--gold-hi),var(--blaze) 50%,var(--gold-lo));border-color:var(--brown)}
 .seg button:disabled{opacity:.45}
 
 /* gold-knob switch */
@@ -322,7 +365,7 @@ button:disabled{cursor:default}
 
 /* ---------- home ---------- */
 /* the hero behind it all: one from the pool, cross-fading to the next */
-.home-bg{position:absolute;z-index:0;left:50%;top:0;height:100%;width:min(48cqw,100cqh);transform:translateX(-50%);opacity:0;transition:opacity .6s;
+.home-bg{position:absolute;z-index:0;left:calc((min(30cqw,60cqh) + 100cqw - min(38cqw,420px)) / 2);top:0;height:100%;width:min(48cqw,100cqh);transform:translateX(-50%);opacity:0;transition:opacity .6s;
   -webkit-mask-image:radial-gradient(ellipse 50% 52% at 50% 45%,#000 52%,transparent 100%);mask-image:radial-gradient(ellipse 50% 52% at 50% 45%,#000 52%,transparent 100%)}
 .home-bg.on{opacity:1}
 .home-bg img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 30%;opacity:0;transition:opacity 1.4s ease}
@@ -332,26 +375,28 @@ button:disabled{cursor:default}
 .home .bar{position:absolute;top:0;right:0;padding-top:max(10px,env(safe-area-inset-top,0px));z-index:3}
 .title{position:absolute;margin:0;z-index:2;left:max(18px,env(safe-area-inset-left,0px));top:max(12px,env(safe-area-inset-top,0px))}
 .title img{display:block;width:min(30cqw,60cqh);height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}
-.modes{position:absolute;z-index:2;right:max(18px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));
-  width:min(38cqw,420px);display:flex;flex-direction:column;gap:clamp(10px,5cqh,24px)}
+/* Choose, the pool and Fight lean as one block, so all their edges line up
+   on the same slant; what's inside them is stood back up */
+.modes{position:absolute;z-index:2;right:max(22px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));
+  width:min(38cqw,420px);display:flex;flex-direction:column;gap:clamp(10px,5cqh,24px);transform:skewX(var(--tilt));--own:0deg}
 /* Choose: a gold banner with two heroes on its left */
-.gban{display:flex;align-items:stretch;width:100%;height:clamp(56px,19cqh,80px);transform:skewX(-6deg);border-radius:10px;overflow:hidden;text-align:left;
+.gban{display:flex;align-items:stretch;width:100%;height:clamp(56px,19cqh,80px);border-radius:10px;overflow:hidden;text-align:left;
   background:var(--gold-face);border:2.5px solid var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 5px 0 #6B3404,0 8px 12px rgba(0,0,0,.45)}
-.gban:active{transform:skewX(-6deg) translateY(3px)}
+.gban:active{transform:translateY(3px)}
 .gban .art{width:44%;display:flex;border-right:2.5px solid var(--brown);background:#5A2E04}
 .gban .art span{flex:1;position:relative;overflow:hidden;background:var(--c,#5A2E04)}
 .gban .art span + span{border-left:2px solid var(--brown)}
-.gban .art img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 30%;transform:skewX(6deg) scale(1.5);transform-origin:50% 28%}
-.gban .txt{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;padding:0 10px 0 16px;transform:skewX(6deg)}
+.gban .art img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 30%;transform:skewX(var(--untilt)) scale(1.5);transform-origin:50% 28%}
+.gban .txt{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 10px;transform:skewX(var(--untilt))}
 .gban .txt b{font-family:var(--head);font-weight:400;font-size:clamp(24px,8cqh,32px);line-height:1;color:#fff;text-shadow:0 3px 0 #9A4A06}
 .gban .txt small{font-size:16px;font-weight:700;color:#7A3404;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* the pool and Fight share one leaning panel: Fight rolls from the pool */
 .combo{position:relative;isolation:isolate;display:flex;flex-direction:column;gap:clamp(8px,3cqh,12px);padding:10px 16px 14px}
-.combo::before{content:"";position:absolute;inset:0;z-index:-1;transform:skewX(-6deg);border-radius:14px;
+.combo::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:14px;
   background:linear-gradient(180deg,rgba(26,33,52,.93),rgba(12,16,26,.93));box-shadow:inset 0 0 0 2px var(--line),0 10px 20px rgba(0,0,0,.4)}
-.poolrow{display:flex;align-items:center;gap:10px;width:100%;height:clamp(44px,13cqh,56px);text-align:left}
+.poolrow{display:flex;align-items:center;gap:12px;width:100%;height:clamp(44px,13cqh,56px);text-align:left;transform:skewX(var(--untilt))}
 .faces{display:flex;flex:none;padding-left:2px}
-.faces .slotf{display:block;margin-left:-9px;border-radius:7px;box-shadow:0 0 0 2.5px #141A28,0 0 0 4px rgba(247,181,44,.75);transition:opacity .9s ease}
+.faces .slotf{display:block;margin-left:7px;border-radius:7px;box-shadow:0 0 0 2.5px #141A28,0 0 0 4px rgba(247,181,44,.75);transition:opacity .9s ease}
 .faces .slotf:first-child{margin-left:0}
 .faces .slotf .av{display:grid}
 .faces .slotf.out{opacity:0}
@@ -359,9 +404,15 @@ button:disabled{cursor:default}
 .pooltxt b{font-family:var(--head);font-weight:400;font-size:24px;line-height:1;color:#fff}
 .pooltxt small{font-size:15px;font-weight:600;color:var(--mist);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #goRandom{height:clamp(72px,26cqh,104px);--fs:clamp(34px,12cqh,46px)}
+.credit{position:absolute;z-index:2;margin:0;left:max(20px,env(safe-area-inset-left,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));
+  font-size:14px;font-weight:600;letter-spacing:.3px;color:var(--mist);opacity:.85}
+@container app (orientation:landscape){
+  .faces .slotf:nth-child(4){display:none}          /* sideways the row is narrower: three faces */
+}
 @container app (orientation:portrait){
   .title{left:50%;transform:translateX(-50%);top:max(22px,env(safe-area-inset-top,0px))}
   .title img{width:min(60cqw,28cqh)}
+  .credit{display:none}
   .home-bg{left:-4%;right:-4%;width:auto;transform:none;top:17cqh;height:56cqh}
   .modes{left:0;right:0;width:auto;max-width:480px;margin:0 auto;padding:0 22px;gap:18px}
   .gban{height:78px}
@@ -382,7 +433,7 @@ button:disabled{cursor:default}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:9px;padding:10px 3px 6px}
 .tile{position:relative;aspect-ratio:64/78;border-radius:7px;overflow:hidden;background:var(--c,#555);min-width:0;
   box-shadow:0 0 0 2px #0B0F17,0 0 0 3px #2C3448;transition:filter .15s,box-shadow .15s}
-.tile img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 30%;transform:scale(1.35);transform-origin:50% 28%}
+.tile img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 30%;transform:scale(1.6);transform-origin:50% 36%}
 .tile .ini{position:absolute;inset:0;display:grid;place-items:center;padding-bottom:12px;font-family:var(--head);font-size:24px;color:rgba(255,255,255,.4);
   background:radial-gradient(ellipse at 50% 35%,color-mix(in srgb,var(--c) 85%,#fff),color-mix(in srgb,var(--c) 50%,#000))}
 .tile .nm{position:absolute;left:0;right:0;bottom:0;padding:12px 2px 3px;font-weight:700;font-size:10.5px;line-height:1.05;text-align:center;letter-spacing:.2px;
@@ -398,12 +449,13 @@ button:disabled{cursor:default}
 .pool .bar .sp{flex:1}
 .pool .ptabs{grid-area:tabs}
 .pool .tools{grid-area:tools}
+.allgrp{display:flex;gap:9px}
 .pool .scroll{grid-area:scroll;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 50px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 50px),transparent)}
 .pool .foot{grid-area:fight;padding:6px 22px max(16px,env(safe-area-inset-bottom,0px))}
 #poolFight{height:84px;--fs:40px;max-width:520px;margin:0 auto}
 /* opener and responder: both tabs lean toward the side being edited */
-.ptabs{display:flex;gap:10px;padding:4px 22px 6px;--sk:-14deg}
-.ptabs.lean-l{--sk:14deg}
+.ptabs{display:flex;gap:12px;padding:4px 22px 6px;--sk:var(--tilt)}
+.ptabs.lean-l{--sk:var(--untilt)}
 .ptab{position:relative;flex:1;display:grid;place-items:center;height:44px;padding:0 22px;isolation:isolate;
   font-weight:600;font-size:18px;text-transform:uppercase;letter-spacing:.5px;color:#C9D3EA;white-space:nowrap}
 .ptab::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:7px;transform:skewX(var(--sk));transition:transform .25s ease;
@@ -412,13 +464,17 @@ button:disabled{cursor:default}
 .ptab[aria-pressed="true"]::before{background:var(--gold-face);border-color:var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #6B3404}
 @container app (orientation:landscape){
   .pool{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto auto minmax(0,1fr);
-    grid-template-areas:"bar tabs fight" "tools tools tools" "scroll scroll scroll"}
+    grid-template-areas:"bar tabs fight" "sort all fight" "scroll scroll scroll"}
+  .pool .tools{display:contents}
+  .pool .tools .sp{display:none}
+  .pool .sortseg{grid-area:sort;align-self:center;margin:0 0 6px max(20px,env(safe-area-inset-left,0px))}
+  .pool .allgrp{grid-area:all;align-self:center;justify-self:center;margin-bottom:6px}
   .pool .bar .sp{display:none}
   .pool .ptabs{align-self:center;justify-self:center;padding:max(12px,env(safe-area-inset-top,0px)) 10px 4px}
   .ptab{flex:none;width:clamp(120px,18cqw,160px)}
-  .pool .foot{padding:max(8px,env(safe-area-inset-top,0px)) max(18px,env(safe-area-inset-right,0px)) 0 0}
-  #poolFight{width:clamp(130px,20cqw,180px);height:62px;--fs:30px}
-  #poolFight .strip span{font-size:12px}
+  .pool .foot{padding:max(10px,env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) 8px 0}
+  #poolFight{width:clamp(150px,24cqw,210px);height:clamp(84px,27cqh,104px);--fs:clamp(30px,10cqh,40px)}
+  #poolFight .strip span{font-size:13px}
   .pool .scroll{padding:0 max(22px,env(safe-area-inset-right,0px)) 16px max(22px,env(safe-area-inset-left,0px))}
   .grid{grid-template-columns:repeat(auto-fill,minmax(62px,1fr))}
 }
@@ -445,8 +501,11 @@ button:disabled{cursor:default}
 .slot.filled::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(5,7,12,.95),transparent 42%)}
 .slot.filled .ini{font-family:var(--head);font-size:90px;color:rgba(255,252,242,.18)}
 /* opener / responder rides at the top of the card, clear of the face */
-.slot .tag{position:absolute;z-index:2;left:50%;top:10px;transform:translateX(-50%);padding:3px 12px 4px;border-radius:999px;background:rgba(8,10,16,.78);
-  box-shadow:0 0 0 1.5px rgba(247,181,44,.6);font-weight:700;font-size:14px;letter-spacing:1.2px;text-transform:uppercase;color:var(--blaze)}
+/* opener / responder: a gold tab in the card's top corner, its outer
+   corner rounded with the frame (opener left, responder right) */
+.slot .tag{position:absolute;z-index:2;top:0;left:0;padding:5px 16px 6px 14px;border-radius:10px 0 0 0;background:var(--gold-face);
+  box-shadow:0 2px 6px rgba(0,0,0,.45);font-weight:700;font-size:15px;letter-spacing:1.2px;text-transform:uppercase;color:#fff;text-shadow:0 1px 0 #9A4A06}
+.slot[data-slot="1"] .tag{left:auto;right:0;padding:5px 14px 6px 16px;border-radius:0 10px 0 0}
 /* the hero's logo where the name was; the name stands in until there is one */
 .slot .who{position:absolute;z-index:1;left:6%;right:6%;bottom:10px;height:28%;display:flex;align-items:flex-end;justify-content:center}
 .slot .who img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px #000)}
@@ -461,8 +520,7 @@ button:disabled{cursor:default}
   .cgrid .vsb{align-self:center}
   #slotSwap{justify-self:center}
   #slotSwap .h{display:block}#slotSwap .v{display:none}
-  #chooseFight{height:clamp(66px,23cqh,92px);--fs:clamp(28px,9cqh,36px)}
-  #chooseFight .strip span{font-size:12px}
+  #chooseFight{height:clamp(60px,20cqh,84px);--fs:clamp(28px,9cqh,38px)}
 }
 
 /* ---------- sheets: picker and settings ---------- */
@@ -480,7 +538,7 @@ button:disabled{cursor:default}
 .setbody{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px}
 .stabs{display:flex;gap:8px;padding:2px 16px 0}
 .stab{position:relative;flex:1;display:grid;place-items:center;height:46px;isolation:isolate;font-weight:600;font-size:18px;text-transform:uppercase;letter-spacing:.4px;color:#fff}
-.stab::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:6px;background:var(--slate-face);border:2px solid var(--edge);box-shadow:0 4px 0 var(--edge)}
+.stab::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:6px;transform:skewX(var(--tilt));background:var(--slate-face);border:2px solid var(--edge);box-shadow:0 4px 0 var(--edge)}
 .stab[aria-selected="true"]{text-shadow:0 2px 0 #9A4A06}
 .stab[aria-selected="true"]::before{background:var(--gold-face);border-color:var(--brown);box-shadow:none;
   clip-path:polygon(0 0,100% 0,100% 84%,56% 84%,50% 100%,44% 84%,0 84%)}
@@ -530,6 +588,7 @@ button:disabled{cursor:default}
   <section id="home" class="screen home">
     <div class="home-bg" id="homeBg" aria-hidden="true"><img alt=""><img alt=""></div>
     <h1 class="title"><img src="app-logo.webp" width="900" height="733" alt="Dice Throne Intros"></h1>
+    <p class="credit" id="credit"></p>
     <header class="bar"><button class="iconbtn" data-open="settings" aria-label="Settings">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></header>
     <div class="modes">
@@ -538,7 +597,7 @@ button:disabled{cursor:default}
       <div class="combo">
         <button class="poolrow" id="openPool"><span class="faces" id="poolFaces"></span>
           <span class="pooltxt"><b>Pool</b><small id="poolTxt"></small></span><span class="sbtn sm gold">Edit</span></button>
-        <button class="fbtn" id="goRandom"><span class="top"><svg viewBox="0 0 24 24"><path d="M5 3h4l10 10-4 4L5 7z"/><path d="M19 3h-4L5 13l4 4L19 7z"/></svg>Fight</span>
+        <button class="fbtn" id="goRandom"><span class="top"><svg class="die" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4.5" fill="#fff" stroke="#9A4A06" stroke-width="1.8"/><circle cx="8" cy="8" r="1.7" fill="#9A4A06"/><circle cx="16" cy="8" r="1.7" fill="#9A4A06"/><circle cx="12" cy="12" r="1.7" fill="#9A4A06"/><circle cx="8" cy="16" r="1.7" fill="#9A4A06"/><circle cx="16" cy="16" r="1.7" fill="#9A4A06"/></svg>Fight</span>
           <span class="strip"><span id="randomSub">Random from your pool</span></span></button>
       </div>
     </div>
@@ -550,9 +609,9 @@ button:disabled{cursor:default}
       <h2>Pool</h2><span class="sp"></span><span class="count" id="poolCount"></span></header>
     <div class="ptabs" id="sideSeg"><button class="ptab" data-side="a">Opener</button><button class="ptab" data-side="b">Responder</button></div>
     <div class="tools"><div class="seg sortseg"><button data-sort="abc">A–Z</button><button data-sort="set">By set</button></div>
-      <span class="sp"></span><button class="sbtn sm" data-all="1">All</button><button class="sbtn sm" data-all="0">None</button></div>
+      <span class="sp"></span><span class="allgrp"><button class="sbtn sm" data-all="1">All</button><button class="sbtn sm" data-all="0">None</button></span></div>
     <div class="scroll"><div class="grid-wrap" id="poolGrid"></div></div>
-    <footer class="foot"><button class="fbtn" id="poolFight"><span class="top">Fight</span>
+    <footer class="foot"><button class="fbtn" id="poolFight"><span class="top"><svg class="die" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4.5" fill="#fff" stroke="#9A4A06" stroke-width="1.8"/><circle cx="8" cy="8" r="1.7" fill="#9A4A06"/><circle cx="16" cy="8" r="1.7" fill="#9A4A06"/><circle cx="12" cy="12" r="1.7" fill="#9A4A06"/><circle cx="8" cy="16" r="1.7" fill="#9A4A06"/><circle cx="16" cy="16" r="1.7" fill="#9A4A06"/></svg>Fight</span>
       <span class="strip"><span id="poolFightSub">From this pool</span></span></button></footer>
   </section>
 
@@ -566,7 +625,7 @@ button:disabled{cursor:default}
       <button class="sbtn" id="slotSwap" aria-label="Swap sides">
         <svg class="h" viewBox="0 0 24 24"><path d="M20 8H5M8.5 4.5 5 8l3.5 3.5M4 16h15M15.5 12.5 19 16l-3.5 3.5"/></svg>
         <svg class="v" viewBox="0 0 24 24"><path d="M8 20V5M4.5 8.5 8 5l3.5 3.5M16 4v15M12.5 15.5 16 19l3.5-3.5"/></svg></button>
-      <button class="fbtn" id="chooseFight" disabled><span class="top">Fight</span><span class="strip"><span>Let's go</span></span></button>
+      <button class="fbtn" id="chooseFight" disabled><span class="top"><svg class="die" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4.5" fill="#fff" stroke="#9A4A06" stroke-width="1.8"/><circle cx="8" cy="8" r="1.7" fill="#9A4A06"/><circle cx="16" cy="8" r="1.7" fill="#9A4A06"/><circle cx="12" cy="12" r="1.7" fill="#9A4A06"/><circle cx="8" cy="16" r="1.7" fill="#9A4A06"/><circle cx="16" cy="16" r="1.7" fill="#9A4A06"/></svg>Fight</span></button>
     </div>
   </section>
 
@@ -602,7 +661,7 @@ button:disabled{cursor:default}
         <div class="pane" data-pane="display" hidden>
           <div class="srow"><div class="lab"><b>Menu background</b><small>Heroes: one from your pool behind the home screen, changing every few seconds</small></div>
             <div class="seg" data-pref="bg"><button data-v="none">None</button><button data-v="heroes">Heroes</button><button data-v="custom" disabled title="Coming soon">Custom</button></div></div>
-          <div class="srow"><div class="lab"><b>Full screen</b><small>Hides the browser bar when a fight starts (Android). On iPhone, add the app to your home screen instead.</small></div>
+          <div class="srow"><div class="lab"><b>Full screen</b><small>Hides the phone's status and navigation bars, like a game (Android). On iPhone, add the app to your home screen instead.</small></div>
             <button class="tog" role="switch" data-tog="full" data-on="on" data-off="off" aria-label="Full screen"></button></div>
           <div class="srow"><div class="lab"><b>Art safe zone</b><small>For preparing hero art: shows where faces must sit on the fight screen</small></div>
             <button class="tog" role="switch" data-tog="zone" data-on="1" data-off="0" aria-label="Art safe zone"></button></div>
@@ -642,9 +701,9 @@ button:disabled{cursor:default}
           <span class="disc"><svg viewBox="0 0 24 24"><path d="M9 5 4.5 9.5 9 14"/><path d="M4.5 9.5H14a5.5 5.5 0 0 1 0 11h-3"/></svg></span><span class="lbl">Back</span></button>
       </nav>
       <div class="edge"></div>
-      <section class="hero a"><img class="art" alt=""><div class="flash"></div><img class="logo" alt=""><span class="logo logoname" hidden></span><div class="speech"></div></section>
+      <section class="hero a"><div class="bg"></div><img class="art" alt=""><div class="flash"></div><img class="logo" alt=""><span class="logo logoname" hidden></span><div class="speech"></div></section>
       <div class="seam"></div>
-      <section class="hero b"><img class="art" alt=""><div class="flash"></div><img class="logo" alt=""><span class="logo logoname" hidden></span><div class="speech"></div></section>
+      <section class="hero b"><div class="bg"></div><img class="art" alt=""><div class="flash"></div><img class="logo" alt=""><span class="logo logoname" hidden></span><div class="speech"></div></section>
     </div>
     <div class="vs" aria-hidden="true">VS</div>
   </div>
@@ -652,7 +711,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '0.5';
+const APP_VERSION = '0.6';
 
 /* ---------------- heroes ---------------- */
 const ROSTER = [
@@ -816,6 +875,30 @@ function drawBalloon(b){
 }
 
 
+/* Logo files often carry empty transparent margins of different sizes, so
+   two logos placed the same way can look unevenly spaced. Each logo is
+   cropped to its visible part once (and remembered), then placed. */
+const TRIMMED = {};
+function trimLogo(img){
+  const src = img.currentSrc || img.src;
+  if (src.startsWith('data:')) return;
+  if (TRIMMED[src]){ if (TRIMMED[src] !== src) img.src = TRIMMED[src]; return; }
+  TRIMMED[src] = src;
+  try {
+    const w = img.naturalWidth, h = img.naturalHeight; if (!w || !h) return;
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+    const d = x.getImageData(0, 0, w, h).data;
+    let x0 = w, y0 = h, x1 = -1, y1 = -1;
+    for (let y = 0; y < h; y++) for (let i = 0; i < w; i++) if (d[(y * w + i) * 4 + 3] > 20){
+      if (i < x0) x0 = i; if (i > x1) x1 = i; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0 || (x0 < 3 && y0 < 3 && x1 > w - 4 && y1 > h - 4)) return;
+    const o = document.createElement('canvas'); o.width = x1 - x0 + 1; o.height = y1 - y0 + 1;
+    o.getContext('2d').drawImage(c, -x0, -y0);
+    TRIMMED[src] = o.toDataURL(); img.src = TRIMMED[src];
+  } catch (e) {}
+}
+
 /* ---------------- the fight ---------------- */
 class Stage {
   constructor(host){
@@ -844,7 +927,7 @@ class Stage {
     });
   }
   start(pair, mode){ this.pair = pair.slice(); this.mode = mode; this.el.dataset.mode = mode; this.play(); }
-  stop(){ this.run++; this.cancelAuto(); }
+  stop(){ this.run++; this.cancelAuto(); this.el.dataset.lean = ''; }
   measure(){
     const rail = this.el.querySelector('.rail');
     const portrait = this.el.clientHeight > this.el.clientWidth;
@@ -859,9 +942,9 @@ class Stage {
       const img = h.querySelector('.art');
       if (prefs.zone !== '1' || !img.naturalWidth || h.classList.contains('noart')){ if (z) z.remove(); return; }
       if (!z){ z = document.createElement('div'); z.className = 'zone'; z.innerHTML = '<span>Face zone</span>'; h.appendChild(z); }
-      const W = h.clientWidth, Hh = h.clientHeight, nw = img.naturalWidth, nh = img.naturalHeight;
+      const W = img.offsetWidth, Hh = h.clientHeight, nw = img.naturalWidth, nh = img.naturalHeight, bx = img.offsetLeft;
       const s = Math.max(W / nw, Hh / nh), rw = nw * s, rh = nh * s;
-      const ox = (W - rw) / 2, oy = (Hh - rh) * .40;
+      const ox = bx + (W - rw) / 2, oy = (Hh - rh) * .40;
       const x0 = Math.max(0, (1 - .74 / (nw / nh)) / 2);
       Object.assign(z.style, { left: ox + x0 * rw + 'px', top: oy + .305 * rh + 'px',
         width: (1 - 2 * x0) * rw + 'px', height: (.622 - .305) * rh + 'px' });
@@ -872,12 +955,12 @@ class Stage {
       const id = ids[i], h = this.el.querySelector('.hero.' + side), hero = H[id];
       const art = h.querySelector('.art'), logo = h.querySelector('img.logo'), name = h.querySelector('.logoname');
       h.classList.remove('morph');
-      h.style.setProperty('--c', SET_COLOR[hero.set]); h.dataset.ini = initials(hero.name);
+      h.style.setProperty('--c', SET_COLOR[hero.set]); h.querySelector('.bg').dataset.ini = initials(hero.name);
       art.dataset.base = artSrc(id);
       if (art.dataset.src !== art.dataset.base){ art.src = art.dataset.src = art.dataset.base; }
       art.alt = hero.name;
       name.textContent = hero.name;
-      logo.onload = () => { logo.hidden = false; name.hidden = true; };
+      logo.onload = () => { logo.hidden = false; name.hidden = true; trimLogo(logo); };
       logo.onerror = () => { logo.hidden = true; name.hidden = false; };
       logo.src = 'logos/' + id + '.png'; logo.alt = hero.name;
     });
@@ -954,7 +1037,7 @@ class Stage {
     for (let t = 0; t < ms; t += 40){ if (id !== this.run || this.skip === id) return; await sleep(40); }
   }
   async play(){
-    const id = ++this.run; this.skip = -1; this.cancelAuto(); this.done = false;
+    const id = ++this.run; this.skip = -1; this.cancelAuto(); this.done = false; this.el.dataset.lean = '';
     await dataReady;
     if (id !== this.run) return;
     const key = this.pair.join('>');
@@ -979,6 +1062,8 @@ class Stage {
     let last = '';
     for (let s = 0; s < 2; s++){
       if (s) await this.wait(Math.max(1000 * mul(), readPause(last)), id);
+      if (id !== this.run) return;
+      this.el.dataset.lean = s ? 'b' : 'a';            // the seam leans away from whoever is talking
       for (let p = 0; p < lines[s].length; p++){
         if (p) await this.wait(readPause(last), id);
         if (id !== this.run) return;
@@ -986,7 +1071,10 @@ class Stage {
         await this.part(heroes[s], who[s], lines[s][p], id);
       }
     }
-    if (id === this.run){ this.done = true; this.scheduleAuto(); }
+    if (id === this.run){
+      this.done = true; this.scheduleAuto();
+      setTimeout(() => { if (id === this.run) this.el.dataset.lean = ''; }, readPause(last));   // straight again once the last line is read
+    }
   }
 }
 
@@ -1043,12 +1131,16 @@ app.addEventListener('click', e => {
   const o = e.target.closest('[data-open]'); if (o) return openSheet(o.dataset.open);
   if (e.target.classList.contains('sheet')) return history.back();     // tap outside a sheet
 });
-/* full screen on Android when a fight starts (needs the tap itself) */
+/* Full screen: hides the phone's status bar and navigation bar, like a game.
+   Browsers only allow it from a tap, so the first tap anywhere asks for it
+   (also inside the installed app, which otherwise keeps the phone's bars). */
 function goFull(){
   if (prefs.full !== 'on' || document.fullscreenElement || !document.fullscreenEnabled) return;
-  if (matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches) return;
+  if (matchMedia('(display-mode: fullscreen)').matches) return;
   try { const p = document.documentElement.requestFullscreen(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
 }
+app.addEventListener('pointerup', () => goFull());
+
 function startFight(pair, mode){
   if (!stage) stage = new Stage($('#fight'));
   go('fight');
@@ -1103,7 +1195,8 @@ function renderHome(){
   const n = k => k + (k === 1 ? ' hero' : ' heroes');
   const same = A.length === B.length && A.every(id => B.includes(id));
   $('#poolTxt').textContent = same ? (A.length === ALL.length ? 'All 45 heroes' : n(A.length))
-    : A.length + ' vs ' + B.length + ' heroes';            // opener pool vs responder pool
+    : A.length + ' vs ' + B.length;                        // opener pool vs responder pool
+  $('#credit').textContent = 'Created by Gad Freund (Rnamon) · Version ' + APP_VERSION;
   $('#goRandom').disabled = !poolOk();
   $('#randomSub').textContent = poolOk() ? 'Random from your pool' : 'Add heroes to the pool first';
   // the Choose banner shows the last two heroes picked
@@ -1227,7 +1320,7 @@ function slotHTML(i){
   // the logo, or the name until the hero has one
   return '<span class="ini">' + initials(h.name) + '</span><img src="' + artSrc(id) + '" alt="" onerror="this.remove()">' +
     '<span class="tag">' + role + '</span>' +
-    '<span class="who"><img src="logos/' + id + '.png" alt="' + h.name + '" onerror="this.nextElementSibling.hidden=false;this.remove()"><b hidden>' + h.name + '</b></span>';
+    '<span class="who"><img src="logos/' + id + '.png" alt="' + h.name + '" onload="trimLogo(this)" onerror="this.nextElementSibling.hidden=false;this.remove()"><b hidden>' + h.name + '</b></span>';
 }
 function renderChoose(){
   document.querySelectorAll('.slot').forEach(s => {
