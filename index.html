@@ -5,6 +5,10 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  0.9  Choose Heroes: hero art a little bigger inside the cards (both
+       orientations) to use the empty space above the heads; Fight: the
+       logos are smaller
+
   0.8  Choose (upright): the upper card's logo is back at the same height
        as the lower card's (the extra gap between the cards now keeps VS clear)
 
@@ -173,7 +177,7 @@ button:disabled{cursor:default}
 .hero::after{content:"";position:absolute;inset:0;pointer-events:none}
 .hero.a::after{background:linear-gradient(to top,rgba(10,13,20,.55),transparent 30%)}
 .hero.b::after{background:linear-gradient(to bottom,rgba(10,13,20,.55),transparent 30%)}
-.logo{position:absolute;left:50%;transform:translateX(-50%);max-width:60%;max-height:23%;width:auto;z-index:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.7))}
+.logo{position:absolute;left:50%;transform:translateX(-50%);max-width:50%;max-height:19%;width:auto;z-index:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.7))}
 .logo[hidden]{display:none}
 /* until a hero has a logo file, its name stands in */
 .logoname{font-family:var(--head);font-size:clamp(22px,8cqmin,52px);line-height:1.05;white-space:nowrap;max-width:none;
@@ -238,8 +242,8 @@ button:disabled{cursor:default}
   transform:translate(-50%,-46%) rotate(-6deg);pointer-events:none}
 @container stage (orientation:portrait){
   .vs{left:50%;top:calc(50% - var(--dockh,0px)/2);font-size:clamp(46px,16cqmin,130px)}
-  .hero.a .logo{left:auto;right:5%;bottom:4%;transform:none;max-width:54%;max-height:18%}
-  .hero.b .logo{left:5%;top:4%;transform:none;max-width:54%;max-height:18%}
+  .hero.a .logo{left:auto;right:5%;bottom:4%;transform:none;max-width:46%;max-height:15%}
+  .hero.b .logo{left:5%;top:4%;transform:none;max-width:46%;max-height:15%}
 }
 
 /* sideways, the seam leans while they talk: right while the opener speaks,
@@ -510,7 +514,7 @@ button:disabled{cursor:default}
 .slot .role{font-family:var(--head);font-size:24px;color:#fff;letter-spacing:.5px}
 .slot .hint{font-size:16px;font-weight:600}
 .slot.filled{background:var(--c,var(--night-2));box-shadow:0 0 0 3px #0B0F17,0 0 0 6px var(--blaze),0 10px 20px rgba(0,0,0,.6)}
-.slot.filled > img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 36%}
+.slot.filled > img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 36%;transform:scale(1.14);transform-origin:50% 22%}
 .slot.filled::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(5,7,12,.95),transparent 42%)}
 .slot.filled .ini{font-family:var(--head);font-size:90px;color:rgba(255,252,242,.18)}
 /* opener / responder rides at the top of the card, clear of the face */
@@ -724,7 +728,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '0.8';
+const APP_VERSION = '0.9';
 
 /* ---------------- heroes ---------------- */
 const ROSTER = [
