@@ -5,6 +5,9 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  0.8  Choose (upright): the upper card's logo is back at the same height
+       as the lower card's (the extra gap between the cards now keeps VS clear)
+
   0.7  Fixes after trying 0.6 on a phone:
        - Pool (sideways): the count next to "Pool" has a fixed width, so
          Opener/Responder, All/None and the sort buttons never move
@@ -520,8 +523,6 @@ button:disabled{cursor:default}
 .slot .who{position:absolute;z-index:1;left:6%;right:6%;bottom:10px;height:28%;display:flex;align-items:flex-end;justify-content:center}
 .slot .who img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px #000)}
 .slot .who b{font-family:var(--head);font-weight:400;font-size:28px;line-height:1;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.6)}
-.slot[data-slot="0"] .who{bottom:10px}
-@container app (orientation:portrait){.slot[data-slot="0"] .who{bottom:24px}}
 .vsb{font-family:var(--head);font-size:clamp(62px,11cqmin + 22px,98px);line-height:1;transform:rotate(-6deg);pointer-events:none;
   background:linear-gradient(180deg,#FFF3B0,var(--blaze) 50%,var(--gold-lo));-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 4px 0 #4A2804) drop-shadow(0 0 2px #2B1600) drop-shadow(0 0 18px rgba(247,181,44,.35))}
@@ -723,7 +724,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '0.7';
+const APP_VERSION = '0.8';
 
 /* ---------------- heroes ---------------- */
 const ROSTER = [
