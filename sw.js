@@ -5,7 +5,7 @@
  * app is opened (or right away with Settings → Check for updates), and the
  * number shows in Settings.
  */
-const VERSION = '0.9';   // must match APP_VERSION in index.html; what changed is listed at the top of index.html
+const VERSION = '1.0';   // must match APP_VERSION in index.html; what changed is listed at the top of index.html
 
 const CACHE = 'dti-' + VERSION;
 /* the app itself, kept so it opens with no connection */

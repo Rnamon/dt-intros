@@ -5,6 +5,14 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.0  Design update:
+       - Home: hero faces in the Choose button sit higher (no empty space
+         above the heads)
+       - Choose Heroes: logos at about 75% of their size; the art sits
+         higher in the cards (zoomed from the bottom edge, so nothing
+         empty shows) in both orientations
+       - Fight buttons: die and word closer together, clear of the edges
+
   0.9  Choose Heroes: hero art a little bigger inside the cards (both
        orientations) to use the empty space above the heads; Fight: the
        logos are smaller
@@ -349,7 +357,7 @@ button:disabled{cursor:default}
    strip runs edge to edge; the lettering is stood back up */
 .fbtn{display:flex;flex-direction:column;width:100%;transform:skewX(var(--own,var(--tilt)));border-radius:10px;overflow:hidden;color:#fff;text-align:center;
   background:var(--gold-face);border:2.5px solid var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 6px 0 #6B3404,0 9px 14px rgba(0,0,0,.45)}
-.fbtn .top{flex:1;display:flex;align-items:center;justify-content:center;gap:.3em;transform:skewX(var(--untilt));padding:.12em .3em .08em;
+.fbtn .top{flex:1;display:flex;align-items:center;justify-content:center;gap:.14em;transform:skewX(var(--untilt));padding:.12em .7em .08em;
   font-family:var(--head);font-size:var(--fs,44px);line-height:1;text-transform:uppercase;letter-spacing:.02em;text-shadow:0 3px 0 #9A4A06,0 0 1px #6B3404}
 /* the die: white with brown pips, like the rest of the gold buttons' lettering */
 .fbtn .top svg.die{width:.82em;height:.82em;flex:none;transform:rotate(-10deg);filter:drop-shadow(0 3px 0 #9A4A06)}
@@ -401,7 +409,7 @@ button:disabled{cursor:default}
 .gban .art{width:44%;display:flex;border-right:2.5px solid var(--brown);background:#5A2E04}
 .gban .art span{flex:1;position:relative;overflow:hidden;background:var(--c,#5A2E04)}
 .gban .art span + span{border-left:2px solid var(--brown)}
-.gban .art img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 30%;transform:skewX(var(--untilt)) scale(1.5);transform-origin:50% 28%}
+.gban .art img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 30%;transform:skewX(var(--untilt)) translateY(-11%) scale(1.5);transform-origin:50% 28%}
 .gban .txt{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 10px;transform:skewX(var(--untilt))}
 .gban .txt b{font-family:var(--head);font-weight:400;font-size:clamp(24px,8cqh,32px);line-height:1;color:#fff;text-shadow:0 3px 0 #9A4A06}
 .gban .txt small{font-size:16px;font-weight:700;color:#7A3404;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -514,7 +522,7 @@ button:disabled{cursor:default}
 .slot .role{font-family:var(--head);font-size:24px;color:#fff;letter-spacing:.5px}
 .slot .hint{font-size:16px;font-weight:600}
 .slot.filled{background:var(--c,var(--night-2));box-shadow:0 0 0 3px #0B0F17,0 0 0 6px var(--blaze),0 10px 20px rgba(0,0,0,.6)}
-.slot.filled > img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 36%;transform:scale(1.14);transform-origin:50% 22%}
+.slot.filled > img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 36%;transform:scale(var(--z,1.2));transform-origin:50% 100%}
 .slot.filled::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(5,7,12,.95),transparent 42%)}
 .slot.filled .ini{font-family:var(--head);font-size:90px;color:rgba(255,252,242,.18)}
 /* opener / responder rides at the top of the card, clear of the face */
@@ -524,20 +532,21 @@ button:disabled{cursor:default}
   box-shadow:0 2px 6px rgba(0,0,0,.45);font-weight:700;font-size:15px;letter-spacing:1.2px;text-transform:uppercase;color:#fff;text-shadow:0 1px 0 #9A4A06}
 .slot[data-slot="1"] .tag{left:auto;right:0;padding:5px 14px 6px 16px;border-radius:0 10px 0 0}
 /* the hero's logo where the name was; the name stands in until there is one */
-.slot .who{position:absolute;z-index:1;left:6%;right:6%;bottom:10px;height:28%;display:flex;align-items:flex-end;justify-content:center}
+.slot .who{position:absolute;z-index:1;left:15%;right:15%;bottom:10px;height:21%;display:flex;align-items:flex-end;justify-content:center}
 .slot .who img{max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px #000)}
-.slot .who b{font-family:var(--head);font-weight:400;font-size:28px;line-height:1;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.6)}
+.slot .who b{font-family:var(--head);font-weight:400;font-size:22px;line-height:1;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.6)}
 .vsb{font-family:var(--head);font-size:clamp(62px,11cqmin + 22px,98px);line-height:1;transform:rotate(-6deg);pointer-events:none;
   background:linear-gradient(180deg,#FFF3B0,var(--blaze) 50%,var(--gold-lo));-webkit-background-clip:text;background-clip:text;color:transparent;
   filter:drop-shadow(0 4px 0 #4A2804) drop-shadow(0 0 2px #2B1600) drop-shadow(0 0 18px rgba(247,181,44,.35))}
 #slotSwap .h{display:none}
 @container app (orientation:landscape){
+  .slot{--z:1.1}
   .cgrid{grid-template-columns:minmax(0,1fr) clamp(120px,17cqw,160px) minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto auto auto minmax(0,1fr);
     grid-template-areas:"a . b" "a vs b" "a swap b" "a fight b" "a . b";row-gap:16px;column-gap:clamp(16px,3cqw,30px);padding-top:4px}
   .cgrid .vsb{align-self:center}
   #slotSwap{justify-self:center}
   #slotSwap .h{display:block}#slotSwap .v{display:none}
-  #chooseFight{height:clamp(60px,20cqh,84px);--fs:clamp(28px,9cqh,38px)}
+  #chooseFight{height:clamp(60px,20cqh,84px);--fs:clamp(26px,8cqh,34px)}
 }
 
 /* ---------- sheets: picker and settings ---------- */
@@ -728,7 +737,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '0.9';
+const APP_VERSION = '1.0';
 
 /* ---------------- heroes ---------------- */
 const ROSTER = [
