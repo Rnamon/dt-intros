@@ -5,6 +5,13 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.1  Speech: found the real cause of Deadpool's balloon growing and shrinking
+       while he types: his balloon had the class "pool", the same name as the
+       Pool screen's grid layout, so the typed text and the hidden rest became
+       grid rows. Renamed to "wade". Also: balloon fonts are loaded before a balloon is measured, so
+       Deadpool's box no longer grows/shrinks while he types, and one-word
+       balloons (Druid, Phoenix) sit centred around the word
+
   1.0  Design update:
        - Home: hero faces in the Choose button sit higher (no empty space
          above the heads)
@@ -209,8 +216,8 @@ button:disabled{cursor:default}
 .balloon{position:relative;isolation:isolate;padding:.5em .95em .55em;color:var(--ink);text-align:center;text-wrap:balance;
   font-family:var(--say);font-weight:var(--sayw);font-size:calc(1em * var(--k));line-height:1.22;
   opacity:0;transform:scale(.4);--line:var(--ink)}
-.balloon:not(.fx):not(.pool){padding:.62em 1.15em .66em;min-width:4.6em}
-.balloon.pool{min-width:4em}
+.balloon:not(.fx):not(.wade){padding:.62em 1.15em .66em;min-width:4.6em}
+.balloon.wade{min-width:4em}
 .hero.a .balloon{transform-origin:30% 125%}
 .hero.b .balloon{transform-origin:70% -25%}
 .balloon.on{opacity:1;transform:none;transition:transform .34s cubic-bezier(.3,1.55,.5,1),opacity .1s}
@@ -218,7 +225,7 @@ button:disabled{cursor:default}
 .balloon .shape{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;z-index:-1;
   filter:drop-shadow(.1em .13em 0 rgba(17,13,39,.5))}
 .balloon .shape path{fill:var(--paper);stroke:var(--line);stroke-width:3;stroke-linejoin:round}
-.balloon:not(.fx):not(.pool) .shape path.main{stroke-width:4}
+.balloon:not(.fx):not(.wade) .shape path.main{stroke-width:4}
 .balloon .shape path.sketch{fill:none;stroke-width:1.4;opacity:.55}
 .balloon .rest{visibility:hidden}
 /* shouts, roars and transformations: a burst, bigger lettering, no typing */
@@ -226,9 +233,10 @@ button:disabled{cursor:default}
   padding:.4em .8em;margin:.35em .4em}
 .balloon.shout .shape path{stroke-width:3.5;stroke-linejoin:miter}
 .balloon.shout.on{transition:transform .26s cubic-bezier(.2,2,.4,1),opacity .05s}
-/* Deadpool talks in yellow boxes, like his comics */
-.balloon.pool{font-family:var(--wade);font-weight:700;font-size:.92em;text-transform:none}
-.balloon.pool .shape path{fill:var(--pool)}
+/* Deadpool talks in yellow boxes, like his comics. (Class is .wade, not .pool:
+   .pool is the Pool screen's layout and made his balloon a grid.) */
+.balloon.wade{font-family:var(--wade);font-weight:700;font-size:.92em;text-transform:none}
+.balloon.wade .shape path{fill:var(--pool)}
 /* Dark Phoenix: dark balloon, flame edge, fire lettering */
 .balloon.phoenix{font-family:var(--shout);font-size:1.3em;letter-spacing:.04em;line-height:1.05;padding:.55em .95em;margin:.3em}
 .balloon.phoenix .shape{filter:drop-shadow(0 0 .35em rgba(255,98,30,.85))}
@@ -737,7 +745,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.0';
+const APP_VERSION = '1.1';
 
 /* ---------------- heroes ---------------- */
 const ROSTER = [
@@ -879,7 +887,7 @@ function shapeFor(kind, w, h, tail, seed){
 function fitBalloon(b){
   b.style.width = '';
   const h0 = b.offsetHeight;
-  let lo = 24, hi = b.offsetWidth;
+  let lo = 24, hi = b.offsetWidth; const full = hi;
   if (hi <= lo) return;
   while (hi - lo > 1){
     const mid = (lo + hi) >> 1;
@@ -887,7 +895,26 @@ function fitBalloon(b){
     // too narrow if it adds a line, or if a word that can't break spills out
     if (b.offsetHeight > h0 || b.scrollWidth > b.clientWidth + 1) lo = mid; else hi = mid;
   }
-  b.style.width = Math.min(b.offsetWidth + 2, hi + 2) + 'px';
+  // a little slack: the text is typed into two spans (typed + still hidden), and a box
+  // cut to the exact width of a full line can wrap that split line early and so grow
+  b.style.width = Math.min(full, hi + 8) + 'px';
+}
+/* A balloon is measured once, so its font must already be loaded: measured in
+   a fallback font, it ends up too wide or too narrow for the real lettering
+   (a one-word balloon then sits off-centre, Deadpool's grows mid-sentence).
+   Fonts used in balloons are loaded up front, each balloon waits for its own
+   font before it is measured, and anything already on screen is re-fitted
+   when a font arrives late. */
+const fontReady = (font, text) => Promise.race([
+  document.fonts ? document.fonts.load(font, text || 'Aa').catch(() => 0) : Promise.resolve(),
+  new Promise(res => setTimeout(res, 1500))]);
+function refitBalloons(){
+  document.querySelectorAll('.balloon').forEach(b => { fitBalloon(b); drawBalloon(b); });
+}
+if (document.fonts){
+  ['700 20px "Comic Neue"','20px Bangers','20px "Pirata One"','20px "Patrick Hand"','500 20px Alegreya','20px "Permanent Marker"','20px "Luckiest Guy"']
+    .forEach(f => document.fonts.load(f).catch(() => 0));
+  document.fonts.addEventListener('loadingdone', refitBalloons);
 }
 function drawBalloon(b){
   const svg = b.querySelector('.shape'); if (!svg) return;
@@ -1033,7 +1060,7 @@ class Stage {
     const kind = fx || (speaker === 'deadpool' ? 'pool' : '');
     const voice = !fx && kind !== 'pool' ? voiceOf(speaker) : '';
     const b = document.createElement('div');
-    b.className = 'balloon' + (kind ? ' ' + kind : '') + (fx ? ' fx' : '') + (voice ? ' v-' + voice : '');
+    b.className = 'balloon' + (kind ? ' ' + (kind === 'pool' ? 'wade' : kind) : '') + (fx ? ' fx' : '') + (voice ? ' v-' + voice : '');
     if (kind) b.dataset.kind = kind;
     b.dataset.tail = '1';
     if (!fx && kind !== 'pool') b.style.setProperty('--line', lineColor(speaker));
@@ -1041,6 +1068,8 @@ class Stage {
     box.appendChild(b);
     const shown = b.querySelector('.shown'), rest = b.querySelector('.rest'), text = p.text;
     rest.textContent = text;                 // reserves the full size, so the balloon never jumps
+    await fontReady(getComputedStyle(b).font, text);   // measure in the real font
+    if (id !== this.run){ b.remove(); return; }
     fitBalloon(b);
     this.ro.observe(b); drawBalloon(b);
     void b.offsetWidth; b.classList.add('on');
