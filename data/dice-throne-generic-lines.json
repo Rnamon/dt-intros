@@ -1,0 +1,498 @@
+{
+  "barbarian": {
+    "openers": [
+      [{"text": "Enough waiting. I want to hit something. You'll do."}],
+      [{"text": "TO BATTLE!!! Time to smash!"}]
+    ],
+    "responses": [
+      [{"text": "Huh? Too many words. Let's just fight."}],
+      [{"text": "Done talking? Good. Hitting time."}]
+    ]
+  },
+  "monk": {
+    "openers": [
+      [{"text": "Breathe. Center yourself. You will need every moment of calm."}],
+      [{"text": "Show me what you have trained for. I have trained for this."}]
+    ],
+    "responses": [
+      [{"text": "Words are wind. Let us see what your actions say."}],
+      [{"text": "Keep talking. Every word is another gap in your guard."}]
+    ]
+  },
+  "moon-elf": {
+    "openers": [
+      [{"text": "The moon has already decided how this ends. I am merely its hand."}],
+      [{"text": "Every shadow here belongs to me. Yours is merely on loan."}]
+    ],
+    "responses": [
+      [{"text": "You speak as though the dark were listening. It is. It simply isn't impressed."}],
+      [{"text": "Aim carefully. I am never where you think."}]
+    ]
+  },
+  "ninja": {
+    "openers": [
+      [{"text": "This will be quick. And quiet."}],
+      [{"text": "Look away, and it is over."}]
+    ],
+    "responses": [
+      [{"text": "Enough. Begin."}],
+      [{"text": "One breath. That's all I need."}]
+    ]
+  },
+  "paladin": {
+    "openers": [
+      [{"text": "By my oath, I will fight you fairly. I expect the same."}],
+      [{"text": "I offer you one chance to yield. I do not offer a second."}]
+    ],
+    "responses": [
+      [{"text": "My faith has weathered far worse than words."}],
+      [{"text": "Then let us settle this with honor."}]
+    ]
+  },
+  "pyromancer": {
+    "openers": [
+      [{"text": "Oh, I'm dying to find out how you burn!"}],
+      [{"text": "I'm going to burn you down to ash. And then I'm going to keep going!"}]
+    ],
+    "responses": [
+      [{"text": "Aww, that's adorable. Let's hear how it sounds while you scream."}],
+      [{"text": "Ooh, hot take! Let's see how it holds up in the fire."}]
+    ]
+  },
+  "shadow-thief": {
+    "openers": [
+      [{"text": "Smile, friend! By the time you notice what's missing, I'll be long gone."}],
+      [{"text": "Relax. I already took what I came for. The fight's just a courtesy."}]
+    ],
+    "responses": [
+      [{"text": "Lovely speech. While you gave it, I helped myself to a few things."}],
+      [{"text": "Careful. The longer this drags on, the worse it gets for you."}]
+    ]
+  },
+  "treant": {
+    "openers": [
+      [{"text": "Little sprout... I have outlived forests. I will outlive you."}],
+      [{"text": "Root... and stone... I have stood for centuries. Move me... if you can."}]
+    ],
+    "responses": [
+      [{"text": "Hmm... Words fall like leaves... and are forgotten just as quickly."}],
+      [{"text": "Patience, young one... The forest always wins."}]
+    ]
+  },
+  "artificer": {
+    "openers": [
+      [{"text": "I just finished building a new invention. I think I'll test it on you."}],
+      [{"text": "My machines have no off switch. They stop only once they're done with you."}]
+    ],
+    "responses": [
+      [{"text": "Excellent. I've been needing a proper stress test for my machines."}],
+      [{"text": "Gears turning, coils charging. I'm sure my inventions will break after you do."}]
+    ]
+  },
+  "cursed-pirate": {
+    "openers": [
+      [
+        {"form": "human", "text": "Ahoy! Hope ye said yer goodbyes."},
+        {"form": "cursed", "text": "The sea's hungry tonight."}
+      ],
+      [
+        {"form": "human", "text": "Ye picked the wrong pirate to cross—"},
+        {"form": "cursed", "text": "—now it's off to Davy Jones' Locker with ye!"}
+      ]
+    ],
+    "responses": [
+      [{"text": "Har! Load the cannons! This fight's goin' to be a grand one!"}],
+      [
+        {"form": "human", "text": "Death's been chasin' me for years."},
+        {"form": "cursed", "text": "Ye'll have to wait yer turn."}
+      ]
+    ]
+  },
+  "gunslinger": {
+    "openers": [
+      [{"text": "There's a bounty on your head, and I intend to collect."}],
+      [{"text": "It's high noon... now draw."}]
+    ],
+    "responses": [
+      [{"text": "Both guns loaded. Ain't no turnin' back now."}],
+      [{"text": "Ain't nothin' left to say. Let the guns do the talkin'."}]
+    ]
+  },
+  "huntress": {
+    "openers": [
+      [{"text": "Run if you want. The hunt is on, and you are the prey."}],
+      [{"text": "We've caught your scent. There's nowhere left to run."}]
+    ],
+    "responses": [
+      [{"text": "Nyra has been waiting for this fight. She's hungry."}],
+      [{"text": "You think you're the hunter in this hunt. You're wrong."}]
+    ]
+  },
+  "samurai": {
+    "openers": [
+      [{"text": "Honor demands your defeat. I will not fail it."}],
+      [{"text": "My blade is drawn. There is no sheathing it until this is done."}]
+    ],
+    "responses": [
+      [{"text": "Words are cheap. Honor is earned in the fight."}],
+      [{"text": "Enough talk. Let the blade decide."}]
+    ]
+  },
+  "seraph": {
+    "openers": [
+      [{"text": "Avert your gaze, or be blinded."}],
+      [{"text": "I bring the light of justice. It will not spare you."}]
+    ],
+    "responses": [
+      [{"text": "Your words are noted. They change nothing."}],
+      [{"text": "Humble yourself. The light has already judged."}]
+    ]
+  },
+  "tactician": {
+    "openers": [
+      [{"text": "Reserves in position. Artillery ready. Commencing the attack."}],
+      [{"text": "The battle plan is drawn. Your defeat is on page one."}]
+    ],
+    "responses": [
+      [{"text": "Every move you have in mind, I have a counter. And a few for the ones you haven't imagined yet."}],
+      [{"text": "Noted. Adjusting the plan. Though I anticipated this, so the revision is minor."}]
+    ]
+  },
+  "vampire-lord": {
+    "openers": [
+      [{"text": "I won't even try to drink from you. The fight itself is the real feast."}],
+      [{"text": "You stand in my shadow now. It is a long way back to the light."}]
+    ],
+    "responses": [
+      [{"text": "Do try. It has been centuries since anyone amused me."}],
+      [{"text": "I have eternity to finish this. You have only this fight."}]
+    ]
+  },
+  "black-panther": {
+    "openers": [
+      [{"text": "The king of Wakanda has entered the arena. Stand aside, or be moved aside."}],
+      [{"text": "I do not lose. A king cannot afford to."}]
+    ],
+    "responses": [
+      [{"text": "Bast is watching. Let us give her a fight worth seeing."}],
+      [{"text": "Diplomacy has ended. Let the claws speak instead."}]
+    ]
+  },
+  "black-widow": {
+    "openers": [
+      [{"text": "I've done this a long time. You won't enjoy how it ends."}],
+      [{"text": "I've already gathered all the intel on you. Beating you will be easy."}]
+    ],
+    "responses": [
+      [{"text": "I'll get the information I need from you. One way or another."}],
+      [{"text": "Let's skip the small talk. I have somewhere to be."}]
+    ]
+  },
+  "captain-marvel": {
+    "openers": [
+      [{"text": "Hostile in range. Locking on. You've been warned."}],
+      [{"text": "Call sign's Captain Marvel. Remember it on your way down."}]
+    ],
+    "responses": [
+      [{"text": "Copy that. Engaging."}],
+      [{"text": "No wingman needed. I'll handle this solo."}]
+    ]
+  },
+  "doctor-strange": {
+    "openers": [
+      [{"text": "Forces you cannot comprehend answer to me. You are about to meet them."}],
+      [{"text": "You are about to face the full power of the Sorcerer Supreme."}]
+    ],
+    "responses": [
+      [{"text": "I have seen fourteen million outcomes of this fight. You win in none of them."}],
+      [{"text": "Allow me to prescribe a remedy for your confidence: swift and thorough defeat."}]
+    ]
+  },
+  "loki": {
+    "openers": [
+      [{"text": "Behold Loki, God of Mischief. Fairness has no place in this fight."}],
+      [{"text": "I am Loki of Asgard, and you are merely a stepping stone toward my Glorious Purpose."}]
+    ],
+    "responses": [
+      [{"text": "Very well. Let us see whose story ends here."}],
+      [{"text": "Splendid. Now the real game begins."}]
+    ]
+  },
+  "spider-man": {
+    "openers": [
+      [{"text": "Heads up. Next thing you know, you're webbed up and I'm walking away."}],
+      [{"text": "Brooklyn's finest is about to take you down. Stretch if you need to."}]
+    ],
+    "responses": [
+      [{"text": "Alright, let's do this. I'm ready for whatever you've got."}],
+      [{"text": "Time to swing into action. This is gonna be fun."}]
+    ]
+  },
+  "scarlet-witch": {
+    "openers": [
+      [{"text": "The reality you know is about to come apart."}],
+      [{"text": "Chaos answers to me. Let me show you what it can do."}]
+    ],
+    "responses": [
+      [{"text": "Then let us begin. The world is already shifting."}],
+      [{"text": "Let us end this quickly. I have grown tired of waiting."}]
+    ]
+  },
+  "thor": {
+    "openers": [
+      [{"text": "Mjolnir thirsts for battle, and you stand in its path!"}],
+      [{"text": "For Asgard! The thunder is coming, and it stops for no one!"}]
+    ],
+    "responses": [
+      [{"text": "Come then! Let us make this battle worthy of a song!"}],
+      [{"text": "By the nine realms, this shall be a fight to remember!"}]
+    ]
+  },
+  "cyclops": {
+    "openers": [
+      [{"text": "Visor's on and the blast is charged. Last chance to back down."}],
+      [{"text": "I've got the angle. I've got the power. You've got a problem."}]
+    ],
+    "responses": [
+      [{"text": "Alright. Let's do this by the book."}],
+      [{"text": "Let's end this fast. No wasted moves."}]
+    ]
+  },
+  "gambit": {
+    "openers": [
+      [{"text": "Every card in dis deck is charged, and every one's headed your way."}],
+      [{"text": "Gambit's dealin' a hand dat you can't fold."}]
+    ],
+    "responses": [
+      [{"text": "De deck's been shuffled. Let's play."}],
+      [{"text": "Gambit never folds."}]
+    ]
+  },
+  "iceman": {
+    "openers": [
+      [{"text": "Fair warning: it's about to get real cold in here."}],
+      [{"text": "I'm gonna put you on ice. Literally."}]
+    ],
+    "responses": [
+      [{"text": "Alright, let's break the ice."}],
+      [{"text": "Stay frosty. This is gonna be fun."}]
+    ]
+  },
+  "jean-grey": {
+    "openers": [
+      [
+        {"form": "jean", "text": "Please, step back. I don't want to hurt you—"},
+        {"form": "phoenix", "text": "—BUT I WILL."}
+      ],
+      [
+        {"form": "jean", "text": "Run. Please—"},
+        {"form": "phoenix", "text": "—BUT IT WON'T HELP YOU."}
+      ]
+    ],
+    "responses": [
+      [
+        {"form": "jean", "text": "I'm sorry—"},
+        {"form": "phoenix", "text": "—THE PHOENIX IS RISING, AND YOU ARE FALLING!"}
+      ],
+      [
+        {"form": "jean", "text": "I can't stop her anymore—"},
+        {"form": "phoenix", "text": "—AND NEITHER CAN YOU."}
+      ]
+    ]
+  },
+  "psylocke": {
+    "openers": [
+      [{"text": "I'll cut through your defenses before you even see the blade."}],
+      [{"text": "A single thought, a single strike. That is all it takes."}]
+    ],
+    "responses": [
+      [{"text": "Stay still. This will be quick and precise."}],
+      [{"text": "Mind and blade, as one. Let us begin."}]
+    ]
+  },
+  "rogue": {
+    "openers": [
+      [{"text": "Sugar, you really don't wanna let me get my hands on you."}],
+      [{"text": "You picked the wrong fight, sugar."}]
+    ],
+    "responses": [
+      [{"text": "Alright, sugar. Let's get this over with."}],
+      [{"text": "I'm ready when you are, sugar."}]
+    ]
+  },
+  "storm": {
+    "openers": [
+      [{"text": "I am Storm. The elements obey me, and they have turned against you."}],
+      [{"text": "Thunder, wind, and rain all answer to me. You don't stand a chance."}]
+    ],
+    "responses": [
+      [{"text": "You believe you can stand against nature itself. You are mistaken."}],
+      [{"text": "Nature obeys me. The outcome is already written."}]
+    ]
+  },
+  "wolverine": {
+    "openers": [
+      [{"text": "Adamantium doesn't break, bub. You will."}],
+      [{"text": "You're about to find out why folks stay outta my way, bub."}]
+    ],
+    "responses": [
+      [{"text": "Let's get on with it, bub."}],
+      [{"text": "Come on. Take your best shot. I've had worse."}]
+    ]
+  },
+  "headless-horseman": {
+    "openers": [
+      [{"text": "Heh heh heh! Time to collect another head. Yours will do!"}],
+      [{"text": "Heh heh heh! Run if you must. The horse is faster!"}]
+    ],
+    "responses": [
+      [{"text": "Heh heh heh! Lovely! I do love a good fight!"}],
+      [{"text": "Heh heh heh! The pumpkin's lit. Let the fun begin!"}]
+    ]
+  },
+  "necromancer": {
+    "openers": [
+      [{"text": "I am the Overlord of the Underworld! Kneel, or join my army!"}],
+      [{"text": "Everyone I beat joins my army! You'll make a GREAT minion!"}]
+    ],
+    "responses": [
+      [{"text": "Excellent! My skeletons have been so bored!"}],
+      [{"text": "To arms, my minions! ...Stop rattling and fight!"}]
+    ]
+  },
+  "pale-lady": {
+    "openers": [
+      [
+        {"form": "lady", "text": "Do forgive me, dear. I'm afraid this will be messy—"},
+        {"form": "werewolf", "text": "GRRAAAH!"}
+      ],
+      [
+        {"form": "lady", "text": "Do run along, dear. I do so enjoy a good chase—"},
+        {"form": "werewolf", "text": "RRRAAAWR!"}
+      ]
+    ],
+    "responses": [
+      [
+        {"form": "lady", "text": "Do keep up, dear. The moon waits for no one—"},
+        {"form": "werewolf", "text": "AWOOOO!"}
+      ],
+      [
+        {"form": "lady", "text": "Do carry on, dear. I'm only just warming up—"},
+        {"form": "werewolf", "text": "GRRAAAH!"}
+      ]
+    ]
+  },
+  "raveness": {
+    "openers": [
+      [{"text": "Nevermore shall you leave this place. The raven has spoken."}],
+      [{"text": "Nevermore will you know peace. The raven has marked you."}]
+    ],
+    "responses": [
+      [{"text": "The raven grows restless. He has waited long for this."}],
+      [{"text": "Let the sorrow begin. The raven grows impatient."}]
+    ]
+  },
+  "druid": {
+    "openers": [
+      [
+        {"form": "druid", "text": "The wild will swallow you whole—"},
+        {"form": "bear", "text": "ROAAAR!"}
+      ],
+      [
+        {"form": "druid", "text": "You'll face every fang and claw the wild has—"},
+        {"form": "cat", "text": "HSSS!"}
+      ]
+    ],
+    "responses": [
+      [{"text": "Claws, fangs, and fury. The wild is ready."}],
+      [
+        {"form": "druid", "text": "In nature, only the strong survive—"},
+        {"form": "bear", "text": "ROAAAR!"}
+      ]
+    ]
+  },
+  "duelist": {
+    "openers": [
+      [{"text": "Prepare to be perfectly, positively punctured!"}],
+      [{"text": "My blade is brilliant, bold, and bloodthirsty. Beware!"}]
+    ],
+    "responses": [
+      [{"text": "Splendid! Steel yourself, for the show starts soon!"}],
+      [{"text": "Dazzling, dramatic, and delightfully deadly. Let's dance!"}]
+    ]
+  },
+  "forgemaster": {
+    "openers": [
+      [{"text": "Hammer's hot, and the anvil's waitin'. Hope you're ready."}],
+      [{"text": "Steel don't bend. Neither do I. You will."}]
+    ],
+    "responses": [
+      [{"text": "Let's see how you hold up against forged steel."}],
+      [{"text": "A good smith never rushes. But I'll make an exception."}]
+    ]
+  },
+  "sun-elf": {
+    "openers": [
+      [{"text": "Stand in her light. It will be the last thing you see."}],
+      [{"text": "In the sun's name, I will scorch you from this place."}]
+    ],
+    "responses": [
+      [{"text": "Let the sun bear witness to this battle."}],
+      [{"text": "May her light guide us both."}]
+    ]
+  },
+  "santa": {
+    "openers": [
+      [{"text": "Ho ho ho! Naughty list. Top of the page. Your name, right there!"}],
+      [{"text": "Ho ho ho! You've interrupted my holiday. Now you'll get what's coming to you!"}]
+    ],
+    "responses": [
+      [{"text": "Ho ho ho! No presents today. Just a good old-fashioned beating!"}],
+      [{"text": "Ho ho ho! Let's make this one a holiday to remember!"}]
+    ]
+  },
+  "krampus": {
+    "openers": [
+      [{"text": "The sack is open. There's room for you."}],
+      [{"text": "Run if you like. My chains never lose a scent."}]
+    ],
+    "responses": [
+      [{"text": "Naughty or nice, it makes no difference. Everyone goes in the sack."}],
+      [{"text": "My chains are hungry. Let them feast."}]
+    ]
+  },
+  "alchemist": {
+    "openers": [
+      [{"text": "Oh, a fight for science! And possibly for fun. Mostly for science!"}],
+      [{"text": "I'm going to try every concoction I own on you. And when I run out, I'll invent new ones!"}]
+    ],
+    "responses": [
+      [{"text": "Bring it! I've got a concoction for every occasion!"}],
+      [{"text": "No problem! I brought flasks. Lots of flasks. Most of them explode!"}]
+    ]
+  },
+  "mystic-brawler": {
+    "openers": [
+      [{"text": "The sea, the sky, and the mountain stand with me! Come, test them!"}],
+      [{"text": "My ancestors are watching! I'll make this a fight they remember!"}]
+    ],
+    "responses": [
+      [{"text": "Ha! Come on! Hit me with everything you've got!"}],
+      [{"text": "The ocean never backs down, and neither will I!"}]
+    ]
+  },
+  "deadpool": {
+    "openers": [
+      [{"text": "Heads up! This is a totally generic threat. Pretend it's super personal!"}],
+      [{"text": "Two katanas, two guns, and zero chill. You're gonna love this!"}],
+      [{"text": "Spend your CP wisely. It won't save you, but it'll look good!"}],
+      [{"text": "I'm gonna hit you with my Ultimate so hard, it'll affect the next fight!"}]
+    ],
+    "responses": [
+      [{"text": "Time for some chimichanga-powered violence!"}],
+      [{"text": "We could've settled this with rock-paper-scissors, you know. Wait! I've got a token for that!"}],
+      [{"text": "Cards, dice, ultimates! Honestly, best game ever!"}],
+      [{"text": "<<Generic Response Line Number 2>>"}]
+    ]
+  }
+}

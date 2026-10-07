@@ -12,7 +12,8 @@ dice-throne-intros/
 ├── icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png
 ├── app-logo.webp        ← הלוגו במסך הבית
 ├── data/
-│   └── dice-throne-dialogues.json
+│   ├── dice-throne-dialogues.json
+│   └── dice-throne-generic-lines.json
 ├── art/                  ← תמונות הגיבורים, 720×783, ‎.webp
 ├── logos/                ← לוגואים, PNG שקוף
 ├── bkg/                  ← רקעים למסכי התפריט (בהמשך)
