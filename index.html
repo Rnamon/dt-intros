@@ -5,6 +5,11 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.3  Conversations: shorter one-line notes in Settings (so the screen doesn't
+       jump when switching); Replay now draws new lines (and special or generic
+       again) instead of repeating the same fight, and the same generic
+       combination never comes up twice running for a pair; no yellow frame around "Got it"
+
   1.2  Generic lines: a second set of dialogues (data/dice-throne-generic-lines.json),
        2 openers + 2 responses per hero (Deadpool 4 + 4), written to work against
        anyone. Every fight first picks special or generic (65% / 35%, see
@@ -591,6 +596,7 @@ button:disabled{cursor:default}
 .srow .lab{flex:1;min-width:160px}
 .srow b{display:block;font-weight:600;font-size:21px;color:#C3CDE4}
 .srow small{display:block;font-size:14px;font-weight:600;color:#7D89A6;line-height:1.2;margin-top:2px}
+#talkNote{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .about{padding:16px 0 8px;font-size:16px;color:var(--mist);line-height:1.45}
 .about b{color:#fff}
 .about p{margin:0 0 8px}
@@ -628,6 +634,7 @@ button:disabled{cursor:default}
 .modal-in p{margin:0 0 14px;font-size:19px;font-weight:500;line-height:1.3;color:#C3CDE4}
 .modal-in label{display:flex;align-items:center;gap:12px;margin:0 0 18px;font-size:18px;font-weight:600;color:#fff;cursor:pointer}
 .modal-in input[type=checkbox]{width:26px;height:26px;flex:none;accent-color:var(--blaze);cursor:pointer}
+.modal-in :focus,.modal-in :focus-visible{outline:none}
 .modal-btns{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:12px}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -777,7 +784,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.2';
+const APP_VERSION = '1.3';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -848,7 +855,6 @@ const dataReady = fetch('data/dice-throne-dialogues.json').then(r => r.json()).t
 /* the generic lines: per hero, openers and responses that work against anyone.
    If the file can't be loaded, fights simply use the special lines. */
 const genericReady = fetch('data/dice-throne-generic-lines.json').then(r => r.json()).then(d => { GENERIC = d; }).catch(() => {});
-const pickOne = list => list[Math.floor(Math.random() * list.length)];
 /* Which kind of fight is this? Special or generic, decided once per fight and
    never mixed. A mirror match is always special. */
 function useGeneric(a, b){
@@ -1008,7 +1014,7 @@ class Stage {
     host.appendChild(document.getElementById('stageTpl').content.cloneNode(true));
     this.el = host.lastElementChild;
     this.pair = ['shadow-thief','gunslinger']; this.mode = 'random';
-    this.run = 0; this.skip = -1; this.lastMirror = {};
+    this.run = 0; this.skip = -1; this.lastMirror = {}; this.lastGen = {};
     this.el.addEventListener('click', e => {
       const b = e.target.closest('[data-act]');
       if (b) return this.act(b.dataset.act);
@@ -1078,7 +1084,7 @@ class Stage {
   }
   act(a){
     this.cancelAuto();
-    if (a === 'replay') return this.play(true);
+    if (a === 'replay') return this.play();
     if (a === 'swap'){ this.pair.reverse(); return this.play(); }
     if (a === 'next'){ this.pair = nextPair(); return this.play(); }
     if (a === 'settings') return openSheet('settings');
@@ -1141,26 +1147,30 @@ class Stage {
   async wait(ms, id){
     for (let t = 0; t < ms; t += 40){ if (id !== this.run || this.skip === id) return; await sleep(40); }
   }
-  /* replay = true repeats the fight just played (same kind, same lines) */
-  async play(replay){
+  /* a generic opener from one hero and a response from the other, never the
+     same combination twice running for the same pair (heroes have only 2 of each) */
+  genLines(a, b){
+    const A = GENERIC[a].openers, B = GENERIC[b].responses, key = a + '>' + b, rnd = n => Math.floor(Math.random() * n);
+    let i, j;
+    do { i = rnd(A.length); j = rnd(B.length); } while (A.length * B.length > 1 && this.lastGen[key] === i + ':' + j);
+    this.lastGen[key] = i + ':' + j;
+    return [A[i], B[j]];
+  }
+  async play(){
     const id = ++this.run; this.skip = -1; this.cancelAuto(); this.done = false; this.el.dataset.lean = '';
     await Promise.all([dataReady, genericReady]);
     if (id !== this.run) return;
     const key = this.pair.join('>');
     let lines = null;
-    if (replay && this.cache && this.cache.key === key) lines = this.cache.lines;
-    else {
-      const [a, b] = this.pair;
-      // special or generic, decided once for this fight; the two are never mixed
-      if (useGeneric(a, b)) lines = [pickOne(GENERIC[a].openers), pickOne(GENERIC[b].responses)];
-      else lines = DATA && DATA[key];
-      if (!lines){ toast('No intro found for ' + this.pair.map(i => H[i].name).join(' vs ')); return; }
-      if (Array.isArray(lines[0][0])){          // a mirror match: one of its exchanges, not the same twice running
-        let i = 0;
-        if (lines.length > 1) do { i = Math.floor(Math.random() * lines.length); } while (i === this.lastMirror[key]);
-        this.lastMirror[key] = i; lines = lines[i];
-        this.cache = null;
-      } else this.cache = { key, lines };
+    const [a, b] = this.pair;
+    // special or generic, decided again for every fight (Replay too); the two are never mixed
+    if (useGeneric(a, b)) lines = this.genLines(a, b);
+    else lines = DATA && DATA[key];
+    if (!lines){ toast('No intro found for ' + this.pair.map(i => H[i].name).join(' vs ')); return; }
+    if (Array.isArray(lines[0][0])){          // a mirror match: one of its exchanges, not the same twice running
+      let i = 0;
+      if (lines.length > 1) do { i = Math.floor(Math.random() * lines.length); } while (i === this.lastMirror[key]);
+      this.lastMirror[key] = i; lines = lines[i];
     }
     const who = this.pair;
     this.load(who);
@@ -1471,10 +1481,9 @@ function renderSettings(){
   document.querySelectorAll('#setTabs .stab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === setTab)));
   document.querySelectorAll('#settings .pane').forEach(p => p.hidden = p.dataset.pane !== setTab);
   $('#verNum').textContent = 'Version ' + (swVersion || APP_VERSION);
-  const pct = Math.round(SPECIAL_SHARE * 100);
-  $('#talkNote').textContent = prefs.talk === 'generic' ? 'Only general lines that any hero can say to anyone. Mirror matches stay special.'
-    : prefs.talk === 'mixed' ? 'Each fight is special about ' + pct + '% of the time and generic about ' + (100 - pct) + '%. Mirror matches stay special.'
-    : 'Only lines written for each pairing. This is the default.';
+  $('#talkNote').textContent = prefs.talk === 'generic' ? 'Generic lines for every hero · Mirror always special'
+    : prefs.talk === 'mixed' ? 'Custom and generic lines · Mirror always special'
+    : 'Custom lines for every pair of heroes';
 }
 $('#settings').addEventListener('click', e => {
   const tab = e.target.closest('[data-tab]');
@@ -1565,7 +1574,7 @@ $('#tipOk').addEventListener('click', () => closeTip(false));
 $('#tipSettings').addEventListener('click', () => closeTip(true));
 $('#tip').addEventListener('click', e => { if (e.target === e.currentTarget) closeTip(false); });
 addEventListener('keydown', e => { if (e.key === 'Escape') closeTip(false); });
-if (prefs.hideTip !== '1'){ $('#tip').hidden = false; $('#tipOk').focus(); }
+if (prefs.hideTip !== '1') $('#tip').hidden = false;
 </script>
 
 </body>
