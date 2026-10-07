@@ -5,6 +5,11 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.11 Pool: a "Mirror matches only" switch above FIGHT. When on, every fight is a hero
+       against itself, drawn from its own list of heroes (tick them in the grid, which
+       then edits that list); the Opener and Responder tabs go grey, and tapping them
+       makes the switch shake. Its choice is remembered. Replaces the Mirror tab of 1.9
+
   1.10 Home: the Pool row shows three rotating faces again (four cut the text short:
        "All 45 her...")
 
@@ -530,15 +535,24 @@ button:disabled{cursor:default}
 .pool .tools{grid-area:tools}
 .allgrp{display:flex;gap:9px}
 .pool .scroll{grid-area:scroll;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 50px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 50px),transparent)}
-.pool .foot{grid-area:fight;padding:6px 22px max(16px,env(safe-area-inset-bottom,0px))}
+.pool .foot{grid-area:fight;display:flex;flex-direction:column;padding:6px 22px max(16px,env(safe-area-inset-bottom,0px))}
 #poolFight{height:84px;--fs:40px;max-width:520px;margin:0 auto}
 /* opener and responder: both tabs lean toward the side being edited */
 .ptabs{display:flex;gap:10px;padding:4px 22px 6px;--sk:var(--tilt)}
 .ptabs.lean-l{--sk:var(--untilt)}
-.ptab{position:relative;flex:1;display:grid;place-items:center;height:44px;padding:0 6px;isolation:isolate;
+.ptab{position:relative;flex:1;display:grid;place-items:center;height:44px;padding:0 22px;isolation:isolate;
   font-weight:600;font-size:18px;text-transform:uppercase;letter-spacing:.5px;color:#C9D3EA;white-space:nowrap}
 .ptab::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:7px;transform:skewX(var(--sk));transition:transform .25s ease;
   background:var(--slate-face);border:2px solid var(--edge);box-shadow:0 4px 0 var(--edge)}
+.ptabs.dim .ptab{opacity:.35;filter:grayscale(1);cursor:not-allowed}
+.mirrorbtn{width:100%;max-width:520px;margin:0 auto 10px;height:40px;font-size:16px}
+.mirrorbtn .box{display:inline-grid;place-items:center;width:20px;height:20px;border:2px solid #C9D3EA;border-radius:5px;transform:skewX(var(--untilt))}
+.mirrorbtn[aria-checked="true"] .box{background:#fff;border-color:#fff}
+.mirrorbtn[aria-checked="true"] .box::after{content:"";width:9px;height:5px;border-left:3px solid #9A4A06;border-bottom:3px solid #9A4A06;transform:rotate(-45deg) translate(1px,-1px)}
+.mirrorbtn[aria-checked="true"]::before{background:var(--gold-face);border-color:var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #6B3404,0 6px 10px rgba(0,0,0,.35)}
+.mirrorbtn[aria-checked="true"]{text-shadow:0 1px 0 #9A4A06}
+.mirrorbtn.shake{animation:shake .45s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}15%{transform:translateX(-9px)}30%{transform:translateX(8px)}45%{transform:translateX(-6px)}60%{transform:translateX(5px)}75%{transform:translateX(-2px)}}
 .ptab[aria-pressed="true"]{color:#fff;text-shadow:0 2px 0 #9A4A06}
 .ptab[aria-pressed="true"]::before{background:var(--gold-face);border-color:var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #6B3404}
 @container app (orientation:landscape){
@@ -552,6 +566,7 @@ button:disabled{cursor:default}
   .pool .count{min-width:104px}   /* fixed width: "0 / 45" and "45 / 45" must not shift the buttons */
   .pool .ptabs{align-self:start;justify-self:center;padding:max(12px,env(safe-area-inset-top,0px)) 10px 4px}
   .ptab{flex:none;width:clamp(112px,16cqw,150px)}
+  .mirrorbtn{width:0;min-width:100%;height:34px;font-size:12px;padding:0 6px;gap:5px;margin-bottom:8px}   /* sideways: as wide as the Fight button below it */
   .pool .foot{padding:max(12px,env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) 8px 0}
   #poolFight{width:clamp(150px,24cqw,210px);height:clamp(84px,27cqh,104px);--fs:clamp(30px,10cqh,40px)}
   #poolFight .strip span{font-size:13px}
@@ -701,11 +716,12 @@ button:disabled{cursor:default}
   <section id="pool" class="screen pool" hidden>
     <header class="bar"><button class="sbtn" data-back>Back</button>
       <h2>Pool</h2><span class="sp"></span><span class="count" id="poolCount"></span></header>
-    <div class="ptabs" id="sideSeg"><button class="ptab" data-side="a">Opener</button><button class="ptab" data-side="b">Responder</button><button class="ptab" data-side="m">Mirror</button></div>
+    <div class="ptabs" id="sideSeg"><button class="ptab" data-side="a">Opener</button><button class="ptab" data-side="b">Responder</button></div>
     <div class="tools"><div class="seg sortseg"><button data-sort="abc">A–Z</button><button data-sort="set">By set</button></div>
       <span class="sp"></span><span class="allgrp"><button class="sbtn sm" data-all="1">All</button><button class="sbtn sm" data-all="0">None</button></span></div>
     <div class="scroll"><div class="grid-wrap" id="poolGrid"></div></div>
-    <footer class="foot"><button class="fbtn" id="poolFight"><span class="top"><svg class="die" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4.5" fill="#fff" stroke="#9A4A06" stroke-width="1.8"/><circle cx="8" cy="8" r="1.7" fill="#9A4A06"/><circle cx="16" cy="8" r="1.7" fill="#9A4A06"/><circle cx="12" cy="12" r="1.7" fill="#9A4A06"/><circle cx="8" cy="16" r="1.7" fill="#9A4A06"/><circle cx="16" cy="16" r="1.7" fill="#9A4A06"/></svg>Fight</span>
+    <footer class="foot"><button class="sbtn mirrorbtn" id="mirrorOnly" role="switch" aria-checked="false"><span class="box" aria-hidden="true"></span>Mirror matches only</button>
+      <button class="fbtn" id="poolFight"><span class="top"><svg class="die" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4.5" fill="#fff" stroke="#9A4A06" stroke-width="1.8"/><circle cx="8" cy="8" r="1.7" fill="#9A4A06"/><circle cx="16" cy="8" r="1.7" fill="#9A4A06"/><circle cx="12" cy="12" r="1.7" fill="#9A4A06"/><circle cx="8" cy="16" r="1.7" fill="#9A4A06"/><circle cx="16" cy="16" r="1.7" fill="#9A4A06"/></svg>Fight</span>
       <span class="strip"><span id="poolFightSub">From this pool</span></span></button></footer>
   </section>
 
@@ -817,7 +833,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.10';
+const APP_VERSION = '1.11';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -859,7 +875,7 @@ const artSrc = (id, form) => 'art/' + id + (form && !FORM_STYLE[form] ? '' : for
 /* ---------------- settings ---------------- */
 const prefs = { speed:'normal', anim:'on', auto:'off', bg:'heroes', full:'on', zone:'0', order:'abc',
   talk:'special', hideTip:'0',
-  pool:{ a:ALL.slice(), b:ALL.slice(), m:[] }, pick:[null, null] };
+  pool:{ a:ALL.slice(), b:ALL.slice(), m:ALL.slice() }, mirrorOnly:'0', pick:[null, null] };
 try {
   const p = JSON.parse(localStorage.getItem('dti-app') || '{}');
   Object.assign(prefs, p, { pool: Object.assign(prefs.pool, p.pool || {}) });
@@ -873,7 +889,8 @@ if (prefs.bg === 'plain') prefs.bg = 'none';
 if (!['special','mixed','generic'].includes(prefs.talk)) prefs.talk = 'special';
 if (prefs.hideTip !== '1') prefs.hideTip = '0';
 ['a','b'].forEach(k => prefs.pool[k] = (prefs.pool[k] || ALL.slice()).filter(id => H[id]));
-prefs.pool.m = (prefs.pool.m || []).filter(id => H[id]);
+prefs.pool.m = (prefs.pool.m || ALL.slice()).filter(id => H[id]);
+if (prefs.mirrorOnly !== '1') prefs.mirrorOnly = '0';
 const save = () => { try { localStorage.setItem('dti-app', JSON.stringify(prefs)); } catch (e) {} };
 const SPEED = { slow:1.5, normal:1, fast:.6 };
 const mul = () => SPEED[prefs.speed] || 1;
@@ -1354,12 +1371,13 @@ class Stage {
 let bag = [], lastKey = '';
 const poolA = () => prefs.pool.a;
 const poolB = () => prefs.pool.b;
-const poolM = () => prefs.pool.m;          // heroes whose mirror match is in the pool
-const poolOk = () => (poolA().length > 0 && poolB().length > 0) || poolM().length > 0;
+const poolM = () => prefs.pool.m;          // Mirror only: the heroes who fight themselves
+const mirrorOn = () => prefs.mirrorOnly === '1';
+const poolOk = () => mirrorOn() ? poolM().length > 0 : poolA().length > 0 && poolB().length > 0;
 function fillBag(){
   if (bag.length) return;
-  poolA().forEach(a => poolB().forEach(b => bag.push([a, b])));
-  poolM().forEach(h => { if (!(poolA().includes(h) && poolB().includes(h))) bag.push([h, h]); });   // no duplicates
+  if (mirrorOn()) poolM().forEach(h => bag.push([h, h]));
+  else poolA().forEach(a => poolB().forEach(b => bag.push([a, b])));
   for (let i = bag.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
   if (bag.length > 1 && bag[bag.length - 1].join('>') === lastKey) bag.unshift(bag.pop());
 }
@@ -1461,17 +1479,18 @@ document.querySelectorAll('.sortseg').forEach(seg => seg.addEventListener('click
 }));
 
 /* ---------------- home ---------------- */
-const poolUnion = () => Array.from(new Set(poolA().concat(poolB(), poolM())));
+const poolUnion = () => mirrorOn() ? poolM().slice() : Array.from(new Set(poolA().concat(poolB())));
 function renderHome(){
   const A = poolA(), B = poolB();
   poolFacesStart(poolUnion());
   const n = k => k + (k === 1 ? ' hero' : ' heroes');
   const same = A.length === B.length && A.every(id => B.includes(id));
-  $('#poolTxt').textContent = same ? (A.length === ALL.length ? 'All 45 heroes' : n(A.length))
+  $('#poolTxt').textContent = mirrorOn() ? 'Mirror: ' + n(poolM().length)
+    : same ? (A.length === ALL.length ? 'All 45 heroes' : n(A.length))
     : A.length + ' vs ' + B.length;                        // opener pool vs responder pool
   $('#credit').textContent = 'Created by Gad Freund (Rnamon) · Version ' + APP_VERSION;
   $('#goRandom').disabled = !poolOk();
-  $('#randomSub').textContent = poolOk() ? 'Random from your pool' : 'Add heroes to the pool first';
+  $('#randomSub').textContent = poolOk() ? (mirrorOn() ? 'Mirror matches only' : 'Random from your pool') : 'Add heroes to the pool first';
   // the Choose banner shows the last two heroes picked
   const two = [prefs.pick[0] || 'pale-lady', prefs.pick[1] || 'gunslinger'];
   $('#chooseArt').innerHTML = two.map(id => '<span style="--c:' + SET_COLOR[H[id].set] + '"><img src="' + artSrc(id) + '" alt="" onerror="this.remove()"></span>').join('');
@@ -1557,30 +1576,36 @@ $('#openPool').addEventListener('click', () => go('pool'));
 /* ---------------- random pool ---------------- */
 let poolSide = 'a';
 function renderPool(){
-  const tabs = $('#sideSeg');
-  tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === poolSide)));
-  tabs.classList.toggle('lean-l', poolSide !== 'a');      // opener leans right, the others lean left
+  const tabs = $('#sideSeg'), mir = mirrorOn();
+  tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(!mir && b.dataset.side === poolSide)));
+  tabs.classList.toggle('lean-l', poolSide === 'b');      // opener leans right, responder leans left
+  tabs.classList.toggle('dim', mir);                      // Mirror only: the two tabs don't apply
+  $('#mirrorOnly').setAttribute('aria-checked', String(mir));
   syncSegs($('#pool'));
-  const list = prefs.pool[poolSide];
+  const list = prefs.pool[mir ? 'm' : poolSide];
   $('#poolCount').innerHTML = list.length + '<small> / 45</small>';
   $('#poolGrid').innerHTML = gridHTML(id => list.includes(id) ? 'on' : 'off', list);
   $('#poolFight').disabled = !poolOk();
-  $('#poolFightSub').textContent = poolOk() ? 'From this pool' : 'Add heroes to the pool first';
+  $('#poolFightSub').textContent = poolOk() ? (mir ? 'Mirror matches only' : 'From this pool') : 'Add heroes to the pool first';
 }
 function poolChanged(){ resetBag(); save(); renderPool(); }
 $('#pool').addEventListener('click', e => {
   const t = e.target.closest('.tile'), sh = e.target.closest('.sethead[data-set]');
   const sd = e.target.closest('[data-side]'), all = e.target.closest('[data-all]');
-  const list = prefs.pool[poolSide];
+  const mir = mirrorOn(), key = mir ? 'm' : poolSide, list = prefs.pool[key];
+  if (e.target.closest('#mirrorOnly')){ prefs.mirrorOnly = mir ? '0' : '1'; return poolChanged(); }
+  if (sd && mir){                                     // the tabs are switched off: the Mirror button shakes to say why
+    const mb = $('#mirrorOnly'); mb.classList.remove('shake'); void mb.offsetWidth; mb.classList.add('shake'); return;
+  }
   if (t){ const i = list.indexOf(t.dataset.id); i < 0 ? list.push(t.dataset.id) : list.splice(i, 1); return poolChanged(); }
   if (sh){
     const ids = HEROES.filter(h => h.set === sh.dataset.set).map(h => h.id);
     const full = ids.every(id => list.includes(id));
-    prefs.pool[poolSide] = full ? list.filter(id => !ids.includes(id)) : Array.from(new Set(list.concat(ids)));
+    prefs.pool[key] = full ? list.filter(id => !ids.includes(id)) : Array.from(new Set(list.concat(ids)));
     return poolChanged();
   }
   if (sd){ poolSide = sd.dataset.side; return renderPool(); }
-  if (all){ prefs.pool[poolSide] = all.dataset.all === '1' ? ALL.slice() : []; return poolChanged(); }
+  if (all){ prefs.pool[key] = all.dataset.all === '1' ? ALL.slice() : []; return poolChanged(); }
 });
 $('#poolFight').addEventListener('click', () => { if (!poolOk()) return; goFull(); startFight(nextPair(), 'random'); });
 
