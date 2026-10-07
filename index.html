@@ -5,6 +5,9 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.10 Home: the Pool row shows three rotating faces again (four cut the text short:
+       "All 45 her...")
+
   1.9  Pool: a third tab, Mirror. Heroes ticked there get their mirror match (hero vs
        the same hero) added to the random draw. Untick everyone in Opener and Responder
        to fight mirror matches only. No grit speckle on the Choose Heroes screen either
@@ -814,7 +817,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.9';
+const APP_VERSION = '1.10';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -1474,9 +1477,9 @@ function renderHome(){
   $('#chooseArt').innerHTML = two.map(id => '<span style="--c:' + SET_COLOR[H[id].set] + '"><img src="' + artSrc(id) + '" alt="" onerror="this.remove()"></span>').join('');
   homeBackground();
 }
-/* up to four faces. A bigger pool holds them for a while, then swaps them
+/* up to three faces (a fourth squeezed the "All 45 heroes" text). A bigger pool holds them for a while, then swaps them
    one at a time, left to right, each fading out and the next fading in. */
-const FACES = 4;
+const FACES = 3;
 let facesT = null, facesGen = 0;
 function poolFacesStart(ids){
   clearTimeout(facesT); facesGen++;
