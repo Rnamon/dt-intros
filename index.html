@@ -5,6 +5,9 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.6  Hero pictures re-saved as lossy WebP (quality 80): 24.6 MB -> 2.8 MB for the
+       48 art files, same look, much faster on a weak signal
+
   1.5  Smooth fight changes. Each fight's pictures (hero art and logos, 4 files)
        are now loaded before anything is shown, then art and logos appear
        together (before, the logo could change first and the art a moment
@@ -798,7 +801,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.5';
+const APP_VERSION = '1.6';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
