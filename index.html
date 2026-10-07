@@ -5,6 +5,10 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.9  Pool: a third tab, Mirror. Heroes ticked there get their mirror match (hero vs
+       the same hero) added to the random draw. Untick everyone in Opener and Responder
+       to fight mirror matches only. No grit speckle on the Choose Heroes screen either
+
   1.8  No grit/grain speckle over the pictures in a fight (it stays on the other screens)
 
   1.7  Balloons: line breaks are fixed once when the balloon is made (the lines the
@@ -371,8 +375,8 @@ button:disabled{cursor:default}
 /* grit: fine speckle over everything */
 #app::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:35;opacity:.42;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.4 -.55'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")}
-/* no speckle over the fight: the art stays clean */
-#app:has(#fight:not([hidden]))::after{display:none}
+/* no speckle over the fight or the hero choice: the art stays clean */
+#app:has(#fight:not([hidden]))::after,#app:has(#choose:not([hidden]))::after{display:none}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;
   background:radial-gradient(ellipse at 30% 20%,rgba(80,100,140,.18),transparent 60%),radial-gradient(ellipse at 80% 90%,rgba(0,0,0,.45),transparent 60%),var(--night)}
 .screen::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 45%,rgba(0,0,0,.5) 100%)}
@@ -526,9 +530,9 @@ button:disabled{cursor:default}
 .pool .foot{grid-area:fight;padding:6px 22px max(16px,env(safe-area-inset-bottom,0px))}
 #poolFight{height:84px;--fs:40px;max-width:520px;margin:0 auto}
 /* opener and responder: both tabs lean toward the side being edited */
-.ptabs{display:flex;gap:12px;padding:4px 22px 6px;--sk:var(--tilt)}
+.ptabs{display:flex;gap:10px;padding:4px 22px 6px;--sk:var(--tilt)}
 .ptabs.lean-l{--sk:var(--untilt)}
-.ptab{position:relative;flex:1;display:grid;place-items:center;height:44px;padding:0 22px;isolation:isolate;
+.ptab{position:relative;flex:1;display:grid;place-items:center;height:44px;padding:0 6px;isolation:isolate;
   font-weight:600;font-size:18px;text-transform:uppercase;letter-spacing:.5px;color:#C9D3EA;white-space:nowrap}
 .ptab::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:7px;transform:skewX(var(--sk));transition:transform .25s ease;
   background:var(--slate-face);border:2px solid var(--edge);box-shadow:0 4px 0 var(--edge)}
@@ -694,7 +698,7 @@ button:disabled{cursor:default}
   <section id="pool" class="screen pool" hidden>
     <header class="bar"><button class="sbtn" data-back>Back</button>
       <h2>Pool</h2><span class="sp"></span><span class="count" id="poolCount"></span></header>
-    <div class="ptabs" id="sideSeg"><button class="ptab" data-side="a">Opener</button><button class="ptab" data-side="b">Responder</button></div>
+    <div class="ptabs" id="sideSeg"><button class="ptab" data-side="a">Opener</button><button class="ptab" data-side="b">Responder</button><button class="ptab" data-side="m">Mirror</button></div>
     <div class="tools"><div class="seg sortseg"><button data-sort="abc">A–Z</button><button data-sort="set">By set</button></div>
       <span class="sp"></span><span class="allgrp"><button class="sbtn sm" data-all="1">All</button><button class="sbtn sm" data-all="0">None</button></span></div>
     <div class="scroll"><div class="grid-wrap" id="poolGrid"></div></div>
@@ -810,7 +814,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.8';
+const APP_VERSION = '1.9';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -852,7 +856,7 @@ const artSrc = (id, form) => 'art/' + id + (form && !FORM_STYLE[form] ? '' : for
 /* ---------------- settings ---------------- */
 const prefs = { speed:'normal', anim:'on', auto:'off', bg:'heroes', full:'on', zone:'0', order:'abc',
   talk:'special', hideTip:'0',
-  pool:{ a:ALL.slice(), b:ALL.slice() }, pick:[null, null] };
+  pool:{ a:ALL.slice(), b:ALL.slice(), m:[] }, pick:[null, null] };
 try {
   const p = JSON.parse(localStorage.getItem('dti-app') || '{}');
   Object.assign(prefs, p, { pool: Object.assign(prefs.pool, p.pool || {}) });
@@ -866,6 +870,7 @@ if (prefs.bg === 'plain') prefs.bg = 'none';
 if (!['special','mixed','generic'].includes(prefs.talk)) prefs.talk = 'special';
 if (prefs.hideTip !== '1') prefs.hideTip = '0';
 ['a','b'].forEach(k => prefs.pool[k] = (prefs.pool[k] || ALL.slice()).filter(id => H[id]));
+prefs.pool.m = (prefs.pool.m || []).filter(id => H[id]);
 const save = () => { try { localStorage.setItem('dti-app', JSON.stringify(prefs)); } catch (e) {} };
 const SPEED = { slow:1.5, normal:1, fast:.6 };
 const mul = () => SPEED[prefs.speed] || 1;
@@ -1346,10 +1351,12 @@ class Stage {
 let bag = [], lastKey = '';
 const poolA = () => prefs.pool.a;
 const poolB = () => prefs.pool.b;
-const poolOk = () => poolA().length > 0 && poolB().length > 0;
+const poolM = () => prefs.pool.m;          // heroes whose mirror match is in the pool
+const poolOk = () => (poolA().length > 0 && poolB().length > 0) || poolM().length > 0;
 function fillBag(){
   if (bag.length) return;
   poolA().forEach(a => poolB().forEach(b => bag.push([a, b])));
+  poolM().forEach(h => { if (!(poolA().includes(h) && poolB().includes(h))) bag.push([h, h]); });   // no duplicates
   for (let i = bag.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
   if (bag.length > 1 && bag[bag.length - 1].join('>') === lastKey) bag.unshift(bag.pop());
 }
@@ -1451,7 +1458,7 @@ document.querySelectorAll('.sortseg').forEach(seg => seg.addEventListener('click
 }));
 
 /* ---------------- home ---------------- */
-const poolUnion = () => Array.from(new Set(poolA().concat(poolB())));
+const poolUnion = () => Array.from(new Set(poolA().concat(poolB(), poolM())));
 function renderHome(){
   const A = poolA(), B = poolB();
   poolFacesStart(poolUnion());
@@ -1549,13 +1556,13 @@ let poolSide = 'a';
 function renderPool(){
   const tabs = $('#sideSeg');
   tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.side === poolSide)));
-  tabs.classList.toggle('lean-l', poolSide === 'b');      // opener leans right, responder leans left
+  tabs.classList.toggle('lean-l', poolSide !== 'a');      // opener leans right, the others lean left
   syncSegs($('#pool'));
   const list = prefs.pool[poolSide];
   $('#poolCount').innerHTML = list.length + '<small> / 45</small>';
   $('#poolGrid').innerHTML = gridHTML(id => list.includes(id) ? 'on' : 'off', list);
   $('#poolFight').disabled = !poolOk();
-  $('#poolFightSub').textContent = poolOk() ? 'From this pool' : 'Each pool needs a hero';
+  $('#poolFightSub').textContent = poolOk() ? 'From this pool' : 'Add heroes to the pool first';
 }
 function poolChanged(){ resetBag(); save(); renderPool(); }
 $('#pool').addEventListener('click', e => {
