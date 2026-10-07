@@ -5,6 +5,15 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.5  Smooth fight changes. Each fight's pictures (hero art and logos, 4 files)
+       are now loaded before anything is shown, then art and logos appear
+       together (before, the logo could change first and the art a moment
+       later). The next random pair downloads while the current one talks.
+       Pictures are kept in their own cache that survives new versions (before,
+       every new version emptied it, so everything was downloaded again), and
+       are re-checked once per session instead of on every showing. The app
+       quietly stores all hero pictures when idle (not on mobile data)
+
   1.4  Balloons hug their text: a balloon whose wrapped lines are much shorter
        than its box (short lines, lots of empty space) is cut down to the longest
        line; the pause between the opener and the responder is shorter (0.4-0.8 s
@@ -789,7 +798,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.4';
+const APP_VERSION = '1.5';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -1011,24 +1020,81 @@ function drawBalloon(b){
    two logos placed the same way can look unevenly spaced. Each logo is
    cropped to its visible part once (and remembered), then placed. */
 const TRIMMED = {};
-function trimLogo(img){
+function trimOf(img){
   const src = img.currentSrc || img.src;
-  if (src.startsWith('data:')) return;
-  if (TRIMMED[src]){ if (TRIMMED[src] !== src) img.src = TRIMMED[src]; return; }
+  if (src.startsWith('data:')) return src;
+  if (src in TRIMMED) return TRIMMED[src];
   TRIMMED[src] = src;
   try {
-    const w = img.naturalWidth, h = img.naturalHeight; if (!w || !h) return;
+    const w = img.naturalWidth, h = img.naturalHeight; if (!w || !h) return src;
     const c = document.createElement('canvas'); c.width = w; c.height = h;
     const x = c.getContext('2d'); x.drawImage(img, 0, 0);
     const d = x.getImageData(0, 0, w, h).data;
     let x0 = w, y0 = h, x1 = -1, y1 = -1;
     for (let y = 0; y < h; y++) for (let i = 0; i < w; i++) if (d[(y * w + i) * 4 + 3] > 20){
       if (i < x0) x0 = i; if (i > x1) x1 = i; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-    if (x1 < 0 || (x0 < 3 && y0 < 3 && x1 > w - 4 && y1 > h - 4)) return;
+    if (x1 < 0 || (x0 < 3 && y0 < 3 && x1 > w - 4 && y1 > h - 4)) return src;
     const o = document.createElement('canvas'); o.width = x1 - x0 + 1; o.height = y1 - y0 + 1;
     o.getContext('2d').drawImage(c, -x0, -y0);
-    TRIMMED[src] = o.toDataURL(); img.src = TRIMMED[src];
+    TRIMMED[src] = o.toDataURL();
   } catch (e) {}
+  return TRIMMED[src];
+}
+function trimLogo(img){
+  const src = img.currentSrc || img.src;
+  if (src.startsWith('data:')) return;
+  const t = trimOf(img);
+  if (t !== src) img.src = t;
+}
+
+/* ---------- pictures are loaded before a fight shows them ----------
+   A fight needs two hero pictures and two logos. They are all fetched (and
+   decoded, the logos trimmed) first, then put on screen together, so the art
+   and the logos change at the same moment instead of one after the other.
+   While a random fight is on, the next pair is already being fetched. */
+const IMGS = {}, IMGOK = {}, KEEP = [];
+let busy = 0;                                  // fights waiting for pictures: background downloads pause
+function loadImg(url){
+  if (url in IMGS) return IMGS[url];
+  return IMGS[url] = new Promise(res => {
+    const im = new Image();
+    im.onload = async () => {
+      try { await im.decode(); } catch (e) {}
+      if (url.startsWith('logos/')) trimOf(im);
+      IMGOK[url] = true; KEEP.push(im); if (KEEP.length > 16) KEEP.shift();
+      res(true);
+    };
+    im.onerror = () => { IMGOK[url] = false; delete IMGS[url]; res(false); };   // missing now: try again next time
+    im.src = url;
+  });
+}
+const logoUrl = id => 'logos/' + id + '.png';
+async function readyFor(ids, forms){
+  const urls = [];
+  ids.forEach((id, i) => { urls.push(artSrc(id), logoUrl(id)); if (forms[i]) urls.push(artSrc(id, forms[i])); });
+  busy++;
+  try { await Promise.race([Promise.all(urls.map(loadImg)), sleep(5000)]); }   // on a very weak signal, go on after 5 s
+  finally { busy--; }
+}
+function warmNext(){
+  const p = peekPair(); if (!p) return;
+  p.forEach(id => { loadImg(artSrc(id)); loadImg(logoUrl(id)); });
+}
+/* Once the app has been open a while, quietly store every hero picture so
+   later fights never wait for the network. One at a time, paused while a
+   fight is loading, skipped on mobile data or Data Saver. */
+async function warmAll(){
+  const c = navigator.connection;
+  if (!navigator.onLine || (c && (c.saveData || c.type === 'cellular'))) return;
+  const urls = [];
+  HEROES.forEach(h => urls.push(artSrc(h.id), logoUrl(h.id)));
+  ['pale-lady-werewolf','druid-bear','druid-cat','jean-grey-phoenix','cursed-pirate-cursed'].forEach(n => urls.push('art/' + n + '.webp'));
+  for (const u of urls){
+    while (busy || document.hidden) await sleep(1500);
+    try { if (await caches.match(u)) continue; } catch (e) { return; }
+    try { await fetch(u); } catch (e) {}
+    await sleep(250);
+  }
 }
 
 /* ---------------- the fight ---------------- */
@@ -1089,12 +1155,15 @@ class Stage {
       h.classList.remove('morph');
       h.style.setProperty('--c', SET_COLOR[hero.set]); h.querySelector('.bg').dataset.ini = initials(hero.name);
       art.dataset.base = artSrc(id);
-      if (art.dataset.src !== art.dataset.base){ art.src = art.dataset.src = art.dataset.base; }
+      if (IMGOK[art.dataset.base] === false){ h.classList.add('noart'); art.dataset.src = art.dataset.base; }   // no art for them yet
+      else if (art.dataset.src !== art.dataset.base){ art.src = art.dataset.src = art.dataset.base; }
       art.alt = hero.name;
       name.textContent = hero.name;
       logo.onload = () => { logo.hidden = false; name.hidden = true; trimLogo(logo); };
       logo.onerror = () => { logo.hidden = true; name.hidden = false; };
-      logo.src = 'logos/' + id + '.png'; logo.alt = hero.name;
+      logo.alt = hero.name;
+      if (IMGOK[logoUrl(id)] === false){ logo.hidden = true; name.hidden = false; }          // no logo yet: the name stands in
+      else logo.src = TRIMMED[new URL(logoUrl(id), document.baseURI).href] || logoUrl(id);   // already trimmed when it was loaded
     });
   }
   /* swap the art to a form, with a flash */
@@ -1196,9 +1265,13 @@ class Stage {
       this.lastMirror[key] = i; lines = lines[i];
     }
     const who = this.pair;
-    this.load(who);
-    lines.forEach((side, s) => side.forEach(p => { if (p.form && FORM_STYLE[p.form]) new Image().src = artSrc(who[s], p.form); }));
     const heroes = [this.el.querySelector('.hero.a'), this.el.querySelector('.hero.b')];
+    heroes.forEach(h => h.querySelector('.speech').innerHTML = '');      // the last fight's balloons go at once
+    await readyFor(who, lines.map(l => l[0].form));                       // pictures first, then everything appears together
+    if (id !== this.run) return;
+    this.load(who);
+    lines.forEach((side, s) => side.forEach(p => { if (p.form && FORM_STYLE[p.form]) loadImg(artSrc(who[s], p.form)); }));
+    if (this.mode === 'random') warmNext();                              // the next pair downloads while this one talks
     // a hero enters in the form of their first line (Pale Lady can open as the wolf)
     heroes.forEach((h, s) => this.setForm(h, who[s], lines[s][0].form, true));
     heroes.forEach(h => h.querySelector('.speech').innerHTML = '');
@@ -1231,14 +1304,14 @@ let bag = [], lastKey = '';
 const poolA = () => prefs.pool.a;
 const poolB = () => prefs.pool.b;
 const poolOk = () => poolA().length > 0 && poolB().length > 0;
-function nextPair(){
-  if (!bag.length){
-    poolA().forEach(a => poolB().forEach(b => bag.push([a, b])));
-    for (let i = bag.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
-    if (bag.length > 1 && bag[bag.length - 1].join('>') === lastKey) bag.unshift(bag.pop());
-  }
-  const p = bag.pop(); lastKey = p.join('>'); return p;
+function fillBag(){
+  if (bag.length) return;
+  poolA().forEach(a => poolB().forEach(b => bag.push([a, b])));
+  for (let i = bag.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+  if (bag.length > 1 && bag[bag.length - 1].join('>') === lastKey) bag.unshift(bag.pop());
 }
+function nextPair(){ fillBag(); const p = bag.pop(); lastKey = p.join('>'); return p; }
+const peekPair = () => poolOk() ? (fillBag(), bag[bag.length - 1]) : null;     // the pair Next will bring
 const resetBag = () => { bag = []; };
 
 /* ---------------- screens and the Back button ---------------- */
@@ -1563,6 +1636,7 @@ if (swOk){
     }).catch(() => {});
   });
 }
+if (swOk) addEventListener('load', () => setTimeout(warmAll, 8000));
 async function checkUpdate(){
   const btn = $('#updBtn');
   if (!swOk) return toast('Updates work once the app is online');
