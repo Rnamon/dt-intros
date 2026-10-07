@@ -5,6 +5,8 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.8  No grit/grain speckle over the pictures in a fight (it stays on the other screens)
+
   1.7  Balloons: line breaks are fixed once when the balloon is made (the lines the
        browser chose are written in and wrapping is switched off), so a balloon is
        always exactly as wide as its longest line and can't re-wrap into short
@@ -369,6 +371,8 @@ button:disabled{cursor:default}
 /* grit: fine speckle over everything */
 #app::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:35;opacity:.42;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.4 -.55'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")}
+/* no speckle over the fight: the art stays clean */
+#app:has(#fight:not([hidden]))::after{display:none}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;
   background:radial-gradient(ellipse at 30% 20%,rgba(80,100,140,.18),transparent 60%),radial-gradient(ellipse at 80% 90%,rgba(0,0,0,.45),transparent 60%),var(--night)}
 .screen::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 45%,rgba(0,0,0,.5) 100%)}
@@ -806,7 +810,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.7';
+const APP_VERSION = '1.8';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;

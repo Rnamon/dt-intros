@@ -5,7 +5,7 @@
  * app is opened (or right away with Settings → Check for updates), and the
  * number shows in Settings.
  */
-const VERSION = '1.7';   // must match APP_VERSION in index.html; what changed is listed at the top of index.html
+const VERSION = '1.8';   // must match APP_VERSION in index.html; what changed is listed at the top of index.html
 
 const CACHE = 'dti-' + VERSION;
 /* the hero pictures and logos have a cache of their own that is NOT emptied
