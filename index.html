@@ -5,6 +5,11 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.7  Balloons: line breaks are fixed once when the balloon is made (the lines the
+       browser chose are written in and wrapping is switched off), so a balloon is
+       always exactly as wide as its longest line and can't re-wrap into short
+       lines inside a wide box while the text is typed
+
   1.6  Hero pictures re-saved as lossy WebP (quality 80): 24.6 MB -> 2.8 MB for the
        48 art files, same look, much faster on a weak signal
 
@@ -801,7 +806,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.6';
+const APP_VERSION = '1.7';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -999,8 +1004,38 @@ function tightenBalloon(b){
 const fontReady = (font, text) => Promise.race([
   document.fonts ? document.fonts.load(font, text || 'Aa').catch(() => 0) : Promise.resolve(),
   new Promise(res => setTimeout(res, 1500))]);
+/* Fixes the line breaks. The balloon is first fitted and wrapped by the browser
+   (balanced), then the lines it chose are written into the text as real line breaks
+   and wrapping is switched off, so the box is exactly as wide as its longest line and
+   can never re-wrap differently while the text is typed (that re-wrap is what left
+   short lines in a wide box). b.dataset.laid holds the text with its line breaks;
+   it keeps the same length as the plain text (a space becomes a line break). */
+function layoutBalloon(b){
+  const a = b.querySelector('.shown'), z = b.querySelector('.rest'), text = b.dataset.text;
+  const n = a.textContent.length;
+  b.style.whiteSpace = ''; b.style.width = '';
+  a.textContent = ''; z.textContent = text;
+  fitBalloon(b);
+  const node = z.firstChild; let laid = text;
+  if (node){
+    const r = document.createRange(), arr = [...text];
+    let top = null, out = '';
+    for (let i = 0; i < arr.length; i++){
+      if (arr[i] === ' '){ out += ' '; continue; }
+      r.setStart(node, i); r.setEnd(node, i + 1);
+      const q = r.getClientRects()[0]; if (!q){ out += arr[i]; continue; }
+      if (top !== null && q.top > top + 3 && out.endsWith(' ')) out = out.slice(0, -1) + '\n';
+      top = top === null ? q.top : Math.max(top, q.top);
+      out += arr[i];
+    }
+    laid = out;
+  }
+  b.dataset.laid = laid;
+  a.textContent = laid.slice(0, n); z.textContent = laid.slice(n);
+  b.style.whiteSpace = 'pre'; b.style.width = '';
+}
 function refitBalloons(){
-  document.querySelectorAll('.balloon').forEach(b => { fitBalloon(b); drawBalloon(b); });
+  document.querySelectorAll('.balloon').forEach(b => { if (b.dataset.text) layoutBalloon(b); drawBalloon(b); });
 }
 if (document.fonts){
   ['700 20px "Comic Neue"','20px Bangers','20px "Pirata One"','20px "Patrick Hand"','500 20px Alegreya','20px "Permanent Marker"','20px "Luckiest Guy"']
@@ -1218,14 +1253,14 @@ class Stage {
     b.innerHTML = '<svg class="shape" aria-hidden="true"></svg><span class="shown"></span><span class="rest"></span>';
     box.appendChild(b);
     const shown = b.querySelector('.shown'), rest = b.querySelector('.rest'), text = p.text;
-    rest.textContent = text;                 // reserves the full size, so the balloon never jumps
+    b.dataset.text = text; rest.textContent = text;   // reserves the full size, so the balloon never jumps
     await fontReady(getComputedStyle(b).font, text);   // measure in the real font
     if (id !== this.run){ b.remove(); return; }
-    fitBalloon(b);
+    layoutBalloon(b);
     this.ro.observe(b); drawBalloon(b);
     void b.offsetWidth; b.classList.add('on');
     if (fx){                                 // a transformation lands all at once, with a shake
-      shown.textContent = text; rest.textContent = '';
+      shown.textContent = b.dataset.laid; rest.textContent = '';
       const sh = this.el.querySelector('.shell');
       sh.classList.remove('hit'); void sh.offsetWidth; sh.classList.add('hit');
       return;
@@ -1234,9 +1269,10 @@ class Stage {
     const tick = 28 * mul();
     for (let i = 1; i <= text.length; i++){
       if (id !== this.run) return;
-      if (this.skip === id){ shown.textContent = text; rest.textContent = ''; return; }
-      shown.textContent = text.slice(0, i); rest.textContent = text.slice(i);
-      await sleep(text[i-1] === ' ' ? tick / 2 : tick);
+      const laid = b.dataset.laid;           // re-read: a late font can re-lay the balloon
+      if (this.skip === id){ shown.textContent = laid; rest.textContent = ''; return; }
+      shown.textContent = laid.slice(0, i); rest.textContent = laid.slice(i);
+      await sleep(laid[i-1] === ' ' || laid[i-1] === '\n' ? tick / 2 : tick);
     }
   }
   async wait(ms, id){
