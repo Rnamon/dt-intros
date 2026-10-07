@@ -5,6 +5,11 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.13 Sideways: Home column a bit narrower; in Pool the Opener / Responder tabs sit
+       right beside FIGHT, the Mirror switch is at the right end of the row and
+       All / None follow A-Z / By set with a gap, and FIGHT ends exactly level with
+       the bottom of that row
+
   1.12 Pool: the Mirror switch sits under FIGHT (sideways: in the All / None row, so
        there is no big empty gap); FIGHT keeps "From this pool" and Home keeps
        "Random from your pool" in mirror mode; the sideways Home column is wider so
@@ -466,7 +471,7 @@ button:disabled{cursor:default}
 /* Choose, the pool and Fight lean as one block, so all their edges line up
    on the same slant; what's inside them is stood back up */
 .modes{position:absolute;z-index:2;right:max(22px,env(safe-area-inset-right,0px));bottom:max(14px,env(safe-area-inset-bottom,0px));
-  width:min(44cqw,470px);display:flex;flex-direction:column;gap:clamp(10px,5cqh,24px);transform:skewX(var(--tilt));--own:0deg}
+  width:min(40cqw,430px);display:flex;flex-direction:column;gap:clamp(10px,5cqh,24px);transform:skewX(var(--tilt));--own:0deg}
 /* Choose: a gold banner with two heroes on its left */
 .gban{display:flex;align-items:stretch;width:100%;height:clamp(56px,19cqh,80px);border-radius:10px;overflow:hidden;text-align:left;
   background:var(--gold-face);border:2.5px solid var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),0 5px 0 #6B3404,0 8px 12px rgba(0,0,0,.45)}
@@ -562,21 +567,24 @@ button:disabled{cursor:default}
 .ptab[aria-pressed="true"]{color:#fff;text-shadow:0 2px 0 #9A4A06}
 .ptab[aria-pressed="true"]::before{background:var(--gold-face);border-color:var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #6B3404}
 @container app (orientation:landscape){
-  .pool{grid-template-columns:max-content minmax(0,1fr) auto;grid-template-rows:auto auto minmax(0,1fr);
+  .pool{grid-template-columns:max-content minmax(0,1fr) calc(clamp(150px,24cqw,210px) + max(22px,env(safe-area-inset-right,0px)));grid-template-rows:auto auto minmax(0,1fr);
     grid-template-areas:"bar tabs fight" "tools tools fight" "scroll scroll scroll"}
   .pool .tools{display:flex;align-items:center;align-self:center;margin:0 0 6px;padding:0 14px 0 max(20px,env(safe-area-inset-left,0px))}
-  .pool .tools .sp{display:block;flex:1;order:1}
-  .pool .tools [data-all]{order:2;margin-left:9px}
+  .pool .tools .sp{display:block;flex:1;order:2}                 /* A-Z, By set  |  All, None  ...  Mirror only */
+  .pool .tools [data-all]{order:1;margin-left:9px}
+  .pool .tools [data-all="1"]{margin-left:clamp(8px,3.6cqw,34px)}
+  .pool .tools .mirrorbtn{order:3;margin:0}
   .pool .allgrp{display:contents}      /* its buttons join the row: A-Z, By set, Mirror only ... All, None */
-  .pool .sortseg{margin:0 12px 0 0}
+  .pool .sortseg{margin:0}
   .pool .bar .sp{display:none}
   .pool .count{min-width:104px}   /* fixed width: "0 / 45" and "45 / 45" must not shift the buttons */
-  .pool .ptabs{align-self:start;justify-self:center;padding:max(12px,env(safe-area-inset-top,0px)) 10px 4px}
+  .pool .ptabs{align-self:start;justify-self:end;padding:max(12px,env(safe-area-inset-top,0px)) 14px 4px 10px}   /* right beside Fight */
   .ptab{flex:none;width:clamp(80px,12cqw,150px);padding:0 6px;font-size:15px}
   .mirrorbtn:not(.in-tools){display:none}      /* sideways: the switch sits in the All / None row instead, so the Fight column stays short */
   .mirrorbtn.in-tools{display:inline-flex;width:auto;max-width:none;margin:0 10px 0 0;height:36px;padding:0 13px;font-size:15px}
-  .pool .foot{padding:max(12px,env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) 8px 0}
-  #poolFight{width:clamp(150px,24cqw,210px);height:clamp(84px,27cqh,104px);--fs:clamp(30px,10cqh,40px)}
+  /* the Fight button spans the two rows and ends exactly where the buttons of the second row end (its bottom gap equals the tools row's bottom margin); it is positioned inside the foot, so it doesn't make the rows taller */
+  .pool .foot{grid-row:1 / 3;position:relative;padding:0}
+  #poolFight{position:absolute;left:0;top:max(12px,env(safe-area-inset-top,0px));bottom:6px;width:clamp(150px,24cqw,210px);height:auto;--fs:clamp(30px,10cqh,40px)}
   #poolFight .strip span{font-size:13px}
   .pool .scroll{padding:0 max(22px,env(safe-area-inset-right,0px)) 16px max(22px,env(safe-area-inset-left,0px))}
   .grid{grid-template-columns:repeat(auto-fill,minmax(62px,1fr))}
@@ -841,7 +849,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.12';
+const APP_VERSION = '1.13';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -1493,7 +1501,7 @@ function renderHome(){
   poolFacesStart(poolUnion());
   const n = k => k + (k === 1 ? ' hero' : ' heroes');
   const same = A.length === B.length && A.every(id => B.includes(id));
-  $('#poolTxt').textContent = mirrorOn() ? 'Mirror: ' + n(poolM().length)
+  $('#poolTxt').textContent = mirrorOn() ? 'Mirror: ' + poolM().length
     : same ? (A.length === ALL.length ? 'All 45 heroes' : n(A.length))
     : A.length + ' vs ' + B.length;                        // opener pool vs responder pool
   $('#credit').textContent = 'Created by Gad Freund (Rnamon) · Version ' + APP_VERSION;
