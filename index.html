@@ -5,6 +5,8 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.15 Settings: About colors (gold roles, white bold developer name); Text size (small/normal/large) under Text speed;
+       Auto-play delay (short/normal/long); the screen stays awake while auto-play runs.
   1.14 Settings: two tabs, Display (everything that was under Fight, plus the menu
        background) and About; a selected tab is just gold, with no notch or arrow;
        Full screen and Art safe zone settings removed (full screen stays on); About
@@ -199,7 +201,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 button:disabled{cursor:default}
 :focus-visible{outline:3px solid var(--gold-hi);outline-offset:3px}
 [hidden]{display:none!important}
-#app{position:relative;overflow:hidden}
+#app{position:relative;overflow:hidden;overflow:clip}
 
 /* lettering: Patrick Hand is the house voice; a few fixed voices go to the
    heroes they suit. --k evens out how big each face looks. */
@@ -275,7 +277,7 @@ button:disabled{cursor:default}
 /* speech: each part of a line is its own balloon, stacked in reading order.
    The tail sits on the balloon nearest the speaker. */
 .speech{position:absolute;z-index:2;display:flex;flex-direction:column;gap:.7em;max-width:90%;pointer-events:none;
-  font-size:clamp(16px,5.4cqmin,40px)}
+  font-size:calc(clamp(16px,5.4cqmin,40px) * var(--ts,1))}
 .hero.a .speech{top:5%;left:5%;align-items:flex-start}
 .hero.b .speech{bottom:5%;right:5%;align-items:flex-end}
 .balloon{position:relative;isolation:isolate;padding:.5em .95em .55em;color:var(--ink);text-align:center;text-wrap:balance;
@@ -663,16 +665,19 @@ button:disabled{cursor:default}
 .pane{display:flex;flex-direction:column;max-width:620px}
 .srow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px 0;border-bottom:1.5px solid rgba(52,64,94,.6)}
 .srow .lab{flex:1;min-width:160px}
+.srow .seg{flex-wrap:wrap;max-width:100%}
+.panes{overflow-x:hidden}
 .srow b{display:block;font-weight:600;font-size:21px;color:#C3CDE4}
 .srow small{display:block;font-size:14px;font-weight:600;color:#7D89A6;line-height:1.2;margin-top:2px}
 #talkNote{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .about{padding:16px 0 8px;font-size:16px;color:var(--mist);line-height:1.45}
 .about h3{margin:18px 0 6px;font-family:var(--head);font-weight:400;font-size:22px;color:#fff;letter-spacing:.3px}
 .about dl{margin:0;display:grid;gap:8px}
-.about dt{font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.8px;color:#7D89A6}
+.about dt{font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--blaze)}
 .about dd{margin:0;color:var(--mist)}
 .about .fine{font-size:14px;color:#9AA6C2}
 .about b{color:#fff}
+.about .dev{color:var(--blaze)}
 .about p{margin:0 0 8px}
 .setfoot{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:12px max(22px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(22px,env(safe-area-inset-left,0px));
@@ -788,18 +793,22 @@ button:disabled{cursor:default}
             <div class="seg" data-pref="talk"><button data-v="special">Special</button><button data-v="mixed">Special + generic</button><button data-v="generic">Generic</button></div></div>
           <div class="srow"><div class="lab"><b>Text speed</b></div>
             <div class="seg" data-pref="speed"><button data-v="slow">Slow</button><button data-v="normal">Normal</button><button data-v="fast">Fast</button></div></div>
+          <div class="srow"><div class="lab"><b>Text size</b><small>Size of the speech balloons</small></div>
+            <div class="seg" data-pref="tsize"><button data-v="small">Small</button><button data-v="normal">Normal</button><button data-v="large">Large</button></div></div>
           <div class="srow"><div class="lab"><b>Animations</b><small>Heroes pushing in, the VS slam, screen shake, transformation flashes</small></div>
             <button class="tog" role="switch" data-tog="anim" data-on="on" data-off="off" aria-label="Animations"></button></div>
           <div class="srow"><div class="lab"><b>Auto-play</b><small>In random fights, the next fight rolls a few seconds after one ends</small></div>
             <button class="tog" role="switch" data-tog="auto" data-on="on" data-off="off" aria-label="Auto-play"></button></div>
+          <div class="srow"><div class="lab"><b>Auto-play delay</b><small>Pause before the next fight. The screen stays awake during auto-play</small></div>
+            <div class="seg" data-pref="autoGap"><button data-v="short">Short</button><button data-v="normal">Normal</button><button data-v="long">Long</button></div></div>
           <div class="srow"><div class="lab"><b>Menu background</b><small>Heroes: one from your pool behind the home screen, changing every few seconds</small></div>
             <div class="seg" data-pref="bg"><button data-v="none">None</button><button data-v="heroes">Heroes</button><button data-v="custom" disabled title="Coming soon">Custom</button></div></div>
         </div>
         <div class="pane" data-pane="about" hidden>
-          <div class="srow"><div class="lab"><b id="aboutVer">Version</b><small>Updates install themselves when you open the app. Impatient? Check now.</small></div>
+          <div class="srow"><div class="lab"><b id="aboutVer">Version</b><small>Updates install themselves when you open the app.</small></div>
             <button class="sbtn sm" id="updBtn">Check for updates</button></div>
           <div class="about">
-            <p><b>Dice Throne Intros</b><br>App developed by Gad Freund (Rnamon)</p>
+            <p><b>Dice Throne Intros</b><br><span class="dev">App developed by</span> <b>Gad Freund (Rnamon)</b></p>
             <p class="fine">Unofficial pre-fight dialogues for all Dice Throne heroes. Non-commercial and made purely out of love for the game. Not affiliated with or endorsed by Roxley Games. Dice Throne and all related names belong to their respective owners.</p>
             <h3>Dice Throne</h3>
             <dl>
@@ -863,7 +872,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.14';
+const APP_VERSION = '1.15';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -904,7 +913,7 @@ const artSrc = (id, form) => 'art/' + id + (form && !FORM_STYLE[form] ? '' : for
 
 /* ---------------- settings ---------------- */
 const prefs = { speed:'normal', anim:'on', auto:'off', bg:'heroes', full:'on', zone:'0', order:'abc',
-  talk:'special', hideTip:'0',
+  talk:'special', hideTip:'0', tsize:'normal', autoGap:'normal',
   pool:{ a:ALL.slice(), b:ALL.slice(), m:ALL.slice() }, mirrorOnly:'0', pick:[null, null] };
 try {
   const p = JSON.parse(localStorage.getItem('dti-app') || '{}');
@@ -918,6 +927,8 @@ if (prefs.bg === 'art') prefs.bg = 'heroes';
 if (prefs.bg === 'plain') prefs.bg = 'none';
 if (!['special','mixed','generic'].includes(prefs.talk)) prefs.talk = 'special';
 if (prefs.hideTip !== '1') prefs.hideTip = '0';
+if (!['small','normal','large'].includes(prefs.tsize)) prefs.tsize = 'normal';
+if (!['short','normal','long'].includes(prefs.autoGap)) prefs.autoGap = 'normal';
 prefs.full = 'on'; prefs.zone = '0';          // their settings are gone: full screen stays on, the art guide stays off
 ['a','b'].forEach(k => prefs.pool[k] = (prefs.pool[k] || ALL.slice()).filter(id => H[id]));
 prefs.pool.m = (prefs.pool.m || ALL.slice()).filter(id => H[id]);
@@ -1286,7 +1297,8 @@ class Stage {
   }
   scheduleAuto(){
     if (this.mode !== 'random' || prefs.auto !== 'on' || current !== 'fight' || openedSheet) return;
-    const ms = 4000 * mul(), btn = this.el.querySelector('.rbtn.main');
+    syncWake();
+    const ms = ({short:2200, normal:4000, long:7000}[prefs.autoGap] || 4000), btn = this.el.querySelector('.rbtn.main');
     btn.style.setProperty('--t', ms + 'ms');
     btn.classList.remove('counting'); void btn.offsetWidth; btn.classList.add('counting');
     this.autoT = setTimeout(() => { btn.classList.remove('counting'); this.pair = nextPair(); this.play(); }, ms);
@@ -1677,7 +1689,7 @@ $('#pickGrid').addEventListener('click', e => {
 });
 
 /* ---------------- settings ---------------- */
-const DEFAULTS = { speed:'normal', anim:'on', auto:'off', bg:'heroes', full:'on', zone:'0', talk:'special', hideTip:'0' };
+const DEFAULTS = { speed:'normal', anim:'on', auto:'off', bg:'heroes', full:'on', zone:'0', talk:'special', hideTip:'0', tsize:'normal', autoGap:'normal' };
 let setTab = 'fight';
 function renderSettings(){
   document.querySelectorAll('#settings [data-pref]').forEach(seg => seg.querySelectorAll('button').forEach(b =>
@@ -1701,7 +1713,21 @@ $('#settings').addEventListener('click', e => {
   else if (!tg && !b) return;
   save(); renderSettings(); applyPrefs();
 });
+/* keep the screen awake while auto-play is running on the fight screen */
+let wake = null;
+function syncWake(){
+  const want = prefs.auto === 'on' && current === 'fight' && !document.hidden;
+  if (want && !wake && 'wakeLock' in navigator){
+    wake = 'pending';
+    navigator.wakeLock.request('screen').then(l => { wake = l; l.addEventListener('release', () => { if (wake === l) wake = null; }); if (!(prefs.auto === 'on' && current === 'fight')) syncWake(); }).catch(() => { wake = null; });
+  } else if (!want && wake && wake !== 'pending'){ const l = wake; wake = null; l.release().catch(() => {}); }
+}
+document.addEventListener('visibilitychange', syncWake);
+setInterval(syncWake, 3000);
 function applyPrefs(){
+  app.style.setProperty('--ts', { small:.88, normal:1, large:1.15 }[prefs.tsize] || 1);
+  syncWake();
+  if (typeof refitBalloons === 'function') refitBalloons();
   app.classList.toggle('still', prefs.anim === 'off');
   if (stage) stage.zones();
   if (current === 'home') renderHome();
