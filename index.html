@@ -5,6 +5,11 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.14 Settings: two tabs, Display (everything that was under Fight, plus the menu
+       background) and About; a selected tab is just gold, with no notch or arrow;
+       Full screen and Art safe zone settings removed (full screen stays on); About
+       shows the version name and the credits
+
   1.13 Sideways: Home column a bit narrower; in Pool the Opener / Responder tabs sit
        right beside FIGHT, the Mirror switch is at the right end of the row and
        All / None follow A-Z / By set with a gap, and FIGHT ends exactly level with
@@ -653,7 +658,7 @@ button:disabled{cursor:default}
 .stab::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:6px;transform:skewX(var(--tilt));background:var(--slate-face);border:2px solid var(--edge);box-shadow:0 4px 0 var(--edge)}
 .stab[aria-selected="true"]{text-shadow:0 2px 0 #9A4A06}
 .stab[aria-selected="true"]::before{background:var(--gold-face);border-color:var(--brown);box-shadow:none;
-  clip-path:polygon(0 0,100% 0,100% 84%,56% 84%,50% 100%,44% 84%,0 84%)}
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #6B3404}
 .panes{flex:1;min-height:0;overflow:auto;padding:4px 22px 90px}
 .pane{display:flex;flex-direction:column;max-width:620px}
 .srow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px 0;border-bottom:1.5px solid rgba(52,64,94,.6)}
@@ -662,6 +667,11 @@ button:disabled{cursor:default}
 .srow small{display:block;font-size:14px;font-weight:600;color:#7D89A6;line-height:1.2;margin-top:2px}
 #talkNote{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .about{padding:16px 0 8px;font-size:16px;color:var(--mist);line-height:1.45}
+.about h3{margin:18px 0 6px;font-family:var(--head);font-weight:400;font-size:22px;color:#fff;letter-spacing:.3px}
+.about dl{margin:0;display:grid;gap:8px}
+.about dt{font-weight:700;font-size:12.5px;text-transform:uppercase;letter-spacing:.8px;color:#7D89A6}
+.about dd{margin:0;color:var(--mist)}
+.about .fine{font-size:14px;color:#9AA6C2}
 .about b{color:#fff}
 .about p{margin:0 0 8px}
 .setfoot{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -672,8 +682,6 @@ button:disabled{cursor:default}
   .setbody{flex-direction:row;gap:0}
   .stabs{flex-direction:column;gap:14px;padding:14px 0 0 max(28px,env(safe-area-inset-left,0px));width:250px;flex:none}
   .stab{flex:none;width:178px;height:48px;font-size:20px}
-  .stab[aria-selected="true"]{width:196px;margin-left:22px}
-  .stab[aria-selected="true"]::before{clip-path:polygon(0 0,90% 0,100% 50%,90% 100%,0 100%);border-radius:6px 0 0 6px}
   .panes{padding:0 max(36px,env(safe-area-inset-right,0px)) 80px 20px}
 }
 
@@ -771,8 +779,7 @@ button:disabled{cursor:default}
     <header class="bar"><button class="sbtn" data-back>Back</button><h2>Settings</h2></header>
     <div class="setbody">
       <div class="stabs" role="tablist" id="setTabs">
-        <button class="stab" role="tab" data-tab="fight">Fight</button>
-        <button class="stab" role="tab" data-tab="display">Display</button>
+        <button class="stab" role="tab" data-tab="fight">Display</button>
         <button class="stab" role="tab" data-tab="about">About</button>
       </div>
       <div class="panes">
@@ -785,22 +792,29 @@ button:disabled{cursor:default}
             <button class="tog" role="switch" data-tog="anim" data-on="on" data-off="off" aria-label="Animations"></button></div>
           <div class="srow"><div class="lab"><b>Auto-play</b><small>In random fights, the next fight rolls a few seconds after one ends</small></div>
             <button class="tog" role="switch" data-tog="auto" data-on="on" data-off="off" aria-label="Auto-play"></button></div>
-        </div>
-        <div class="pane" data-pane="display" hidden>
           <div class="srow"><div class="lab"><b>Menu background</b><small>Heroes: one from your pool behind the home screen, changing every few seconds</small></div>
             <div class="seg" data-pref="bg"><button data-v="none">None</button><button data-v="heroes">Heroes</button><button data-v="custom" disabled title="Coming soon">Custom</button></div></div>
-          <div class="srow"><div class="lab"><b>Full screen</b><small>Hides the phone's status and navigation bars, like a game (Android). On iPhone, add the app to your home screen instead.</small></div>
-            <button class="tog" role="switch" data-tog="full" data-on="on" data-off="off" aria-label="Full screen"></button></div>
-          <div class="srow"><div class="lab"><b>Art safe zone</b><small>For preparing hero art: shows where faces must sit on the fight screen</small></div>
-            <button class="tog" role="switch" data-tog="zone" data-on="1" data-off="0" aria-label="Art safe zone"></button></div>
         </div>
         <div class="pane" data-pane="about" hidden>
-          <div class="srow"><div class="lab"><b>Updates</b><small>Updates install themselves when you open the app. Impatient? Check now.</small></div>
+          <div class="srow"><div class="lab"><b id="aboutVer">Version</b><small>Updates install themselves when you open the app. Impatient? Check now.</small></div>
             <button class="sbtn sm" id="updBtn">Check for updates</button></div>
           <div class="about">
-            <p><b>Dice Throne Intros</b></p>
-            <p>Pre-fight dialogues for all 45 Dice Throne heroes. Made by Gad.</p>
-            <p>Dice Throne is a game by Roxley Games. This is an unofficial fan project.</p>
+            <p><b>Dice Throne Intros</b><br>App developed by Gad Freund (Rnamon)</p>
+            <p class="fine">Unofficial pre-fight dialogues for all Dice Throne heroes. Non-commercial and made purely out of love for the game. Not affiliated with or endorsed by Roxley Games. Dice Throne and all related names belong to their respective owners.</p>
+            <h3>Dice Throne</h3>
+            <dl>
+              <div><dt>Game design</dt><dd>Nate Chatellier, Manny Trembley, Gavan Brown</dd></div>
+              <div><dt>Game development</dt><dd>Nate Chatellier, John Heidrich</dd></div>
+              <div><dt>Graphic design</dt><dd>Gavan Brown, Gui Landgraf, Britt Anderson, Nick Malara</dd></div>
+              <div><dt>Illustration</dt><dd>Manny Trembley, Nick Malara, Britt Anderson</dd></div>
+              <div><dt>Operations</dt><dd>Aaron Waltmann, Jeff Beal</dd></div>
+              <div><dt>Community Development Director</dt><dd>Jonathan Herrera-Thomas</dd></div>
+              <div><dt>Media and Marketing</dt><dd>Josh Vett</dd></div>
+              <div><dt>Trays &amp; Storage</dt><dd>TrayForge, GameTrayz</dd></div>
+              <div><dt>Main rulebook editors</dt><dd>John Heidrich and many others who helped</dd></div>
+              <div><dt>Playtesters</dt><dd>John Heidrich, Noah Burke, Jonathan Westfall, Heather Hash, Michael Hash, Nick Lem, Kevin Heidrich, Christopher Peterson, Jacob Adams, Rex Edward Custorio, Grace Galayda, Rick May, Chris Petkidis, Patrick Woodward, Cam Roberts, Josh Hou, Derick Gilkeson, Dustin Millican, Devin Elie, Drake Finney, Eric Bouma, Kasey Schertenleib, Dino Pathoummahong, David Jacobson, Daniel Dar, Luke Pinyerd, Corey Cook, Todd Daniels, Justin Nguyen, Ryan Muehlberg, Brandt Arganbright, Danny Jacobson, Tomer Rosenbaum, Jeffrey Jacobson, Ashton Jacobson, Veronica Elie, Dylan Chin, Liam Fairley, Sammi Roberts, Sarah Slyman and the rest of the beta team.</dd></div>
+            </dl>
+            <p class="fine" style="margin-top:12px">For Hero specific credits, see Hero Leaflets.</p>
           </div>
         </div>
       </div>
@@ -849,7 +863,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.13';
+const APP_VERSION = '1.14';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -904,6 +918,7 @@ if (prefs.bg === 'art') prefs.bg = 'heroes';
 if (prefs.bg === 'plain') prefs.bg = 'none';
 if (!['special','mixed','generic'].includes(prefs.talk)) prefs.talk = 'special';
 if (prefs.hideTip !== '1') prefs.hideTip = '0';
+prefs.full = 'on'; prefs.zone = '0';          // their settings are gone: full screen stays on, the art guide stays off
 ['a','b'].forEach(k => prefs.pool[k] = (prefs.pool[k] || ALL.slice()).filter(id => H[id]));
 prefs.pool.m = (prefs.pool.m || ALL.slice()).filter(id => H[id]);
 if (prefs.mirrorOnly !== '1') prefs.mirrorOnly = '0';
@@ -1670,7 +1685,7 @@ function renderSettings(){
   document.querySelectorAll('#settings [data-tog]').forEach(t => t.setAttribute('aria-checked', String(prefs[t.dataset.tog] === t.dataset.on)));
   document.querySelectorAll('#setTabs .stab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === setTab)));
   document.querySelectorAll('#settings .pane').forEach(p => p.hidden = p.dataset.pane !== setTab);
-  $('#verNum').textContent = 'Version ' + (swVersion || APP_VERSION);
+  $('#verNum').textContent = $('#aboutVer').textContent = 'Version ' + (swVersion || APP_VERSION);
   $('#talkNote').textContent = prefs.talk === 'generic' ? 'Generic lines for every hero · Mirror always special'
     : prefs.talk === 'mixed' ? 'Custom and generic lines · Mirror always special'
     : 'Custom lines for every pair of heroes';
@@ -1701,7 +1716,7 @@ function showVersion(){
   const ctl = swOk && navigator.serviceWorker.controller;
   if (!ctl) return;
   const ch = new MessageChannel();
-  ch.port1.onmessage = e => { swVersion = e.data; $('#verNum').textContent = 'Version ' + e.data; };
+  ch.port1.onmessage = e => { swVersion = e.data; $('#verNum').textContent = $('#aboutVer').textContent = 'Version ' + e.data; };
   ctl.postMessage('version', [ch.port2]);
 }
 const takeOver = sw => { if (sw) sw.postMessage('skipWaiting'); return !!sw; };
