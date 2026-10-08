@@ -7,6 +7,9 @@
 
   1.15 Settings: About colors (gold roles, white bold developer name); Text size (small/normal/large) under Text speed;
        Auto-play delay (short/normal/long); the screen stays awake while auto-play runs.
+  1.19 Roars (Werewolf, Bear, Cat) are a plain burst with no pointer; the colored square beside the set names is gone; changed hero pictures
+       are now re-checked in the background as soon as a new version is installed.
+
   1.18 Balloon styles per hero from data/hero-styles.json (made from the hand-filled Excel): font, ALL CAPS and line color for every hero and for the
        Werewolf / Bear / Cat forms; Deadpool, Dark Phoenix and the cursed form keep their own look. druid.webp recompressed (675KB to 127KB).
 
@@ -533,7 +536,6 @@ button:disabled{cursor:default}
 .tools .sp{flex:1}
 .grid-wrap{max-width:1200px;margin:0 auto}
 .sethead{display:flex;align-items:center;gap:10px;width:100%;padding:14px 4px 6px;text-align:left;border-bottom:2px solid var(--line)}
-.sethead .sw{width:12px;height:12px;border-radius:3px;background:var(--c);flex:none}
 .sethead b{flex:1;font-family:var(--head);font-weight:400;font-size:19px;letter-spacing:.4px}
 .sethead .n{font-size:15px;font-weight:600;color:var(--mist);font-variant-numeric:tabular-nums}
 .sethead .tog2{font-size:14px;font-weight:700;color:var(--blaze);letter-spacing:.4px;text-transform:uppercase;min-width:60px;text-align:right}
@@ -884,7 +886,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.18';
+const APP_VERSION = '1.19';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -1340,7 +1342,7 @@ class Stage {
     const b = document.createElement('div');
     b.className = 'balloon' + (kind ? ' ' + (kind === 'pool' ? 'wade' : kind) : '') + (fx ? ' fx' : '') + (voice ? ' v-' + voice : '');
     if (kind) b.dataset.kind = kind;
-    b.dataset.tail = '1';
+    b.dataset.tail = fx === 'shout' ? '0' : '1';      // a roar is a plain burst: no pointer
     if (st){                                 // the hero's own row in data/hero-styles.json
       b.style.setProperty('--line', st.line);
       if (fx) { if (st.font !== 'F04') b.style.setProperty('--shout', fontStack(st.font)); }
@@ -1532,9 +1534,9 @@ function gridHTML(cls, withHeads){
     if (set){
       const on = withHeads ? list.filter(h => withHeads.includes(h.id)).length : 0;
       head = withHeads
-        ? '<button class="sethead" data-set="' + set + '" style="--c:' + SET_COLOR[set] + '"><span class="sw"></span><b>' + set + '</b>' +
+        ? '<button class="sethead" data-set="' + set + '" style="--c:' + SET_COLOR[set] + '"><b>' + set + '</b>' +
           '<span class="n">' + on + '/' + list.length + '</span><span class="tog2">' + (on === list.length ? 'Remove' : 'Add all') + '</span></button>'
-        : '<div class="sethead" style="--c:' + SET_COLOR[set] + '"><span class="sw"></span><b>' + set + '</b></div>';
+        : '<div class="sethead" style="--c:' + SET_COLOR[set] + '"><b>' + set + '</b></div>';
     }
     return head + '<div class="grid">' + list.map(h => cardHTML(h, cls(h.id))).join('') + '</div>';
   }).join('');

@@ -5,7 +5,7 @@
  * app is opened (or right away with Settings → Check for updates), and the
  * number shows in Settings.
  */
-const VERSION = '1.18';   // must match APP_VERSION in index.html; what changed is listed at the top of index.html
+const VERSION = '1.19';   // must match APP_VERSION in index.html; what changed is listed at the top of index.html
 
 const CACHE = 'dti-' + VERSION;
 /* the hero pictures and logos have a cache of their own that is NOT emptied
@@ -52,6 +52,14 @@ self.addEventListener('activate', e => {
       await caches.delete(k);
     }
     await self.clients.claim();
+    /* pictures that were replaced on the server: a conditional request per stored picture
+       (a few bytes when nothing changed, the new file when it did), so the change shows on the next view */
+    try {
+      for (const req of await img.keys()) {
+        checked.add(req.url);
+        try { const res = await fetch(req.url, { cache: 'no-cache' }); if (res.ok) await img.put(req, res); } catch (err) {}
+      }
+    } catch (err) {}
   })());
 });
 
