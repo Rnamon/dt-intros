@@ -7,6 +7,9 @@
 
   1.15 Settings: About colors (gold roles, white bold developer name); Text size (small/normal/large) under Text speed;
        Auto-play delay (short/normal/long); the screen stays awake while auto-play runs.
+  1.18 Balloon styles per hero from data/hero-styles.json (made from the hand-filled Excel): font, ALL CAPS and line color for every hero and for the
+       Werewolf / Bear / Cat forms; Deadpool, Dark Phoenix and the cursed form keep their own look. druid.webp recompressed (675KB to 127KB).
+
   1.17 Dialogues: the Rogue mirror conversation and Doctor Strange > Rogue conversation replaced with new lines.
 
   1.16 Settings: no divider lines inside the speed/size and auto-play groups, fewer captions; About title as big as the credits heading.
@@ -881,7 +884,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.17';
+const APP_VERSION = '1.18';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -958,6 +961,13 @@ let DATA = null, GENERIC = null;
 const dataReady = fetch('data/dice-throne-dialogues.json').then(r => r.json()).then(d => { DATA = d; }).catch(() => {});
 /* the generic lines: per hero, openers and responses that work against anyone.
    If the file can't be loaded, fights simply use the special lines. */
+/* per-hero balloon style (font, ALL CAPS, line color), built from the hand-filled table by tools/build-hero-styles.py;
+   without it the app falls back to the built-in HERO_VOICE / HERO_LINE above */
+let STYLES = null;
+const stylesReady = fetch('data/hero-styles.json').then(r => r.json()).then(d => { STYLES = d; }).catch(() => {});
+const FONT_K = { F02:.92, F03:.96 };             // evens out how big each face looks
+const styleOf = (id, form) => { const h = STYLES && STYLES.heroes[id]; return h ? (form ? h.forms && h.forms[form] : h) || null : null; };
+const fontStack = fid => { const f = STYLES.fonts[fid]; return '"' + f.family + '","Comic Sans MS",system-ui,sans-serif'; };
 const genericReady = fetch('data/dice-throne-generic-lines.json').then(r => r.json()).then(d => { GENERIC = d; }).catch(() => {});
 /* Which kind of fight is this? Special or generic, decided once per fight and
    never mixed. A mirror match is always special. */
@@ -1325,15 +1335,24 @@ class Stage {
     if (p.form) this.setForm(hero, speaker, p.form);
     const fx = FORM_STYLE[p.form];          // shout, phoenix, cursed, or a normal balloon
     const kind = fx || (speaker === 'deadpool' ? 'pool' : '');
-    const voice = !fx && kind !== 'pool' ? voiceOf(speaker) : '';
+    const st = kind === 'pool' || fx === 'phoenix' || fx === 'cursed' ? null : styleOf(speaker, fx ? p.form : null);
+    const voice = !fx && kind !== 'pool' && !st ? voiceOf(speaker) : '';
     const b = document.createElement('div');
     b.className = 'balloon' + (kind ? ' ' + (kind === 'pool' ? 'wade' : kind) : '') + (fx ? ' fx' : '') + (voice ? ' v-' + voice : '');
     if (kind) b.dataset.kind = kind;
     b.dataset.tail = '1';
-    if (!fx && kind !== 'pool') b.style.setProperty('--line', lineColor(speaker));
+    if (st){                                 // the hero's own row in data/hero-styles.json
+      b.style.setProperty('--line', st.line);
+      if (fx) { if (st.font !== 'F04') b.style.setProperty('--shout', fontStack(st.font)); }
+      else {
+        b.style.setProperty('--say', fontStack(st.font));
+        b.style.setProperty('--sayw', STYLES.fonts[st.font].weight || 400);
+        b.style.setProperty('--k', FONT_K[st.font] || 1);
+      }
+    } else if (!fx && kind !== 'pool') b.style.setProperty('--line', lineColor(speaker));
     b.innerHTML = '<svg class="shape" aria-hidden="true"></svg><span class="shown"></span><span class="rest"></span>';
     box.appendChild(b);
-    const shown = b.querySelector('.shown'), rest = b.querySelector('.rest'), text = p.text;
+    const shown = b.querySelector('.shown'), rest = b.querySelector('.rest'), text = st && st.caps ? p.text.toUpperCase() : p.text;
     b.dataset.text = text; rest.textContent = text;   // reserves the full size, so the balloon never jumps
     await fontReady(getComputedStyle(b).font, text);   // measure in the real font
     if (id !== this.run){ b.remove(); return; }
@@ -1370,7 +1389,7 @@ class Stage {
   }
   async play(){
     const id = ++this.run; this.skip = -1; this.cancelAuto(); this.done = false; this.el.dataset.lean = '';
-    await Promise.all([dataReady, genericReady]);
+    await Promise.all([dataReady, genericReady, stylesReady]);
     if (id !== this.run) return;
     const key = this.pair.join('>');
     let lines = null;

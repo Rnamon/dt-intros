@@ -1,0 +1,401 @@
+{
+ "fonts": {
+  "F01": {
+   "family": "Patrick Hand",
+   "weight": 400
+  },
+  "F02": {
+   "family": "Alegreya",
+   "weight": 500
+  },
+  "F03": {
+   "family": "Permanent Marker",
+   "weight": 400
+  },
+  "F04": {
+   "family": "Bangers",
+   "weight": 400
+  },
+  "F05": {
+   "family": "Pirata One",
+   "weight": 400
+  },
+  "F06": {
+   "family": "Comic Neue",
+   "weight": 700
+  },
+  "F07": {
+   "family": "Luckiest Guy",
+   "weight": 400
+  },
+  "F08": {
+   "family": "Lilita One",
+   "weight": 400
+  },
+  "F09": {
+   "family": "Kalam",
+   "weight": 700
+  },
+  "F10": {
+   "family": "Caveat Brush",
+   "weight": 400
+  },
+  "F11": {
+   "family": "Gochi Hand",
+   "weight": 400
+  },
+  "F12": {
+   "family": "Gloria Hallelujah",
+   "weight": 400
+  },
+  "F13": {
+   "family": "Architects Daughter",
+   "weight": 400
+  },
+  "F14": {
+   "family": "Short Stack",
+   "weight": 400
+  },
+  "F15": {
+   "family": "Boogaloo",
+   "weight": 400
+  },
+  "F16": {
+   "family": "Bubblegum Sans",
+   "weight": 400
+  },
+  "F17": {
+   "family": "Chewy",
+   "weight": 400
+  },
+  "F18": {
+   "family": "Londrina Solid",
+   "weight": 400
+  },
+  "F19": {
+   "family": "Sedgwick Ave Display",
+   "weight": 400
+  },
+  "F20": {
+   "family": "Titan One",
+   "weight": 400
+  },
+  "F21": {
+   "family": "Anton",
+   "weight": 400
+  },
+  "F22": {
+   "family": "Bebas Neue",
+   "weight": 400
+  },
+  "F23": {
+   "family": "Oswald",
+   "weight": 600
+  },
+  "F24": {
+   "family": "Barlow Condensed",
+   "weight": 700
+  },
+  "F25": {
+   "family": "Russo One",
+   "weight": 400
+  },
+  "F26": {
+   "family": "Cinzel",
+   "weight": 700
+  },
+  "F27": {
+   "family": "MedievalSharp",
+   "weight": 400
+  },
+  "F28": {
+   "family": "Metamorphous",
+   "weight": 400
+  },
+  "F29": {
+   "family": "Uncial Antiqua",
+   "weight": 400
+  },
+  "F30": {
+   "family": "Almendra",
+   "weight": 400
+  },
+  "F31": {
+   "family": "Macondo",
+   "weight": 400
+  },
+  "F32": {
+   "family": "Cormorant Garamond",
+   "weight": 600
+  },
+  "F33": {
+   "family": "Playfair Display",
+   "weight": 700
+  },
+  "F34": {
+   "family": "Marcellus",
+   "weight": 400
+  },
+  "F35": {
+   "family": "Creepster",
+   "weight": 400
+  },
+  "F36": {
+   "family": "Eater",
+   "weight": 400
+  },
+  "F37": {
+   "family": "Butcherman",
+   "weight": 400
+  },
+  "F38": {
+   "family": "Special Elite",
+   "weight": 400
+  },
+  "F39": {
+   "family": "Rock Salt",
+   "weight": 400
+  }
+ },
+ "heroes": {
+  "barbarian": {
+   "font": "F03",
+   "caps": true,
+   "line": "#d60021"
+  },
+  "monk": {
+   "font": "F01",
+   "caps": false,
+   "line": "#e1dbd5"
+  },
+  "moon-elf": {
+   "font": "F02",
+   "caps": false,
+   "line": "#609fb9"
+  },
+  "ninja": {
+   "font": "F01",
+   "caps": false,
+   "line": "#4b5c4b"
+  },
+  "paladin": {
+   "font": "F02",
+   "caps": false,
+   "line": "#f8c851"
+  },
+  "pyromancer": {
+   "font": "F01",
+   "caps": false,
+   "line": "#ffa114"
+  },
+  "shadow-thief": {
+   "font": "F01",
+   "caps": false,
+   "line": "#54974d"
+  },
+  "treant": {
+   "font": "F02",
+   "caps": false,
+   "line": "#906a3d"
+  },
+  "artificer": {
+   "font": "F02",
+   "caps": false,
+   "line": "#375b8b"
+  },
+  "cursed-pirate": {
+   "font": "F01",
+   "caps": false,
+   "line": "#862d47"
+  },
+  "gunslinger": {
+   "font": "F01",
+   "caps": false,
+   "line": "#357fce"
+  },
+  "huntress": {
+   "font": "F01",
+   "caps": false,
+   "line": "#425d35"
+  },
+  "samurai": {
+   "font": "F02",
+   "caps": false,
+   "line": "#da8e60"
+  },
+  "seraph": {
+   "font": "F02",
+   "caps": false,
+   "line": "#ffd944"
+  },
+  "tactician": {
+   "font": "F02",
+   "caps": false,
+   "line": "#4f5975"
+  },
+  "vampire-lord": {
+   "font": "F02",
+   "caps": false,
+   "line": "#a30837"
+  },
+  "black-panther": {
+   "font": "F02",
+   "caps": false,
+   "line": "#291f38"
+  },
+  "black-widow": {
+   "font": "F01",
+   "caps": false,
+   "line": "#9f0f15"
+  },
+  "captain-marvel": {
+   "font": "F01",
+   "caps": false,
+   "line": "#fabd51"
+  },
+  "doctor-strange": {
+   "font": "F02",
+   "caps": false,
+   "line": "#fabd51"
+  },
+  "loki": {
+   "font": "F02",
+   "caps": false,
+   "line": "#4c7412"
+  },
+  "spider-man": {
+   "font": "F01",
+   "caps": false,
+   "line": "#840e27"
+  },
+  "scarlet-witch": {
+   "font": "F01",
+   "caps": false,
+   "line": "#a20307"
+  },
+  "thor": {
+   "font": "F02",
+   "caps": true,
+   "line": "#637f9a"
+  },
+  "cyclops": {
+   "font": "F01",
+   "caps": false,
+   "line": "#fbbd18"
+  },
+  "gambit": {
+   "font": "F01",
+   "caps": false,
+   "line": "#ff99ff"
+  },
+  "iceman": {
+   "font": "F01",
+   "caps": false,
+   "line": "#67f7ff"
+  },
+  "jean-grey": {
+   "font": "F01",
+   "caps": false,
+   "line": "#ffde1b"
+  },
+  "psylocke": {
+   "font": "F01",
+   "caps": false,
+   "line": "#46306b"
+  },
+  "rogue": {
+   "font": "F01",
+   "caps": false,
+   "line": "#2d5519"
+  },
+  "storm": {
+   "font": "F02",
+   "caps": false,
+   "line": "#ffce07"
+  },
+  "wolverine": {
+   "font": "F03",
+   "caps": false,
+   "line": "#ffaa1f"
+  },
+  "headless-horseman": {
+   "font": "F03",
+   "caps": false,
+   "line": "#ff8133"
+  },
+  "necromancer": {
+   "font": "F02",
+   "caps": false,
+   "line": "#625927"
+  },
+  "pale-lady": {
+   "font": "F02",
+   "caps": false,
+   "line": "#e8dde4",
+   "forms": {
+    "werewolf": {
+     "font": "F04",
+     "caps": true,
+     "line": "#50535b"
+    }
+   }
+  },
+  "raveness": {
+   "font": "F02",
+   "caps": false,
+   "line": "#112a2a"
+  },
+  "druid": {
+   "font": "F01",
+   "caps": false,
+   "line": "#4f5d18",
+   "forms": {
+    "bear": {
+     "font": "F04",
+     "caps": true,
+     "line": "#4f5d18"
+    },
+    "cat": {
+     "font": "F04",
+     "caps": true,
+     "line": "#4f5d18"
+    }
+   }
+  },
+  "duelist": {
+   "font": "F02",
+   "caps": false,
+   "line": "#8a73a7"
+  },
+  "forgemaster": {
+   "font": "F03",
+   "caps": false,
+   "line": "#495a52"
+  },
+  "sun-elf": {
+   "font": "F02",
+   "caps": false,
+   "line": "#ffae00"
+  },
+  "santa": {
+   "font": "F01",
+   "caps": false,
+   "line": "#b91e16"
+  },
+  "krampus": {
+   "font": "F03",
+   "caps": false,
+   "line": "#3e5e40"
+  },
+  "alchemist": {
+   "font": "F01",
+   "caps": false,
+   "line": "#d296e2"
+  },
+  "mystic-brawler": {
+   "font": "F01",
+   "caps": false,
+   "line": "#2ed397"
+  }
+ }
+}
