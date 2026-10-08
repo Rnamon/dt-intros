@@ -7,6 +7,9 @@
 
   1.15 Settings: About colors (gold roles, white bold developer name); Text size (small/normal/large) under Text speed;
        Auto-play delay (short/normal/long); the screen stays awake while auto-play runs.
+  1.16 Settings: no divider lines inside the speed/size and auto-play groups, fewer captions; About title as big as the credits heading.
+       Pool: Fight bottom lines up with the button row, equal gaps (A-Z/By set and All/None), None lines up with Responder, the Mirror checkbox leans right.
+       Grain now only over the big hero picture on the home screen (every other hero picture is clean).
   1.14 Settings: two tabs, Display (everything that was under Fight, plus the menu
        background) and About; a selected tab is just gold, with no notch or arrow;
        Full screen and Art safe zone settings removed (full screen stays on); About
@@ -397,11 +400,9 @@ button:disabled{cursor:default}
    Gritty slate ground, slanted slate buttons, gold for the main action
    and for whatever is selected, heavy white headings. */
 #app{container:app/size}
-/* grit: fine speckle over everything */
-#app::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:35;opacity:.42;mix-blend-mode:overlay;
+/* grit: fine speckle, only over the big hero picture behind the home screen */
+.home-bg::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.42;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.4 -.55'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")}
-/* no speckle over the fight or the hero choice: the art stays clean */
-#app:has(#fight:not([hidden]))::after,#app:has(#choose:not([hidden]))::after{display:none}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;
   background:radial-gradient(ellipse at 30% 20%,rgba(80,100,140,.18),transparent 60%),radial-gradient(ellipse at 80% 90%,rgba(0,0,0,.45),transparent 60%),var(--night)}
 .screen::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 45%,rgba(0,0,0,.5) 100%)}
@@ -523,7 +524,7 @@ button:disabled{cursor:default}
 }
 
 /* ---------- hero grids (pool and picker): small square cards ---------- */
-.tools{flex:none;display:flex;align-items:center;gap:8px;padding:6px max(18px,env(safe-area-inset-right,0px)) 12px max(18px,env(safe-area-inset-left,0px))}
+.tools{flex:none;display:flex;align-items:center;gap:8px;padding:6px max(22px,env(safe-area-inset-right,0px)) 12px max(22px,env(safe-area-inset-left,0px))}
 .tools .sp{flex:1}
 .grid-wrap{max-width:1200px;margin:0 auto}
 .sethead{display:flex;align-items:center;gap:10px;width:100%;padding:14px 4px 6px;text-align:left;border-bottom:2px solid var(--line)}
@@ -551,6 +552,7 @@ button:disabled{cursor:default}
 .pool .ptabs{grid-area:tabs}
 .pool .tools{grid-area:tools}
 .allgrp{display:flex;gap:9px}
+.pool .tools{gap:0}
 .pool .scroll{grid-area:scroll;-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 50px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 50px),transparent)}
 .pool .foot{grid-area:fight;display:flex;flex-direction:column;padding:6px 22px max(16px,env(safe-area-inset-bottom,0px))}
 #poolFight{height:84px;--fs:40px;max-width:520px;margin:0 auto}
@@ -564,7 +566,7 @@ button:disabled{cursor:default}
 .ptabs.dim .ptab{opacity:.35;filter:grayscale(1);cursor:not-allowed}
 .mirrorbtn{width:100%;max-width:520px;margin:12px auto 0;height:40px;font-size:16px}
 .mirrorbtn.in-tools{display:none}
-.mirrorbtn .box{display:inline-grid;place-items:center;width:20px;height:20px;border:2px solid #C9D3EA;border-radius:5px;transform:skewX(var(--untilt))}
+.mirrorbtn .box{display:inline-grid;place-items:center;width:20px;height:20px;border:2px solid #C9D3EA;border-radius:5px;transform:skewX(var(--tilt))}
 .mirrorbtn[aria-checked="true"] .box{background:#fff;border-color:#fff}
 .mirrorbtn[aria-checked="true"] .box::after{content:"";width:9px;height:5px;border-left:3px solid #9A4A06;border-bottom:3px solid #9A4A06;transform:rotate(-45deg) translate(1px,-1px)}
 .mirrorbtn[aria-checked="true"]::before{background:var(--gold-face);border-color:var(--brown);box-shadow:inset 0 2px 0 rgba(255,255,255,.5),0 4px 0 #6B3404,0 6px 10px rgba(0,0,0,.35)}
@@ -580,6 +582,7 @@ button:disabled{cursor:default}
   .pool .tools .sp{display:block;flex:1;order:2}                 /* A-Z, By set  |  All, None  ...  Mirror only */
   .pool .tools [data-all]{order:1;margin-left:9px}
   .pool .tools [data-all="1"]{margin-left:clamp(8px,3.6cqw,34px)}
+  .pool .tools .sortseg{margin-right:0}
   .pool .tools .mirrorbtn{order:3;margin:0}
   .pool .allgrp{display:contents}      /* its buttons join the row: A-Z, By set, Mirror only ... All, None */
   .pool .sortseg{margin:0}
@@ -666,6 +669,8 @@ button:disabled{cursor:default}
 .srow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:12px 0;border-bottom:1.5px solid rgba(52,64,94,.6)}
 .srow .lab{flex:1;min-width:160px}
 .srow .seg{flex-wrap:wrap;max-width:100%}
+.srow.nb{border-bottom:0;padding-bottom:0}
+.srow.nb + .srow{padding-top:6px}
 .panes{overflow-x:hidden}
 .srow b{display:block;font-weight:600;font-size:21px;color:#C3CDE4}
 .srow small{display:block;font-size:14px;font-weight:600;color:#7D89A6;line-height:1.2;margin-top:2px}
@@ -678,6 +683,7 @@ button:disabled{cursor:default}
 .about .fine{font-size:14px;color:#9AA6C2}
 .about b{color:#fff}
 .about .dev{color:var(--blaze)}
+.about .appname{margin-top:0}
 .about p{margin:0 0 8px}
 .setfoot{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:12px max(22px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(22px,env(safe-area-inset-left,0px));
@@ -791,24 +797,25 @@ button:disabled{cursor:default}
         <div class="pane" data-pane="fight">
           <div class="srow"><div class="lab"><b>Conversations</b><small id="talkNote"></small></div>
             <div class="seg" data-pref="talk"><button data-v="special">Special</button><button data-v="mixed">Special + generic</button><button data-v="generic">Generic</button></div></div>
-          <div class="srow"><div class="lab"><b>Text speed</b></div>
+          <div class="srow nb"><div class="lab"><b>Text speed</b></div>
             <div class="seg" data-pref="speed"><button data-v="slow">Slow</button><button data-v="normal">Normal</button><button data-v="fast">Fast</button></div></div>
-          <div class="srow"><div class="lab"><b>Text size</b><small>Size of the speech balloons</small></div>
+          <div class="srow"><div class="lab"><b>Text size</b></div>
             <div class="seg" data-pref="tsize"><button data-v="small">Small</button><button data-v="normal">Normal</button><button data-v="large">Large</button></div></div>
           <div class="srow"><div class="lab"><b>Animations</b><small>Heroes pushing in, the VS slam, screen shake, transformation flashes</small></div>
             <button class="tog" role="switch" data-tog="anim" data-on="on" data-off="off" aria-label="Animations"></button></div>
-          <div class="srow"><div class="lab"><b>Auto-play</b><small>In random fights, the next fight rolls a few seconds after one ends</small></div>
+          <div class="srow nb"><div class="lab"><b>Auto-play</b><small>In random fights, the next fight rolls a few seconds after one ends</small></div>
             <button class="tog" role="switch" data-tog="auto" data-on="on" data-off="off" aria-label="Auto-play"></button></div>
-          <div class="srow"><div class="lab"><b>Auto-play delay</b><small>Pause before the next fight. The screen stays awake during auto-play</small></div>
+          <div class="srow"><div class="lab"><b>Auto-play delay</b><small>Pause before the next fight</small></div>
             <div class="seg" data-pref="autoGap"><button data-v="short">Short</button><button data-v="normal">Normal</button><button data-v="long">Long</button></div></div>
-          <div class="srow"><div class="lab"><b>Menu background</b><small>Heroes: one from your pool behind the home screen, changing every few seconds</small></div>
+          <div class="srow"><div class="lab"><b>Menu background</b></div>
             <div class="seg" data-pref="bg"><button data-v="none">None</button><button data-v="heroes">Heroes</button><button data-v="custom" disabled title="Coming soon">Custom</button></div></div>
         </div>
         <div class="pane" data-pane="about" hidden>
           <div class="srow"><div class="lab"><b id="aboutVer">Version</b><small>Updates install themselves when you open the app.</small></div>
             <button class="sbtn sm" id="updBtn">Check for updates</button></div>
           <div class="about">
-            <p><b>Dice Throne Intros</b><br><span class="dev">App developed by</span> <b>Gad Freund (Rnamon)</b></p>
+            <h3 class="appname">Dice Throne Intros</h3>
+            <p><span class="dev">App developed by</span> <b>Gad Freund (Rnamon)</b></p>
             <p class="fine">Unofficial pre-fight dialogues for all Dice Throne heroes. Non-commercial and made purely out of love for the game. Not affiliated with or endorsed by Roxley Games. Dice Throne and all related names belong to their respective owners.</p>
             <h3>Dice Throne</h3>
             <dl>
@@ -872,7 +879,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.15';
+const APP_VERSION = '1.16';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
