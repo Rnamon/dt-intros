@@ -2065,12 +2065,12 @@
   "mystic-brawler>monk": [
     [
       {
-        "text": "Hit me as hard as you can, little brother!"
+        "text": "The sea, the sky, the mountain! I shout and they answer, little brother!"
       }
     ],
     [
       {
-        "text": "I know what you are. I will not."
+        "text": "I whisper. They answer too. Quietly."
       }
     ]
   ],
@@ -3088,12 +3088,12 @@
   "deadpool>mystic-brawler": [
     [
       {
-        "text": "Every hit I land comes back at me doubled? Who designed you, my ex?"
+        "text": "Big muscles, no shirt, and a Concussion token? You sure you're not Barbarian with paint on?"
       }
     ],
     [
       {
-        "text": "The sea, the sky, and the mountain, friend."
+        "text": "Beneath the sky, across the sea, and in the folds of the mountains, there is no other like me!"
       }
     ]
   ],
@@ -3105,7 +3105,7 @@
     ],
     [
       {
-        "text": "Do the mountains have finger guns? No? Then I win."
+        "text": "Mountains don't get a speaking role. I checked the script."
       }
     ]
   ],
@@ -8004,7 +8004,7 @@
     ],
     [
       {
-        "text": "The biggest! And every hit comes back twice, little sister!"
+        "text": "So is the mountain, little sister! Nobody has ever moved it!"
       }
     ]
   ],
@@ -8895,12 +8895,12 @@
   "mystic-brawler>pyromancer": [
     [
       {
-        "text": "Fire is sacred to my people, little sister."
+        "text": "The sea puts out fires, little sister! I've watched it swallow volcanoes!"
       }
     ],
     [
       {
-        "text": "Sacred? Me too! I worship it every single day!"
+        "text": "Ooh, a challenge! Then I'll just have to burn the sea!"
       }
     ]
   ],
@@ -9528,14 +9528,28 @@
   ],
   "storm>alchemist": [
     [
-      {
-        "text": "Your fumes poison the sky, chemist."
-      }
+      [
+        {
+          "text": "Your fumes poison the sky, chemist."
+        }
+      ],
+      [
+        {
+          "text": "That's ENTIRELY a side effect!"
+        }
+      ]
     ],
     [
-      {
-        "text": "That's ENTIRELY a side effect!"
-      }
+      [
+        {
+          "text": "Face the power of lightning, alchemist!"
+        }
+      ],
+      [
+        {
+          "text": "Oh, I'll just bottle it... I'll call it... a lightbulb!"
+        }
+      ]
     ]
   ],
   "alchemist>wolverine": [
@@ -9743,24 +9757,24 @@
   "alchemist>mystic-brawler": [
     [
       {
-        "text": "Every hit comes back stronger? That breaks at least three laws of nature!"
+        "text": "So mountain, sea and sky combine to make... you? How unexpected."
       }
     ],
     [
       {
-        "text": "My ancestors never heard of your laws, little sister!"
+        "text": "Unexpected, but magnificent! Write that down, little sister!"
       }
     ]
   ],
   "mystic-brawler>alchemist": [
     [
       {
-        "text": "Your bottles can't hurt me, little sister! The ocean protects me!"
+        "text": "What powers do YOU call on, little sister? Sea? Sky? Mountain?"
       }
     ],
     [
       {
-        "text": "Then I'll test the ocean first!"
+        "text": "Sulfur, mostly. And mercury! And something I can't pronounce yet!"
       }
     ]
   ],
@@ -10591,12 +10605,12 @@
   "mystic-brawler>paladin": [
     [
       {
-        "text": "Hit me as hard as you can, knight!"
+        "text": "The sea, the sky, the mountain! Which one does your god live in, knight?"
       }
     ],
     [
       {
-        "text": "Strike me, and it returns to you as well. We may be here a while."
+        "text": "All three. And in the man who stands before them."
       }
     ]
   ],
@@ -15092,12 +15106,12 @@
   "mystic-brawler>tactician": [
     [
       {
-        "text": "Hit me with everything you've got, general! It all comes back!"
+        "text": "I fight with the sea, the sky and the mountain! And you, general?"
       }
     ],
     [
       {
-        "text": "Everything is two hundred cannons. Let's see how much comes back."
+        "text": "A fleet, an air force and an army. You're outnumbered."
       }
     ]
   ],
@@ -18758,12 +18772,12 @@
   "krampus>mystic-brawler": [
     [
       {
-        "text": "Loud, proud, and never punished. You need my sack, islander."
+        "text": "Loud, proud, and never punished. I have a list for people like you, islander."
       }
     ],
     [
       {
-        "text": "Your sack couldn't hold my left arm, brother!"
+        "text": "A list? Brother, my name is carved into the mountains!"
       }
     ]
   ],
@@ -21464,12 +21478,12 @@
   "mystic-brawler>black-panther": [
     [
       {
-        "text": "Hit me, brother! Everything you give comes back double!"
+        "text": "The sky, the sea, the mountain! What does your land have, brother?"
       }
     ],
     [
       {
-        "text": "Mine as well. Then neither of us falls first."
+        "text": "Mountains, jungle, and a sky no stranger crosses unseen."
       }
     ]
   ],
@@ -22785,12 +22799,12 @@
   "mystic-brawler>storm": [
     [
       {
-        "text": "The sky is one of my powers too, sister! Let's share!"
+        "text": "The sky is one of my powers too, sister!"
       }
     ],
     [
       {
-        "text": "The sky does not share, brother. But it will make room for you."
+        "text": "The sky has one ruler, brother. There is no room for another."
       }
     ]
   ],
@@ -24185,11 +24199,11 @@
     [
       {
         "form": "jean",
-        "text": "Volcanoes sleep for years, Brawler. She—"
+        "text": "Volcanoes sleep for years, Brawler—"
       },
       {
         "form": "phoenix",
-        "text": "—NEVER SLEEPS."
+        "text": "—I AM ALWAYS BLAZING!"
       }
     ]
   ],
@@ -24268,12 +24282,12 @@
   "rogue>mystic-brawler": [
     [
       {
-        "text": "Heard you hit back harder every time you're hit. Me too, darlin'."
+        "text": "Sea, sky an' mountains? That's a lotta bragging, hon."
       }
     ],
     [
       {
-        "text": "Then this will be the longest fight in history, sister!"
+        "text": "Not bragging, sister! Just a list of my friends!"
       }
     ]
   ],
