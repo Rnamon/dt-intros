@@ -5,6 +5,8 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.21 Fix: a long balloon with a hyphen or dash in it ("reality-warp", "complexity-one", "army of—") no longer stays on one line and runs off the screen;
+       balloons also re-wrap when the screen size changes.
   1.20 Dialogues: Mystic Brawler conversations updated (Monk, Ninja, Paladin, Pyromancer, Tactician, Black Panther, Jean Grey, Rogue, Storm, Krampus,
        Alchemist, Deadpool); a second Storm > Alchemist conversation added.
   1.15 Settings: About colors (gold roles, white bold developer name); Text size (small/normal/large) under Text speed;
@@ -888,7 +890,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.20';
+const APP_VERSION = '1.21';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -1102,8 +1104,9 @@ const fontReady = (font, text) => Promise.race([
    (balanced), then the lines it chose are written into the text as real line breaks
    and wrapping is switched off, so the box is exactly as wide as its longest line and
    can never re-wrap differently while the text is typed (that re-wrap is what left
-   short lines in a wide box). b.dataset.laid holds the text with its line breaks;
-   it keeps the same length as the plain text (a space becomes a line break). */
+   short lines in a wide box). b.dataset.laid holds the text with its line breaks:
+   a space becomes a line break, and a break where there is no space (after a hyphen) adds one extra character,
+   so the typing loop goes by the length of `laid`, not of the plain text. */
 function layoutBalloon(b){
   const a = b.querySelector('.shown'), z = b.querySelector('.rest'), text = b.dataset.text;
   const n = a.textContent.length;
@@ -1118,7 +1121,10 @@ function layoutBalloon(b){
       if (arr[i] === ' '){ out += ' '; continue; }
       r.setStart(node, i); r.setEnd(node, i + 1);
       const q = r.getClientRects()[0]; if (!q){ out += arr[i]; continue; }
-      if (top !== null && q.top > top + 3 && out.endsWith(' ')) out = out.slice(0, -1) + '\n';
+      if (top !== null && q.top > top + 3){
+        // a line can also break with no space there (after a hyphen: "reality-warp", or before a dash): nothing to turn into a break, so one is added
+        out = out.endsWith(' ') ? out.slice(0, -1) + '\n' : out + '\n';
+      }
       top = top === null ? q.top : Math.max(top, q.top);
       out += arr[i];
     }
@@ -1243,7 +1249,7 @@ class Stage {
     });
     this.ro = new ResizeObserver(entries => {
       entries.forEach(en => {
-        if (en.target === this.el) this.el.querySelectorAll('.balloon').forEach(fitBalloon);
+        if (en.target === this.el) this.el.querySelectorAll('.balloon').forEach(x => x.dataset.text ? layoutBalloon(x) : fitBalloon(x));   // new size: the line breaks are worked out again
         else if (en.target.classList.contains('balloon')) drawBalloon(en.target);
       });
       this.measure(); this.zones();
@@ -1371,13 +1377,14 @@ class Stage {
     }
     await sleep(still() ? 0 : 160);
     const tick = 28 * mul();
-    for (let i = 1; i <= text.length; i++){
+    for (let i = 1; i <= b.dataset.laid.length; i++){
       if (id !== this.run) return;
       const laid = b.dataset.laid;           // re-read: a late font can re-lay the balloon
       if (this.skip === id){ shown.textContent = laid; rest.textContent = ''; return; }
       shown.textContent = laid.slice(0, i); rest.textContent = laid.slice(i);
       await sleep(laid[i-1] === ' ' || laid[i-1] === '\n' ? tick / 2 : tick);
     }
+    shown.textContent = b.dataset.laid; rest.textContent = '';
   }
   async wait(ms, id){
     for (let t = 0; t < ms; t += 40){ if (id !== this.run || this.skip === id) return; await sleep(40); }
