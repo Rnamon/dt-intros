@@ -5,6 +5,7 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.23 Background: a Random choice (a new picture each time the app opens), Settings shows the chosen picture behind it, the slider is called Background opacity, fewer captions.
   1.22 Background: Settings now picks a picture from bkg/ (17 of them, with thumbnails) that sits behind every screen, and an opacity slider (40-100%) sets how much of it
        shows over the plain base. None is the plain base. The "Heroes" option is gone: the rotating heroes on Home always show.
   1.21 Fix: a long balloon with a hyphen or dash in it ("reality-warp", "complexity-one", "army of—") no longer stays on one line and runs off the screen;
@@ -670,8 +671,10 @@ button:disabled{cursor:default}
 #picker .tools{padding-top:0}
 
 /* settings: a full screen with tabs */
-#settings .sheet-in{max-width:none;height:100%;border:0;border-radius:0;animation:none;box-shadow:none;position:relative;
+#settings .sheet-in{max-width:none;height:100%;border:0;border-radius:0;animation:none;box-shadow:none;position:relative;isolation:isolate;
   background:radial-gradient(ellipse at 30% 20%,rgba(80,100,140,.18),transparent 60%),var(--night)}
+/* the chosen background picture also shows behind Settings, so a pick can be seen at once (same opacity as everywhere else) */
+#settings .sheet-in::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:var(--bgimg,none) center / cover no-repeat;opacity:var(--bgo,0);transition:opacity .35s}
 .setbody{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px}
 .stabs{display:flex;gap:8px;padding:2px 16px 0}
 .stab{position:relative;flex:1;display:grid;place-items:center;height:46px;isolation:isolate;font-weight:600;font-size:18px;text-transform:uppercase;letter-spacing:.4px;color:#fff}
@@ -687,7 +690,9 @@ button:disabled{cursor:default}
 .srow.nb{border-bottom:0;padding-bottom:0}
 .srow.nb + .srow{padding-top:6px}
 /* background picker: a tile per picture, the chosen one in gold */
-.bgpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px;padding:8px 0 12px;border-bottom:1.5px solid rgba(52,64,94,.6)}
+.bgpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px;padding:8px 0 12px}
+.bgpair{display:grid;grid-template-rows:1fr 1fr;gap:5px;aspect-ratio:16/10}
+.bgpair .bgtile{aspect-ratio:auto;height:100%;border-radius:7px}
 .bgtile{position:relative;aspect-ratio:16/10;border-radius:8px;overflow:hidden;border:2.5px solid var(--line);background:var(--night-2);display:block}
 .bgtile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
 .bgtile.base{background:radial-gradient(ellipse at 30% 20%,rgba(80,100,140,.3),transparent 60%),radial-gradient(ellipse at 80% 90%,rgba(0,0,0,.6),transparent 60%),var(--night)}
@@ -836,9 +841,9 @@ button:disabled{cursor:default}
             <button class="tog" role="switch" data-tog="auto" data-on="on" data-off="off" aria-label="Auto-play"></button></div>
           <div class="srow"><div class="lab"><b>Auto-play delay</b><small>Pause before the next fight</small></div>
             <div class="seg" data-pref="autoGap"><button data-v="short">Short</button><button data-v="normal">Normal</button><button data-v="long">Long</button></div></div>
-          <div class="srow nb"><div class="lab"><b>Background</b><small>None is the plain base. A picture goes behind every screen.</small></div></div>
+          <div class="srow nb"><div class="lab"><b>Background</b></div></div>
           <div class="bgpick" id="bgPick"></div>
-          <div class="srow nb" id="bgoRow"><div class="lab"><b>Picture opacity</b><small>How much of the picture shows over the base</small></div>
+          <div class="srow nb" id="bgoRow"><div class="lab"><b>Background opacity</b></div>
             <div class="bgo"><input type="range" id="bgo" min="40" max="100" step="5" aria-label="Background picture opacity"><output id="bgoVal"></output></div></div>
         </div>
         <div class="pane" data-pane="about" hidden>
@@ -910,7 +915,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.22';
+const APP_VERSION = '1.23';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -965,7 +970,7 @@ delete prefs.pool.split; delete prefs.sort;
 const BKG = [['artificer','Artificer'],['barbarian','Barbarian'],['cursed-pirate','Cursed Pirate'],['gunslinger','Gunslinger'],['huntress','Huntress'],
   ['marvel','Marvel'],['monk','Monk'],['moon-elf','Moon Elf'],['ninja','Ninja'],['paladin','Paladin'],['pyromancer','Pyromancer'],['samurai','Samurai'],
   ['seraph','Seraph'],['shadow-thief','Shadow Thief'],['tactician','Tactician'],['treant','Treant'],['vampire-lord','Vampire Lord']];
-if (!BKG.some(b => b[0] === prefs.bg)) prefs.bg = 'none';
+if (prefs.bg !== 'random' && !BKG.some(b => b[0] === prefs.bg)) prefs.bg = 'none';
 prefs.bgo = Math.min(100, Math.max(40, Math.round(Number(prefs.bgo)) || 70));
 if (!['special','mixed','generic'].includes(prefs.talk)) prefs.talk = 'special';
 if (prefs.hideTip !== '1') prefs.hideTip = '0';
@@ -1761,7 +1766,7 @@ function renderSettings(){
   document.querySelectorAll('#settings .pane').forEach(p => p.hidden = p.dataset.pane !== setTab);
   const pick = $('#bgPick');
   if (!pick.children.length){                       // built once, when Settings is first opened
-    pick.innerHTML = '<button class="bgtile base" data-bg="none"><span>None</span></button>' + BKG.map(([id, name]) =>
+    pick.innerHTML = '<div class="bgpair"><button class="bgtile base" data-bg="none"><span>None</span></button><button class="bgtile base" data-bg="random"><span>Random</span></button></div>' + BKG.map(([id, name]) =>
       '<button class="bgtile" data-bg="' + id + '"><img src="bkg/thumb/bkg-' + id + '.webp" alt="" loading="lazy" decoding="async"><span>' + name + '</span></button>').join('');
   }
   pick.querySelectorAll('.bgtile').forEach(t => t.setAttribute('aria-pressed', String(t.dataset.bg === prefs.bg)));
@@ -1780,7 +1785,7 @@ $('#settings').addEventListener('click', e => {
   const b = e.target.closest('[data-pref] [data-v]');
   if (b && !b.disabled) prefs[b.parentElement.dataset.pref] = b.dataset.v;
   const bt = e.target.closest('[data-bg]');
-  if (bt) prefs.bg = bt.dataset.bg;
+  if (bt){ prefs.bg = bt.dataset.bg; if (prefs.bg === 'random') rollRandom(); }
   if (e.target.closest('#resetBtn')){ Object.assign(prefs, DEFAULTS); toast('Settings restored'); }
   else if (!tg && !b && !bt) return;
   save(); renderSettings(); applyPrefs();
@@ -1798,10 +1803,18 @@ document.addEventListener('visibilitychange', syncWake);
 setInterval(syncWake, 3000);
 $('#bgo').addEventListener('input', e => { prefs.bgo = Number(e.target.value); $('#bgoVal').textContent = prefs.bgo + '%'; applyBackground(); });
 $('#bgo').addEventListener('change', () => save());
+/* Random: a new picture each time the app is opened (and each time Random is tapped in Settings); it is not saved, 'random' is */
+let bgRandom = null;
+function rollRandom(){
+  const ids = BKG.map(b => b[0]).filter(id => id !== bgRandom);
+  bgRandom = ids[Math.floor(Math.random() * ids.length)];
+}
 function applyBackground(){
-  const el = $('#appBg'), on = BKG.some(b => b[0] === prefs.bg);
-  el.style.backgroundImage = on ? 'url("bkg/bkg-' + prefs.bg + '.webp")' : 'none';
-  el.style.opacity = on ? prefs.bgo / 100 : 0;
+  if (prefs.bg === 'random' && !bgRandom) rollRandom();
+  const id = prefs.bg === 'random' ? bgRandom : prefs.bg, on = BKG.some(b => b[0] === id);
+  const img = on ? 'url("bkg/bkg-' + id + '.webp")' : 'none', op = on ? prefs.bgo / 100 : 0;
+  const el = $('#appBg'); el.style.backgroundImage = img; el.style.opacity = op;
+  app.style.setProperty('--bgimg', img); app.style.setProperty('--bgo', op);
 }
 function applyPrefs(){
   applyBackground();
