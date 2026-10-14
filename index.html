@@ -5,6 +5,8 @@
   APP_VERSION in the script below, and VERSION in sw.js
   (raising it in sw.js is what makes phones fetch the new version).
 
+  1.22 Background: Settings now picks a picture from bkg/ (17 of them, with thumbnails) that sits behind every screen, and an opacity slider (40-100%) sets how much of it
+       shows over the plain base. None is the plain base. The "Heroes" option is gone: the rotating heroes on Home always show.
   1.21 Fix: a long balloon with a hyphen or dash in it ("reality-warp", "complexity-one", "army of—") no longer stays on one line and runs off the screen;
        balloons also re-wrap when the screen size changes.
   1.20 Dialogues: Mystic Brawler conversations updated (Monk, Ninja, Paladin, Pyromancer, Tactician, Black Panther, Jean Grey, Rogue, Storm, Krampus,
@@ -411,12 +413,14 @@ button:disabled{cursor:default}
 /* ================= the game look =================
    Gritty slate ground, slanted slate buttons, gold for the main action
    and for whatever is selected, heavy white headings. */
-#app{container:app/size}
+#app{container:app/size;isolation:isolate;
+  background:radial-gradient(ellipse at 30% 20%,rgba(80,100,140,.18),transparent 60%),radial-gradient(ellipse at 80% 90%,rgba(0,0,0,.45),transparent 60%),var(--night)}
+/* the chosen background picture: between the base ground and every screen, covers portrait and landscape alike */
+#appBg{position:absolute;inset:0;z-index:-1;pointer-events:none;background:center / cover no-repeat;opacity:0;transition:opacity .35s}
 /* grit: fine speckle, only over the big hero picture behind the home screen */
 .home-bg::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;opacity:.42;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.4 -.55'/></filter><rect width='300' height='300' filter='url(%23n)'/></svg>")}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;
-  background:radial-gradient(ellipse at 30% 20%,rgba(80,100,140,.18),transparent 60%),radial-gradient(ellipse at 80% 90%,rgba(0,0,0,.45),transparent 60%),var(--night)}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column}
 .screen::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 45%,rgba(0,0,0,.5) 100%)}
 .screen > *{position:relative}
 .bar{display:flex;align-items:center;gap:18px;flex:none;
@@ -682,6 +686,19 @@ button:disabled{cursor:default}
 .srow .seg{flex-wrap:wrap;max-width:100%}
 .srow.nb{border-bottom:0;padding-bottom:0}
 .srow.nb + .srow{padding-top:6px}
+/* background picker: a tile per picture, the chosen one in gold */
+.bgpick{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px;padding:8px 0 12px;border-bottom:1.5px solid rgba(52,64,94,.6)}
+.bgtile{position:relative;aspect-ratio:16/10;border-radius:8px;overflow:hidden;border:2.5px solid var(--line);background:var(--night-2);display:block}
+.bgtile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
+.bgtile.base{background:radial-gradient(ellipse at 30% 20%,rgba(80,100,140,.3),transparent 60%),radial-gradient(ellipse at 80% 90%,rgba(0,0,0,.6),transparent 60%),var(--night)}
+.bgtile span{position:absolute;left:0;right:0;bottom:0;padding:10px 4px 3px;font-weight:700;font-size:13px;letter-spacing:.6px;text-transform:uppercase;text-align:center;color:#fff;line-height:1.1;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.75));text-shadow:0 1px 2px #000}
+.bgtile.base span{position:absolute;inset:0;display:grid;place-items:center;padding:0;background:none}
+.bgtile[aria-pressed="true"]{border-color:var(--blaze);box-shadow:0 0 0 2px rgba(247,181,44,.35),0 0 14px rgba(247,181,44,.5)}
+.bgo{flex:1;min-width:190px;max-width:320px;display:flex;align-items:center;gap:12px}
+.bgo input{flex:1;min-width:0;accent-color:var(--blaze);height:28px;cursor:pointer}
+.bgo output{min-width:3.2em;text-align:right;font-weight:700;font-size:18px;color:#fff}
+.srow.dim .bgo{opacity:.4}
 .panes{overflow-x:hidden}
 .srow b{display:block;font-weight:600;font-size:21px;color:#C3CDE4}
 .srow small{display:block;font-size:14px;font-weight:600;color:#7D89A6;line-height:1.2;margin-top:2px}
@@ -738,6 +755,7 @@ button:disabled{cursor:default}
 
 
 <div id="app">
+  <div id="appBg" aria-hidden="true"></div>
 
   <!-- HOME -->
   <section id="home" class="screen home">
@@ -818,8 +836,10 @@ button:disabled{cursor:default}
             <button class="tog" role="switch" data-tog="auto" data-on="on" data-off="off" aria-label="Auto-play"></button></div>
           <div class="srow"><div class="lab"><b>Auto-play delay</b><small>Pause before the next fight</small></div>
             <div class="seg" data-pref="autoGap"><button data-v="short">Short</button><button data-v="normal">Normal</button><button data-v="long">Long</button></div></div>
-          <div class="srow"><div class="lab"><b>Menu background</b></div>
-            <div class="seg" data-pref="bg"><button data-v="none">None</button><button data-v="heroes">Heroes</button><button data-v="custom" disabled title="Coming soon">Custom</button></div></div>
+          <div class="srow nb"><div class="lab"><b>Background</b><small>None is the plain base. A picture goes behind every screen.</small></div></div>
+          <div class="bgpick" id="bgPick"></div>
+          <div class="srow nb" id="bgoRow"><div class="lab"><b>Picture opacity</b><small>How much of the picture shows over the base</small></div>
+            <div class="bgo"><input type="range" id="bgo" min="40" max="100" step="5" aria-label="Background picture opacity"><output id="bgoVal"></output></div></div>
         </div>
         <div class="pane" data-pane="about" hidden>
           <div class="srow"><div class="lab"><b id="aboutVer">Version</b><small>Updates install themselves when you open the app.</small></div>
@@ -890,7 +910,7 @@ button:disabled{cursor:default}
 
 <script>
 /* the version shown in Settings; must match VERSION in sw.js (see the list at the top of this file) */
-const APP_VERSION = '1.21';
+const APP_VERSION = '1.22';
 /* how often a fight uses the special lines when both kinds are allowed
    (Settings > Fight > Conversations > Special + generic); the rest is generic */
 const SPECIAL_SHARE = 0.65;
@@ -930,7 +950,7 @@ const lineColor = id => HERO_LINE[id] || SET_COLOR[H[id].set];
 const artSrc = (id, form) => 'art/' + id + (form && !FORM_STYLE[form] ? '' : form ? '-' + form : '') + '.webp';
 
 /* ---------------- settings ---------------- */
-const prefs = { speed:'normal', anim:'on', auto:'off', bg:'heroes', full:'on', zone:'0', order:'abc',
+const prefs = { speed:'normal', anim:'on', auto:'off', bg:'none', bgo:70, full:'on', zone:'0', order:'abc',
   talk:'special', hideTip:'0', tsize:'normal', autoGap:'normal',
   pool:{ a:ALL.slice(), b:ALL.slice(), m:ALL.slice() }, mirrorOnly:'0', pick:[null, null] };
 try {
@@ -941,8 +961,12 @@ try {
 if (prefs.pool.split === false) prefs.pool.b = (prefs.pool.a || ALL).slice();
 delete prefs.pool.split; delete prefs.sort;
 // 0.5 renamed the menu backgrounds: hero art is now 'heroes', plain is 'none'
-if (prefs.bg === 'art') prefs.bg = 'heroes';
-if (prefs.bg === 'plain') prefs.bg = 'none';
+/* 1.22: 'heroes' is gone (the rotating heroes on Home now always show); the choice is 'none' or the name of a picture in bkg/ */
+const BKG = [['artificer','Artificer'],['barbarian','Barbarian'],['cursed-pirate','Cursed Pirate'],['gunslinger','Gunslinger'],['huntress','Huntress'],
+  ['marvel','Marvel'],['monk','Monk'],['moon-elf','Moon Elf'],['ninja','Ninja'],['paladin','Paladin'],['pyromancer','Pyromancer'],['samurai','Samurai'],
+  ['seraph','Seraph'],['shadow-thief','Shadow Thief'],['tactician','Tactician'],['treant','Treant'],['vampire-lord','Vampire Lord']];
+if (!BKG.some(b => b[0] === prefs.bg)) prefs.bg = 'none';
+prefs.bgo = Math.min(100, Math.max(40, Math.round(Number(prefs.bgo)) || 70));
 if (!['special','mixed','generic'].includes(prefs.talk)) prefs.talk = 'special';
 if (prefs.hideTip !== '1') prefs.hideTip = '0';
 if (!['small','normal','large'].includes(prefs.tsize)) prefs.tsize = 'normal';
@@ -1625,7 +1649,6 @@ let bgT = null, bgGen = 0, bgOrder = [], bgAt = -1, bgFront = 0;
 function homeBackground(){
   const box = $('#homeBg');
   clearTimeout(bgT); bgGen++;
-  if (prefs.bg !== 'heroes'){ box.classList.remove('on'); return; }
   box.classList.add('on');
   bgOrder = poolUnion().sort(() => Math.random() - .5); bgAt = -1;
   bgNext(bgGen);
@@ -1728,7 +1751,7 @@ $('#pickGrid').addEventListener('click', e => {
 });
 
 /* ---------------- settings ---------------- */
-const DEFAULTS = { speed:'normal', anim:'on', auto:'off', bg:'heroes', full:'on', zone:'0', talk:'special', hideTip:'0', tsize:'normal', autoGap:'normal' };
+const DEFAULTS = { speed:'normal', anim:'on', auto:'off', bg:'none', bgo:70, full:'on', zone:'0', talk:'special', hideTip:'0', tsize:'normal', autoGap:'normal' };
 let setTab = 'fight';
 function renderSettings(){
   document.querySelectorAll('#settings [data-pref]').forEach(seg => seg.querySelectorAll('button').forEach(b =>
@@ -1736,6 +1759,14 @@ function renderSettings(){
   document.querySelectorAll('#settings [data-tog]').forEach(t => t.setAttribute('aria-checked', String(prefs[t.dataset.tog] === t.dataset.on)));
   document.querySelectorAll('#setTabs .stab').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === setTab)));
   document.querySelectorAll('#settings .pane').forEach(p => p.hidden = p.dataset.pane !== setTab);
+  const pick = $('#bgPick');
+  if (!pick.children.length){                       // built once, when Settings is first opened
+    pick.innerHTML = '<button class="bgtile base" data-bg="none"><span>None</span></button>' + BKG.map(([id, name]) =>
+      '<button class="bgtile" data-bg="' + id + '"><img src="bkg/thumb/bkg-' + id + '.webp" alt="" loading="lazy" decoding="async"><span>' + name + '</span></button>').join('');
+  }
+  pick.querySelectorAll('.bgtile').forEach(t => t.setAttribute('aria-pressed', String(t.dataset.bg === prefs.bg)));
+  $('#bgo').value = prefs.bgo; $('#bgoVal').textContent = prefs.bgo + '%';
+  $('#bgoRow').classList.toggle('dim', prefs.bg === 'none'); $('#bgo').disabled = prefs.bg === 'none';
   $('#verNum').textContent = $('#aboutVer').textContent = 'Version ' + (swVersion || APP_VERSION);
   $('#talkNote').textContent = prefs.talk === 'generic' ? 'Generic lines for every hero · Mirror always special'
     : prefs.talk === 'mixed' ? 'Custom and generic lines · Mirror always special'
@@ -1748,8 +1779,10 @@ $('#settings').addEventListener('click', e => {
   if (tg) prefs[tg.dataset.tog] = prefs[tg.dataset.tog] === tg.dataset.on ? tg.dataset.off : tg.dataset.on;
   const b = e.target.closest('[data-pref] [data-v]');
   if (b && !b.disabled) prefs[b.parentElement.dataset.pref] = b.dataset.v;
+  const bt = e.target.closest('[data-bg]');
+  if (bt) prefs.bg = bt.dataset.bg;
   if (e.target.closest('#resetBtn')){ Object.assign(prefs, DEFAULTS); toast('Settings restored'); }
-  else if (!tg && !b) return;
+  else if (!tg && !b && !bt) return;
   save(); renderSettings(); applyPrefs();
 });
 /* keep the screen awake while auto-play is running on the fight screen */
@@ -1763,7 +1796,15 @@ function syncWake(){
 }
 document.addEventListener('visibilitychange', syncWake);
 setInterval(syncWake, 3000);
+$('#bgo').addEventListener('input', e => { prefs.bgo = Number(e.target.value); $('#bgoVal').textContent = prefs.bgo + '%'; applyBackground(); });
+$('#bgo').addEventListener('change', () => save());
+function applyBackground(){
+  const el = $('#appBg'), on = BKG.some(b => b[0] === prefs.bg);
+  el.style.backgroundImage = on ? 'url("bkg/bkg-' + prefs.bg + '.webp")' : 'none';
+  el.style.opacity = on ? prefs.bgo / 100 : 0;
+}
 function applyPrefs(){
+  applyBackground();
   app.style.setProperty('--ts', { small:.88, normal:1, large:1.15 }[prefs.tsize] || 1);
   syncWake();
   if (typeof refitBalloons === 'function') refitBalloons();
